@@ -18,11 +18,29 @@ No diretório `mobile`, instale as dependências:
 npm install
 ```
 
+Depois, crie seu arquivo de ambiente local a partir do exemplo:
+
+```bash
+cp .env.example .env.local
+```
+
 ## Configuração de ambiente
 
 O app usa a variável `EXPO_PUBLIC_API_URL` para acessar a API.
 
-Arquivo: `.env`
+Arquivo de exemplo versionado: `.env.example`
+
+```env
+EXPO_PUBLIC_API_URL=http://SEU_IP_LOCAL:3333
+```
+
+Arquivos recomendados:
+
+- `.env.example`: modelo seguro para versionar no Git
+- `.env.local`: configuração local de cada desenvolvedor
+- `.env`: opcional, mas não é o melhor lugar para manter ajustes pessoais se o time quiser um fluxo previsível
+
+Exemplo de `.env.local`:
 
 ```env
 EXPO_PUBLIC_API_URL=http://192.168.18.194:3333
@@ -33,9 +51,38 @@ EXPO_PUBLIC_API_URL=http://192.168.18.194:3333
 - Não use `localhost` quando for testar no celular.
 - Use o IP da máquina onde o backend está rodando.
 - O celular e o computador precisam estar na mesma rede.
-- Se o IP da máquina mudar, atualize o `.env`.
+- Se o IP da máquina mudar, atualize o `.env.local`.
 
 Se preferir usar a API publicada, troque a variável para a URL remota.
+
+## Ambientes do EAS
+
+O arquivo `eas.json` está configurado para usar um ambiente por perfil de build:
+
+- `development` -> environment `development`
+- `preview` -> environment `preview`
+- `production` -> environment `production`
+
+Isso ajuda a deixar explícito qual conjunto de variáveis do Expo/EAS será usado em cada build.
+
+### Importante: build remoto e execução local não são a mesma coisa
+
+No `development build`, existem dois contextos diferentes:
+
+- `eas build --profile development`: usa as variáveis configuradas no ambiente `development` do Expo/EAS
+- `npx expo start` depois que o app já está instalado: usa as variáveis disponíveis na sua máquina local, incluindo `.env.local`
+
+Ou seja: o log da build pode mostrar que a variável do EAS foi carregada com sucesso, mas quando você abrir o app pelo Metro local o valor efetivo pode vir do seu `.env.local`.
+
+Se quiser alinhar seu ambiente local com o ambiente `development` do EAS, rode:
+
+```bash
+eas env:pull --environment development
+```
+
+Isso baixa as variáveis do ambiente remoto para uso local.
+
+Se quiser preservar configurações específicas da sua máquina, revise o arquivo gerado antes de substituir o que você já usa localmente.
 
 ## Como iniciar localmente
 
@@ -70,6 +117,7 @@ Arquivo de configuração: `eas.json`
 
 O perfil `development` está com:
 
+- `environment: development`
 - `developmentClient: true`
 - `distribution: internal`
 
@@ -96,7 +144,7 @@ Se o QR for lido e nada acontecer, normalmente é porque:
 
 - o projeto está em modo `Development Build` e você tentou abrir no Expo Go
 - o app de desenvolvimento não está instalado no celular
-- o celular não consegue alcançar a API definida no `.env`
+- o celular não consegue alcançar a API definida no `.env.local`
 
 ## Como rodar no Android ou iOS localmente
 
@@ -120,9 +168,9 @@ Arquivo de configuração: `eas.json`
 
 Perfis disponíveis:
 
-- `development`: build de desenvolvimento com `expo-dev-client`
-- `preview`: build interna para validação
-- `production`: build de produção com incremento automático de versão
+- `development`: build de desenvolvimento com `expo-dev-client` e ambiente `development`
+- `preview`: build interna para validação com ambiente `preview`
+- `production`: build de produção com incremento automático de versão e ambiente `production`
 
 ## Login no Expo
 
@@ -183,10 +231,19 @@ eas update --branch production --message "Atualizacao do app"
 ## Fluxo recomendado para desenvolvimento
 
 1. Suba o backend localmente.
-2. Ajuste `EXPO_PUBLIC_API_URL` com o IP atual da máquina.
-3. Entre em `mobile`.
-4. Rode `npx expo start --go` para o fluxo mais simples.
-5. Se precisar de recursos do dev client, gere e instale um build `development`.
+2. Crie ou ajuste o `.env.local` com `EXPO_PUBLIC_API_URL` apontando para o IP atual da máquina.
+3. Se quiser espelhar o ambiente remoto do Expo, rode `eas env:pull --environment development`.
+4. Entre em `mobile`.
+5. Rode `npx expo start --go` para o fluxo mais simples.
+6. Se precisar de recursos do dev client, gere e instale um build `development`.
+
+## Padrão recomendado para o time
+
+- Versionar apenas `.env.example`
+- Manter `.env`, `.env.local` e arquivos reais de ambiente fora do Git
+- Usar `.env.local` para desenvolvimento local
+- Usar os ambientes do Expo/EAS para `development`, `preview` e `production`
+- Usar `eas env:pull --environment development` quando quiser aproximar o ambiente local do remoto
 
 ## Solução de problemas
 
