@@ -6,13 +6,25 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "autoIncrement": true,
+      "android": {
+        "distribution": "internal",
+        "autoIncrement": "versionCode"
+      }
     },
     "preview": {
-      "distribution": "internal"
+      "autoIncrement": true,
+      "android": {
+        "distribution": "internal",
+        "autoIncrement": "versionCode"
+      }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "android": {
+        "distribution": "internal",
+        "autoIncrement": "versionCode"
+      }
     }
   },
   "submit": {
