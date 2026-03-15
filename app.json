@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.fin-9.mobile"
+      "bundleIdentifier": "com.fin9.mobile"
     },
     "android": {
       "adaptiveIcon": {
@@ -23,11 +23,18 @@
         "backgroundImage": "./assets/splash-icon.png",
         "monochromeImage": "./assets/splash-icon.png"
       },
-      "package": "com.fin-9.mobile"
+      "package": "com.fin9.mobile"
     },
     "plugins": [
       "expo-router",
       "expo-secure-store"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "8e0dcda3-a8f3-44e8-8baa-871caaf1aa95"
+      }
+    },
+    "owner": "horizonx9"
   }
 }
