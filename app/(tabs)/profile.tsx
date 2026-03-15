@@ -7,10 +7,11 @@ import { Input } from '../../src/components/ui/Input';
 import { Card } from '../../src/components/ui/Card';
 
 export default function ProfileScreen() {
-  const { user, logout, updateProfile } = useAuthStore();
+  const { user, logout, updateProfile, deleteAccount } = useAuthStore();
   const [name, setName] = useState(user?.name || '');
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleSave = async () => {
     if (!name.trim()) return Alert.alert('Atenção', 'Informe seu nome');
@@ -31,6 +32,44 @@ export default function ProfileScreen() {
       { text: 'Cancelar', style: 'cancel' },
       { text: 'Sair', style: 'destructive', onPress: logout },
     ]);
+  };
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      'Excluir conta',
+      'Essa acao ira apagar permanentemente seu perfil e todos os dados vinculados, incluindo despesas, receitas, contas e categorias. Deseja continuar?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Excluir conta',
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert(
+              'Confirmacao final',
+              'Essa exclusao nao pode ser desfeita. Confirma a exclusao total da conta?',
+              [
+                { text: 'Voltar', style: 'cancel' },
+                {
+                  text: 'Excluir definitivamente',
+                  style: 'destructive',
+                  onPress: async () => {
+                    setIsDeleting(true);
+                    try {
+                      await deleteAccount();
+                      Alert.alert('Conta excluida', 'Sua conta e todos os dados relacionados foram removidos.');
+                    } catch (err: any) {
+                      Alert.alert('Erro', err.message);
+                    } finally {
+                      setIsDeleting(false);
+                    }
+                  },
+                },
+              ],
+            );
+          },
+        },
+      ],
+    );
   };
 
   return (
@@ -102,6 +141,19 @@ export default function ProfileScreen() {
         <View className="pb-8">
           <Button title="Sair da Conta" onPress={handleLogout} variant="danger" />
         </View>
+
+        <Card className="border border-[#FECACA] bg-[#FFF1F2] p-5">
+          <Text className="mb-2 text-lg font-bold text-[#B42318]">Zona de perigo</Text>
+          <Text className="mb-5 text-sm leading-6 text-[#B42318]">
+            Exclua sua conta para remover permanentemente seu perfil e todas as informacoes financeiras relacionadas.
+          </Text>
+          <Button
+            title="Deletar Conta"
+            onPress={handleDeleteAccount}
+            variant="danger"
+            isLoading={isDeleting}
+          />
+        </Card>
       </ScrollView>
     </SafeAreaView>
   );

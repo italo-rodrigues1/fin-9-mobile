@@ -10,6 +10,7 @@ interface CategoryState {
   create: (payload: { name: string; color?: string; icon?: string }) => Promise<void>;
   update: (id: string, payload: Partial<{ name: string; color: string; icon: string }>) => Promise<void>;
   remove: (id: string) => Promise<void>;
+  reset: () => void;
 }
 
 export const useCategoryStore = create<CategoryState>((set, get) => ({
@@ -53,4 +54,6 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
       throw new Error(err.response?.data?.message || 'Erro ao excluir categoria');
     }
   },
+
+  reset: () => set({ categories: [], isLoading: false, error: null }),
 }));

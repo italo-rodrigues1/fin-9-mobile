@@ -21,4 +21,9 @@ export const authService = {
     const { data } = await api.patch('/auth/profile', { name });
     return data;
   },
+
+  deleteAccount: async () => {
+    const { data } = await api.delete('/auth/account');
+    return data;
+  },
 };

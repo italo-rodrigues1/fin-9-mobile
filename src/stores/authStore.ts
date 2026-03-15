@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
 import { User } from '../types';
 import { authService } from '../services/authService';
+import { useCategoryStore } from './categoryStore';
+import { useTransactionStore } from './transactionStore';
 
 interface AuthState {
   user: User | null;
@@ -12,10 +14,16 @@ interface AuthState {
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
   loadToken: () => Promise<void>;
   updateProfile: (name: string) => Promise<void>;
   clearError: () => void;
 }
+
+const resetAppStores = () => {
+  useCategoryStore.getState().reset();
+  useTransactionStore.getState().reset();
+};
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
@@ -52,7 +60,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: async () => {
     await SecureStore.deleteItemAsync('auth_token');
+    resetAppStores();
     set({ user: null, token: null, isAuthenticated: false, error: null });
+  },
+
+  deleteAccount: async () => {
+    try {
+      await authService.deleteAccount();
+      await SecureStore.deleteItemAsync('auth_token');
+      resetAppStores();
+      set({ user: null, token: null, isAuthenticated: false, error: null, isLoading: false });
+    } catch (err: any) {
+      const message = err.response?.data?.message || 'Erro ao excluir conta';
+      set({ error: message });
+      throw new Error(message);
+    }
   },
 
   loadToken: async () => {
@@ -66,6 +88,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
     } catch {
       await SecureStore.deleteItemAsync('auth_token');
+      resetAppStores();
       set({ isLoading: false });
     }
   },

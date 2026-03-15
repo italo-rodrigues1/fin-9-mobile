@@ -12,6 +12,7 @@ interface TransactionState {
   update: (id: string, payload: Parameters<typeof transactionService.update>[1]) => Promise<void>;
   remove: (id: string) => Promise<void>;
   setFilters: (filters: TransactionFilters) => void;
+  reset: () => void;
 }
 
 export const useTransactionStore = create<TransactionState>((set, get) => ({
@@ -59,4 +60,6 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
   },
 
   setFilters: (filters) => set({ filters }),
+
+  reset: () => set({ transactions: [], isLoading: false, error: null, filters: {} }),
 }));
