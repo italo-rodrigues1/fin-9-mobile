@@ -52,12 +52,21 @@ export default function RegisterScreen() {
     <KeyboardAvoidingView
       className="flex-1 bg-[#F7F8FA]"
       behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 24 : 0}
     >
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: "center",
+          paddingHorizontal: 32,
+          paddingVertical: 48,
+          paddingBottom: 72,
+        }}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
+        showsVerticalScrollIndicator={false}
       >
-        <View className="flex-1 justify-center px-8 py-12">
+        <View>
           <View className="mb-14 items-center">
             <BrandLogo muted />
           </View>

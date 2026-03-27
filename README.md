@@ -46,6 +46,16 @@ Exemplo de `.env.local`:
 EXPO_PUBLIC_API_URL=http://192.168.18.194:3333
 ```
 
+### Sentry: público x segredo
+
+- Variáveis `EXPO_PUBLIC_*` (ex: `EXPO_PUBLIC_SENTRY_DSN`) vão para o app cliente e são públicas por natureza.
+- `SENTRY_AUTH_TOKEN` é segredo e deve ficar apenas em `.env.local` (máquina local) ou nos ambientes do Expo/EAS.
+- `SENTRY_ORG` e `SENTRY_PROJECT` são usadas no plugin de build/sourcemap e podem ficar em `.env.local`/EAS.
+- Recomendação de fluxo:
+  1. Versionar somente `.env.example`
+  2. Usar `.env`/`.env.local` localmente (não versionados)
+  3. Configurar variáveis de produção no EAS (`development`, `preview`, `production`)
+
 ### Importante para uso local no celular
 
 - Não use `localhost` quando for testar no celular.
