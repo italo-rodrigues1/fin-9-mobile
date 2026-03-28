@@ -26,7 +26,8 @@
       "autoIncrement": true,
       "android": {
         "distribution": "internal",
-        "autoIncrement": "versionCode"
+        "autoIncrement": "versionCode",
+        "buildType": "app-bundle"
       }
     }
   },
