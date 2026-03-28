@@ -68,15 +68,6 @@ export default function CreateTransactionScreen() {
 
   return (
     <FormScreen>
-      <View className="mb-6">
-        <Text className="text-2xl font-bold" style={{ color: colors.text }}>
-          Nova Transação
-        </Text>
-        <Text className="mt-1 text-sm" style={{ color: colors.textMuted }}>
-          Cadastre uma nova receita ou despesa.
-        </Text>
-      </View>
-
       <Card className="mb-6 p-5">
         <View className="mb-8 flex-row gap-4">
           <TouchableOpacity
