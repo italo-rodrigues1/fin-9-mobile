@@ -29,7 +29,7 @@ export function BrandLogo({ muted = false }: BrandLogoProps) {
         className="text-[18px] font-semibold tracking-[-0.3px]"
         style={{ color: brandColor }}
       >
-        fin-9
+        Fin-9
       </Text>
     </View>
   );
