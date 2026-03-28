@@ -14,12 +14,12 @@ export default function TransactionsLayout() {
         headerShadowVisible: false,
         contentStyle: { backgroundColor: colors.background },
         animation: "slide_from_right",
-        headerRight: () => <InternalHeaderRight />,
+        headerLeft: () => <InternalHeaderRight />,
       }}
     >
       <Stack.Screen name="index" options={{ title: "Transações" }} />
       <Stack.Screen name="create" options={{ title: "Nova Transação" }} />
-      <Stack.Screen name="[id]" options={{ title: "Editar Transação" }} />
+      <Stack.Screen name="[id]" options={{ title: "" }} />
     </Stack>
   );
 }

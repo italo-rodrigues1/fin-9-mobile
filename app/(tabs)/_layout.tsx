@@ -43,7 +43,7 @@ export default function TabsLayout() {
         name="profile"
         options={{
           title: "Perfil",
-          headerRight: () => <InternalHeaderRight />,
+          headerLeft: () => <InternalHeaderRight />,
         }}
       />
       <Tabs.Screen

@@ -14,7 +14,7 @@ export default function CategoriesLayout() {
         headerShadowVisible: false,
         contentStyle: { backgroundColor: colors.background },
         animation: "slide_from_right",
-        headerRight: () => <InternalHeaderRight />,
+        headerLeft: () => <InternalHeaderRight />,
       }}
     >
       <Stack.Screen name="index" options={{ title: "Categorias" }} />

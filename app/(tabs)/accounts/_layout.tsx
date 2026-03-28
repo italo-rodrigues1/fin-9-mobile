@@ -14,10 +14,10 @@ export default function AccountsLayout() {
         headerShadowVisible: false,
         contentStyle: { backgroundColor: colors.background },
         animation: "slide_from_right",
-        headerRight: () => <InternalHeaderRight />,
+        headerLeft: () => <InternalHeaderRight />,
       }}
     >
-      <Stack.Screen name="create" options={{ title: "Nova Conta" }} />
+      <Stack.Screen name="create" options={{ title: "", }} />
     </Stack>
   );
 }
