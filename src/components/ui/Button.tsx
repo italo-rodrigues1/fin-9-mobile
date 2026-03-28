@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   ViewStyle,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../../theme/useTheme";
 
 interface ButtonProps {
@@ -14,6 +15,10 @@ interface ButtonProps {
   isLoading?: boolean;
   disabled?: boolean;
   style?: ViewStyle;
+  icon?: keyof typeof Ionicons.glyphMap;
+  iconPosition?: "left" | "right";
+  iconSize?: number;
+  iconColor?: string;
 }
 
 export function Button({
@@ -23,28 +28,18 @@ export function Button({
   isLoading,
   disabled,
   style,
+  icon,
+  iconPosition = "left",
+  iconSize = 20,
+  iconColor,
 }: ButtonProps) {
   const { colors } = useTheme();
   const baseClass =
-    "min-h-[56px] flex-row items-center justify-center rounded-[16px] px-5 py-4";
-
-  const variantClass = {
-    primary: "",
-    secondary: "",
-    danger: "",
-    outline: "",
-  }[variant];
-
-  const textClass = {
-    primary: "text-white font-semibold text-lg",
-    secondary: "font-semibold text-lg",
-    danger: "text-white font-semibold text-lg",
-    outline: "font-semibold text-lg",
-  }[variant];
+    "min-h-[56px] flex-row items-center justify-center rounded-[18px] px-6 py-4";
 
   const backgroundColor = {
     primary: colors.primary,
-    secondary: colors.surface,
+    secondary: colors.surfaceSecondary,
     danger: colors.danger,
     outline: "transparent",
   }[variant];
@@ -63,26 +58,59 @@ export function Button({
     outline: colors.border,
   }[variant];
 
+  const resolvedIconColor = iconColor || textColor;
   const spinnerColor =
     variant === "primary" || variant === "danger" ? "#FFFFFF" : colors.text;
 
-  return (
-    <TouchableOpacity
-      className={`${baseClass} ${variantClass} ${
-        disabled || isLoading ? "opacity-60" : ""
-      }`}
-      onPress={onPress}
-      disabled={disabled || isLoading}
-      activeOpacity={0.8}
-      style={[{ backgroundColor, borderWidth: 1, borderColor }, style]}
-    >
-      {isLoading ? (
-        <ActivityIndicator color={spinnerColor} />
-      ) : (
-        <Text className={textClass} style={{ color: textColor }}>
+  const renderContent = () => {
+    if (isLoading) {
+      return <ActivityIndicator color={spinnerColor} />;
+    }
+
+    return (
+      <>
+        {icon && iconPosition === "left" && (
+          <Ionicons
+            name={icon}
+            size={iconSize}
+            color={resolvedIconColor}
+            style={{ marginRight: 8 }}
+          />
+        )}
+        <Text
+          className="text-lg font-semibold tracking-tight"
+          style={{ color: textColor }}
+        >
           {title}
         </Text>
-      )}
+        {icon && iconPosition === "right" && (
+          <Ionicons
+            name={icon}
+            size={iconSize}
+            color={resolvedIconColor}
+            style={{ marginLeft: 8 }}
+          />
+        )}
+      </>
+    );
+  };
+
+  return (
+    <TouchableOpacity
+      className={`${baseClass} ${disabled || isLoading ? "opacity-60" : ""}`}
+      onPress={onPress}
+      disabled={disabled || isLoading}
+      activeOpacity={0.7}
+      style={[
+        {
+          backgroundColor,
+          borderWidth: variant === "outline" || variant === "secondary" ? 1 : 0,
+          borderColor,
+        },
+        style,
+      ]}
+    >
+      {renderContent()}
     </TouchableOpacity>
   );
 }

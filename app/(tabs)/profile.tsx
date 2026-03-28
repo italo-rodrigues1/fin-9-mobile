@@ -216,8 +216,13 @@ export default function ProfileScreen() {
           </Text>
         </Card>
 
-        <View className="pb-8">
-          <Button title="Sair da Conta" onPress={handleLogout} variant="danger" />
+        <View className="mb-6">
+          <Button
+            title="Sair da Conta"
+            onPress={handleLogout}
+            variant="secondary"
+            icon="log-out-outline"
+          />
         </View>
 
         <Card
