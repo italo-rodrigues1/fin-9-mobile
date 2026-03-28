@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, TextInput, Text } from 'react-native';
-import { COLORS } from '../../constants';
+import React from "react";
+import { View, TextInput, Text } from "react-native";
+import { useTheme } from "../../theme/useTheme";
 
 interface InputProps {
   label: string;
@@ -8,10 +8,10 @@ interface InputProps {
   onChangeText: (text: string) => void;
   placeholder?: string;
   secureTextEntry?: boolean;
-  keyboardType?: 'default' | 'email-address' | 'numeric' | 'decimal-pad';
+  keyboardType?: "default" | "email-address" | "numeric" | "decimal-pad";
   error?: string;
   multiline?: boolean;
-  autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+  autoCapitalize?: "none" | "sentences" | "words" | "characters";
 }
 
 export function Input({
@@ -23,26 +23,44 @@ export function Input({
   keyboardType = 'default',
   error,
   multiline,
-  autoCapitalize = 'sentences',
+  autoCapitalize = "sentences",
 }: InputProps) {
+  const { colors } = useTheme();
+
   return (
     <View className="mb-4">
-      {Boolean(label) && <Text className="mb-2 ml-1 text-sm font-medium text-[#667085]">{label}</Text>}
+      {Boolean(label) ? (
+        <Text
+          className="mb-2 ml-1 text-sm font-medium"
+          style={{ color: colors.textSecondary }}
+        >
+          {label}
+        </Text>
+      ) : null}
       <TextInput
-        className={`rounded-[14px] border bg-white px-4 py-4 text-base text-[#344054] ${
-          error ? 'border-[#FF6B6B]' : 'border-[#D0D5DD]'
-        } ${multiline ? 'min-h-[120px] text-top' : ''}`}
+        className={`rounded-[14px] border px-4 py-4 text-base ${
+          multiline ? "min-h-[120px] text-top" : ""
+        }`}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={COLORS.textMuted}
+        placeholderTextColor={colors.textMuted}
         secureTextEntry={secureTextEntry}
         keyboardType={keyboardType}
         multiline={multiline}
         autoCapitalize={autoCapitalize}
-        textAlignVertical={multiline ? 'top' : 'center'}
+        textAlignVertical={multiline ? "top" : "center"}
+        style={{
+          backgroundColor: colors.surface,
+          color: colors.text,
+          borderColor: error ? colors.danger : colors.border,
+        }}
       />
-      {error && <Text className="mt-2 ml-1 text-xs text-[#FF6B6B]">{error}</Text>}
+      {error ? (
+        <Text className="mt-2 ml-1 text-xs" style={{ color: colors.danger }}>
+          {error}
+        </Text>
+      ) : null}
     </View>
   );
 }

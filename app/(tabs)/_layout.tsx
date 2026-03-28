@@ -1,44 +1,49 @@
-import { Tabs } from 'expo-router';
-import { COLORS } from '../../src/constants';
+import { Tabs } from "expo-router";
+import { InternalHeaderRight } from "../../src/components/layout/InternalHeaderRight";
+import { useTheme } from "../../src/theme/useTheme";
 
 export default function TabsLayout() {
+  const { colors } = useTheme();
+
   return (
     <Tabs
       screenOptions={{
-        headerStyle: { backgroundColor: COLORS.background },
-        headerTintColor: COLORS.text,
-        headerTitleStyle: { fontWeight: 'bold' },
+        headerStyle: { backgroundColor: colors.background },
+        headerTintColor: colors.text,
+        headerTitleStyle: { fontWeight: "bold" },
+        headerShadowVisible: false,
+        sceneStyle: { backgroundColor: colors.background },
         tabBarStyle: {
-          display: 'none',
+          display: "none",
         },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Dashboard',
+          title: "Dashboard",
           headerShown: false,
         }}
       />
       <Tabs.Screen
         name="transactions"
         options={{
-          title: 'Transações',
+          title: "Transações",
           headerShown: false,
         }}
       />
       <Tabs.Screen
         name="categories"
         options={{
-          title: 'Categorias',
+          title: "Categorias",
           headerShown: false,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Perfil',
-          headerShown: false,
+          title: "Perfil",
+          headerRight: () => <InternalHeaderRight />,
         }}
       />
       <Tabs.Screen

@@ -1,15 +1,22 @@
-import React from 'react';
-import { View, Text } from 'react-native';
+import React from "react";
+import { View, Text, ViewProps } from "react-native";
+import { useTheme } from "../../theme/useTheme";
 
-interface CardProps {
+interface CardProps extends ViewProps {
   children: React.ReactNode;
   className?: string;
 }
 
 export function Card({ children, className, ...props }: CardProps) {
+  const { colors } = useTheme();
+
   /* aria-label: Generic structural Card */
   return (
-    <View className={`rounded-[24px] border border-[#EEF2F5] bg-white p-4 ${className}`}>
+    <View
+      className={`rounded-[24px] border p-4 ${className}`}
+      style={{ borderColor: colors.border, backgroundColor: colors.surface }}
+      {...props}
+    >
       {children}
     </View>
   );
@@ -22,26 +29,32 @@ interface SummaryCardProps {
   color?: 'success' | 'danger' | 'primary' | 'neutral';
 }
 
-export function SummaryCard({ title, value, icon, color = 'neutral' }: SummaryCardProps) {
-  const colorClass = {
-    success: 'text-[#6CCF7F]',
-    danger: 'text-[#FF6B6B]',
-    primary: 'text-[#169670]',
-    neutral: 'text-[#344054]',
-  }[color];
-
-  const bgClass = {
-    success: 'bg-white border-[#EEF2F5]',
-    danger: 'bg-white border-[#EEF2F5]',
-    primary: 'bg-white border-[#EEF2F5]',
-    neutral: 'bg-white border-[#EEF2F5]',
+export function SummaryCard({ title, value, icon, color = "neutral" }: SummaryCardProps) {
+  const { colors } = useTheme();
+  const valueColor = {
+    success: colors.success,
+    danger: colors.danger,
+    primary: colors.primary,
+    neutral: colors.text,
   }[color];
 
   return (
-    <View className={`${bgClass} flex-1 rounded-[20px] border p-5`}>
+    <View
+      className="flex-1 rounded-[20px] border p-5"
+      style={{ backgroundColor: colors.surface, borderColor: colors.border }}
+    >
       <Text className="mb-3 text-2xl">{icon}</Text>
-      <Text className="text-xs font-medium uppercase tracking-wide text-[#98A2B3]">{title}</Text>
-      <Text className={`${colorClass} mt-2 text-lg font-bold`} numberOfLines={1}>
+      <Text
+        className="text-xs font-medium uppercase tracking-wide"
+        style={{ color: colors.textMuted }}
+      >
+        {title}
+      </Text>
+      <Text
+        className="mt-2 text-lg font-bold"
+        style={{ color: valueColor }}
+        numberOfLines={1}
+      >
         {value}
       </Text>
     </View>

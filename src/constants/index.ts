@@ -18,6 +18,9 @@ export const COLORS = {
   avatar: '#E9FBF3',
 };
 
+export { themeTokens } from "../theme/tokens";
+export type { AppTheme, ThemeColors } from "../theme/tokens";
+
 export const CATEGORY_ICONS: Record<string, string> = {
   utensils: '🍽️',
   car: '🚗',

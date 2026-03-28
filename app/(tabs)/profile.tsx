@@ -1,64 +1,69 @@
-import React, { useState } from 'react';
-import { View, Text, Alert, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAuthStore } from '../../src/stores/authStore';
-import { Button } from '../../src/components/ui/Button';
-import { Input } from '../../src/components/ui/Input';
-import { Card } from '../../src/components/ui/Card';
+import React, { useState } from "react";
+import { Alert, ScrollView, Switch, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Button } from "../../src/components/ui/Button";
+import { Card } from "../../src/components/ui/Card";
+import { Input } from "../../src/components/ui/Input";
+import { useAuthStore } from "../../src/stores/authStore";
+import { useTheme } from "../../src/theme/useTheme";
 
 export default function ProfileScreen() {
   const { user, logout, updateProfile, deleteAccount } = useAuthStore();
-  const [name, setName] = useState(user?.name || '');
+  const { colors, isDark, toggleTheme } = useTheme();
+  const [name, setName] = useState(user?.name || "");
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleSave = async () => {
-    if (!name.trim()) return Alert.alert('Atenção', 'Informe seu nome');
+    if (!name.trim()) return Alert.alert("Atenção", "Informe seu nome");
     setIsSaving(true);
     try {
       await updateProfile(name.trim());
       setIsEditing(false);
-      Alert.alert('Sucesso', 'Perfil atualizado!');
+      Alert.alert("Sucesso", "Perfil atualizado!");
     } catch (err: any) {
-      Alert.alert('Erro', err.message);
+      Alert.alert("Erro", err.message);
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleLogout = () => {
-    Alert.alert('Sair', 'Tem certeza que deseja sair?', [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Sair', style: 'destructive', onPress: logout },
+    Alert.alert("Sair", "Tem certeza que deseja sair?", [
+      { text: "Cancelar", style: "cancel" },
+      { text: "Sair", style: "destructive", onPress: logout },
     ]);
   };
 
   const handleDeleteAccount = () => {
     Alert.alert(
-      'Excluir conta',
-      'Essa acao ira apagar permanentemente seu perfil e todos os dados vinculados, incluindo despesas, receitas, contas e categorias. Deseja continuar?',
+      "Excluir conta",
+      "Essa acao ira apagar permanentemente seu perfil e todos os dados vinculados, incluindo despesas, receitas, contas e categorias. Deseja continuar?",
       [
-        { text: 'Cancelar', style: 'cancel' },
+        { text: "Cancelar", style: "cancel" },
         {
-          text: 'Excluir conta',
-          style: 'destructive',
+          text: "Excluir conta",
+          style: "destructive",
           onPress: () => {
             Alert.alert(
-              'Confirmacao final',
-              'Essa exclusao nao pode ser desfeita. Confirma a exclusao total da conta?',
+              "Confirmacao final",
+              "Essa exclusao nao pode ser desfeita. Confirma a exclusao total da conta?",
               [
-                { text: 'Voltar', style: 'cancel' },
+                { text: "Voltar", style: "cancel" },
                 {
-                  text: 'Excluir definitivamente',
-                  style: 'destructive',
+                  text: "Excluir definitivamente",
+                  style: "destructive",
                   onPress: async () => {
                     setIsDeleting(true);
                     try {
                       await deleteAccount();
-                      Alert.alert('Conta excluida', 'Sua conta e todos os dados relacionados foram removidos.');
+                      Alert.alert(
+                        "Conta excluida",
+                        "Sua conta e todos os dados relacionados foram removidos.",
+                      );
                     } catch (err: any) {
-                      Alert.alert('Erro', err.message);
+                      Alert.alert("Erro", err.message);
                     } finally {
                       setIsDeleting(false);
                     }
@@ -73,20 +78,34 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F7F8FA]">
-      <ScrollView className="flex-1 px-4" contentContainerStyle={{ paddingBottom: 40 }}>
+    <SafeAreaView className="flex-1" style={{ backgroundColor: colors.background }}>
+      <ScrollView
+        className="flex-1 px-4"
+        contentContainerStyle={{ paddingBottom: 40, paddingTop: 16 }}
+        showsVerticalScrollIndicator={false}
+      >
         <View className="items-center pt-10 pb-8">
-          <View className="mb-5 h-24 w-24 items-center justify-center rounded-full bg-[#E9FBF3]">
-            <Text className="text-3xl font-semibold text-[#169670]">
-              {(user?.name || 'EA').slice(0, 2).toUpperCase()}
+          <View
+            className="mb-5 h-24 w-24 items-center justify-center rounded-full border-2"
+            style={{
+              backgroundColor: colors.avatar,
+              borderColor: colors.borderStrong,
+            }}
+          >
+            <Text className="text-3xl font-semibold" style={{ color: colors.avatarText }}>
+              {(user?.name || "EA").slice(0, 2).toUpperCase()}
             </Text>
           </View>
-          <Text className="text-2xl font-bold tracking-tight text-[#344054]">{user?.name}</Text>
-          <Text className="mt-1 text-sm font-medium text-[#98A2B3]">{user?.email}</Text>
+          <Text className="text-2xl font-bold tracking-tight" style={{ color: colors.text }}>
+            {user?.name}
+          </Text>
+          <Text className="mt-1 text-sm font-medium" style={{ color: colors.textMuted }}>
+            {user?.email}
+          </Text>
         </View>
 
         <Card className="mb-6 p-5">
-          <Text className="mb-5 flex-row items-center text-xl font-bold text-[#344054]">
+          <Text className="mb-5 text-xl font-bold" style={{ color: colors.text }}>
             Informações Pessoais
           </Text>
 
@@ -98,9 +117,16 @@ export default function ProfileScreen() {
                 onChangeText={setName}
                 placeholder="Seu nome completo"
               />
-              <View className="flex-row gap-4 mt-2">
+              <View className="mt-2 flex-row gap-4">
                 <View className="flex-1">
-                  <Button title="Cancelar" onPress={() => { setIsEditing(false); setName(user?.name || ''); }} variant="outline" />
+                  <Button
+                    title="Cancelar"
+                    onPress={() => {
+                      setIsEditing(false);
+                      setName(user?.name || "");
+                    }}
+                    variant="outline"
+                  />
                 </View>
                 <View className="flex-1">
                   <Button title="Salvar" onPress={handleSave} isLoading={isSaving} />
@@ -109,31 +135,83 @@ export default function ProfileScreen() {
             </View>
           ) : (
             <View>
-              <View className="flex-row items-center justify-between border-b border-[#EEF2F5] py-4">
-                <Text className="text-sm font-medium text-[#98A2B3]">Nome</Text>
-                <Text className="text-sm font-semibold text-[#344054]">{user?.name}</Text>
+              <View
+                className="flex-row items-center justify-between border-b py-4"
+                style={{ borderColor: colors.border }}
+              >
+                <Text className="text-sm font-medium" style={{ color: colors.textMuted }}>
+                  Nome
+                </Text>
+                <Text className="text-sm font-semibold" style={{ color: colors.text }}>
+                  {user?.name}
+                </Text>
               </View>
-              <View className="flex-row justify-between items-center border-b border-[#EEF2F5] py-4">
-                <Text className="text-sm font-medium text-[#98A2B3]">E-mail</Text>
-                <Text className="text-sm font-semibold text-[#344054]">{user?.email}</Text>
+              <View
+                className="flex-row items-center justify-between border-b py-4"
+                style={{ borderColor: colors.border }}
+              >
+                <Text className="text-sm font-medium" style={{ color: colors.textMuted }}>
+                  E-mail
+                </Text>
+                <Text className="text-sm font-semibold" style={{ color: colors.text }}>
+                  {user?.email}
+                </Text>
               </View>
-              <View className="flex-row justify-between items-center py-4">
-                <Text className="text-sm font-medium text-[#98A2B3]">Membro desde</Text>
-                <Text className="text-sm font-semibold text-[#169670]">
-                  {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('pt-BR') : '-'}
+              <View className="flex-row items-center justify-between py-4">
+                <Text className="text-sm font-medium" style={{ color: colors.textMuted }}>
+                  Membro desde
+                </Text>
+                <Text className="text-sm font-semibold" style={{ color: colors.primary }}>
+                  {user?.createdAt
+                    ? new Date(user.createdAt).toLocaleDateString("pt-BR")
+                    : "-"}
                 </Text>
               </View>
               <View className="mt-6">
-                <Button title="Editar Perfil" onPress={() => setIsEditing(true)} variant="secondary" />
+                <Button
+                  title="Editar Perfil"
+                  onPress={() => setIsEditing(true)}
+                  variant="secondary"
+                />
               </View>
             </View>
           )}
         </Card>
 
+        <Card className="mb-6 p-5">
+          <View className="flex-row items-center justify-between">
+            <View className="flex-1 pr-4">
+              <Text className="text-lg font-bold" style={{ color: colors.text }}>
+                Aparência
+              </Text>
+              <Text
+                className="mt-2 text-sm leading-6"
+                style={{ color: colors.textSecondary }}
+              >
+                Ative o dark mode para reduzir o brilho e manter o app no seu
+                estilo preferido.
+              </Text>
+            </View>
+            <Switch
+              value={isDark}
+              onValueChange={() => {
+                void toggleTheme();
+              }}
+              trackColor={{ false: colors.border, true: colors.primary }}
+              thumbColor={colors.white}
+            />
+          </View>
+        </Card>
+
         <Card className="mb-8 p-5">
-          <Text className="mb-3 text-lg font-bold text-[#344054]">Sobre o App</Text>
-          <Text className="text-sm leading-6 text-[#98A2B3]">
-            <Text className="font-bold text-[#667085]">Fin-9 v1.0.0</Text>{'\n'}
+          <Text className="mb-3 text-lg font-bold" style={{ color: colors.text }}>
+            Sobre o App
+          </Text>
+          <Text className="text-sm leading-6" style={{ color: colors.textMuted }}>
+            <Text className="font-bold" style={{ color: colors.textSecondary }}>
+              Fin-9 v1.0.0
+            </Text>
+            {"\n"}
             Domine suas finanças pessoais de forma simples, eficiente e elegante.
           </Text>
         </Card>
@@ -142,9 +220,17 @@ export default function ProfileScreen() {
           <Button title="Sair da Conta" onPress={handleLogout} variant="danger" />
         </View>
 
-        <Card className="border border-[#FECACA] bg-[#FFF1F2] p-5">
-          <Text className="mb-2 text-lg font-bold text-[#B42318]">Zona de perigo</Text>
-          <Text className="mb-5 text-sm leading-6 text-[#B42318]">
+        <Card
+          className="p-5"
+          style={{
+            borderColor: `${colors.danger}55`,
+            backgroundColor: `${colors.danger}12`,
+          }}
+        >
+          <Text className="mb-2 text-lg font-bold" style={{ color: colors.danger }}>
+            Zona de perigo
+          </Text>
+          <Text className="mb-5 text-sm leading-6" style={{ color: colors.danger }}>
             Exclua sua conta para remover permanentemente seu perfil e todas as informacoes financeiras relacionadas.
           </Text>
           <Button

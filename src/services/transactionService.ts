@@ -8,6 +8,7 @@ export const transactionService = {
     if (filters?.year) params.set('year', String(filters.year));
     if (filters?.type) params.set('type', filters.type);
     if (filters?.categoryId) params.set('categoryId', filters.categoryId);
+    if (filters?.accountId) params.set('accountId', filters.accountId);
     if (filters?.orderBy) params.set('orderBy', filters.orderBy);
     if (filters?.orderDir) params.set('orderDir', filters.orderDir);
 

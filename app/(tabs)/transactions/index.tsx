@@ -1,18 +1,28 @@
-import React, { useEffect, useCallback, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { useTransactionStore } from '../../../src/stores/transactionStore';
-import { TransactionItem } from '../../../src/components/TransactionItem';
-import { EmptyState } from '../../../src/components/EmptyState';
-import { Transaction, TransactionType } from '../../../src/types';
-import { getCurrentMonth, getCurrentYear } from '../../../src/utils/format';
-import { COLORS } from '../../../src/constants';
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  FlatList,
+  RefreshControl,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+import { EmptyState } from "../../../src/components/EmptyState";
+import { QuickActionsMenu } from "../../../src/components/layout/QuickActionsMenu";
+import { TransactionItem } from "../../../src/components/TransactionItem";
+import { TransactionItemSkeletonMemoized } from "../../../src/components/TransactionItemSkeleton";
+import { useTransactionStore } from "../../../src/stores/transactionStore";
+import { useTheme } from "../../../src/theme/useTheme";
+import { Transaction, TransactionType } from "../../../src/types";
+import { getCurrentMonth, getCurrentYear } from "../../../src/utils/format";
 
 export default function TransactionsListScreen() {
-  const { transactions, fetch, filters, setFilters } = useTransactionStore();
+  const { transactions, fetch, filters, setFilters, isLoading } = useTransactionStore();
   const [refreshing, setRefreshing] = useState(false);
+  const [isQuickMenuOpen, setIsQuickMenuOpen] = useState(false);
   const router = useRouter();
+  const { colors } = useTheme();
 
   useEffect(() => {
     const currentFilters = {
@@ -43,35 +53,45 @@ export default function TransactionsListScreen() {
       setFilters(newFilters);
       fetch(newFilters);
     },
-    [filters, setFilters, fetch],
+    [fetch, filters, setFilters],
   );
 
   const renderItem = useCallback(
-    ({ item }: { item: Transaction }) => <TransactionItem item={item} onPress={handlePress} />,
+    ({ item }: { item: Transaction }) => (
+      <TransactionItem item={item} onPress={handlePress} />
+    ),
     [handlePress],
   );
 
-  const keyExtractor = useCallback((item: Transaction) => item.id, []);
-
   return (
-    <SafeAreaView className="flex-1 bg-[#F7F8FA]">
+    <SafeAreaView className="flex-1" style={{ backgroundColor: colors.background }}>
       <View className="flex-row gap-3 px-4 py-4">
         {[
-          { label: 'Todas', value: undefined },
-          { label: 'Receitas', value: TransactionType.INCOME },
-          { label: 'Despesas', value: TransactionType.EXPENSE },
+          { label: "Todas", value: undefined },
+          { label: "Receitas", value: TransactionType.INCOME },
+          { label: "Despesas", value: TransactionType.EXPENSE },
         ].map((filter) => (
           <TouchableOpacity
             key={filter.label}
             onPress={() => handleFilter(filter.value)}
-            className={`rounded-full px-5 py-3 ${
-              filters.type === filter.value ? 'bg-[#169670]' : 'border border-[#D6DEE6] bg-white'
-            }`}
+            className="rounded-full px-5 py-3"
+            style={{
+              backgroundColor:
+                filters.type === filter.value
+                  ? colors.chipActive
+                  : colors.chipInactive,
+              borderWidth: filters.type === filter.value ? 0 : 1,
+              borderColor: colors.border,
+            }}
           >
             <Text
-              className={`text-sm font-semibold ${
-                filters.type === filter.value ? 'text-white' : 'text-[#667085]'
-              }`}
+              className="text-sm font-semibold"
+              style={{
+                color:
+                  filters.type === filter.value
+                    ? colors.chipActiveText
+                    : colors.chipInactiveText,
+              }}
             >
               {filter.label}
             </Text>
@@ -80,11 +100,15 @@ export default function TransactionsListScreen() {
       </View>
 
       <FlatList
-        data={transactions}
-        renderItem={renderItem}
-        keyExtractor={keyExtractor}
+        data={isLoading && transactions.length === 0 ? Array(5).fill(0).map((_, i) => ({ id: `skeleton-${i}` } as any)) : transactions}
+        renderItem={(props) => (isLoading && transactions.length === 0) ? <TransactionItemSkeletonMemoized /> : renderItem(props)}
+        keyExtractor={(item) => item.id}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.primary} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.primary}
+          />
         }
         ListEmptyComponent={
           <View className="mt-10">
@@ -99,14 +123,10 @@ export default function TransactionsListScreen() {
         showsVerticalScrollIndicator={false}
       />
 
-      <TouchableOpacity
-        onPress={() => router.push('/(tabs)/transactions/create')}
-        className="absolute bottom-6 right-4 h-14 w-14 items-center justify-center rounded-full"
-        style={{ backgroundColor: COLORS.primary }}
-        activeOpacity={0.8}
-      >
-        <Text className="mb-[2px] text-3xl text-white">+</Text>
-      </TouchableOpacity>
+      <QuickActionsMenu
+        isOpen={isQuickMenuOpen}
+        onToggle={() => setIsQuickMenuOpen((current) => !current)}
+      />
     </SafeAreaView>
   );
 }

@@ -71,6 +71,7 @@ export interface TransactionFilters {
   year?: number;
   type?: TransactionType;
   categoryId?: string;
+  accountId?: string;
   orderBy?: 'date' | 'amount';
   orderDir?: 'asc' | 'desc';
 }
