@@ -1,13 +1,13 @@
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
-  Alert,
   FlatList,
   RefreshControl,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { EmptyState } from "../../../src/components/EmptyState";
 import { CATEGORY_ICONS } from "../../../src/constants";
@@ -35,20 +35,27 @@ export default function CategoriesScreen() {
 
   const handleDelete = useCallback(
     (category: Category) => {
-      Alert.alert("Excluir", `Deseja excluir "${category.name}"?`, [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Excluir",
-          style: "destructive",
-          onPress: async () => {
+      Toast.show({
+        type: "confirm",
+        text1: "Excluir",
+        text2: `Deseja excluir "${category.name}"?`,
+        position: "bottom",
+        autoHide: false,
+        props: {
+          confirmText: "Excluir",
+          onConfirm: async () => {
             try {
               await remove(category.id);
             } catch (err: any) {
-              Alert.alert("Erro", err.message);
+              Toast.show({
+                type: "error",
+                text1: "Erro",
+                text2: err.message,
+              });
             }
           },
         },
-      ]);
+      });
     },
     [remove],
   );

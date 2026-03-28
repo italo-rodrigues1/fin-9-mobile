@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
+import Toast from "react-native-toast-message";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { FormScreen } from "../../../src/components/layout/FormScreen";
 import { Button } from "../../../src/components/ui/Button";
@@ -42,11 +43,27 @@ export default function CreateTransactionScreen() {
   }, [params.type]);
 
   const handleSubmit = async () => {
-    if (!title.trim()) return Alert.alert("Atenção", "Informe o título");
-    if (!amount || Number(amount.replace(",", ".")) <= 0) {
-      return Alert.alert("Atenção", "Informe um valor válido");
+    if (!title.trim()) {
+      return Toast.show({
+        type: "error",
+        text1: "Atenção",
+        text2: "Informe o título",
+      });
     }
-    if (!categoryId) return Alert.alert("Atenção", "Selecione uma categoria");
+    if (!amount || Number(amount.replace(",", ".")) <= 0) {
+      return Toast.show({
+        type: "error",
+        text1: "Atenção",
+        text2: "Informe um valor válido",
+      });
+    }
+    if (!categoryId) {
+      return Toast.show({
+        type: "error",
+        text1: "Atenção",
+        text2: "Selecione uma categoria",
+      });
+    }
 
     setIsSubmitting(true);
     try {
@@ -60,7 +77,11 @@ export default function CreateTransactionScreen() {
       });
       router.replace("/(tabs)/transactions");
     } catch (err: any) {
-      Alert.alert("Erro", err.message);
+      Toast.show({
+        type: "error",
+        text1: "Erro",
+        text2: err.message,
+      });
     } finally {
       setIsSubmitting(false);
     }

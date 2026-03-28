@@ -1,7 +1,8 @@
 import { Sentry } from "@/lib/sentry";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Alert, Text, View } from "react-native";
+import { Text, View } from "react-native";
+import Toast from "react-native-toast-message";
 import { BrandLogo } from "../../src/components/BrandLogo";
 import { FormScreen } from "../../src/components/layout/FormScreen";
 import { Button } from "../../src/components/ui/Button";
@@ -18,13 +19,21 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
-      Alert.alert("Atenção", "Preencha todos os campos");
+      Toast.show({
+        type: "error",
+        text1: "Atenção",
+        text2: "Preencha todos os campos",
+      });
       return;
     }
     try {
       await login(email.trim(), password);
     } catch (err: any) {
-      Alert.alert("Erro", err.message);
+      Toast.show({
+        type: "error",
+        text1: "Erro",
+        text2: err.message,
+      });
     }
   };
 

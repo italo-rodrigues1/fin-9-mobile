@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
+import Toast from "react-native-toast-message";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { FormScreen } from "../../../src/components/layout/FormScreen";
 import { Button } from "../../../src/components/ui/Button";
@@ -47,7 +48,11 @@ export default function EditCategoryScreen() {
         setSelectedColor(category.color);
         setIsDefault(category.isDefault);
       } catch (err: any) {
-        Alert.alert("Erro", err.message || "Categoria não encontrada");
+        Toast.show({
+          type: "error",
+          text1: "Erro",
+          text2: err.message || "Categoria não encontrada",
+        });
         router.replace("/(tabs)/categories");
       }
     };
@@ -57,7 +62,11 @@ export default function EditCategoryScreen() {
 
   const handleSave = async () => {
     if (!name.trim()) {
-      return Alert.alert("Atenção", "Informe o nome da categoria");
+      return Toast.show({
+        type: "error",
+        text1: "Atenção",
+        text2: "Informe o nome da categoria",
+      });
     }
 
     setIsSubmitting(true);
@@ -65,31 +74,42 @@ export default function EditCategoryScreen() {
       await update(id, { name: name.trim(), color: selectedColor });
       router.replace("/(tabs)/categories");
     } catch (err: any) {
-      Alert.alert("Erro", err.message);
+      Toast.show({
+        type: "error",
+        text1: "Erro",
+        text2: err.message,
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDelete = () => {
-    Alert.alert("Excluir", "Tem certeza que deseja excluir esta categoria?", [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Excluir",
-        style: "destructive",
-        onPress: async () => {
+    Toast.show({
+      type: "confirm",
+      text1: "Excluir",
+      text2: "Tem certeza que deseja excluir esta categoria?",
+      position: "bottom",
+      autoHide: false,
+      props: {
+        confirmText: "Excluir",
+        onConfirm: async () => {
           setIsDeleting(true);
           try {
             await remove(id);
             router.replace("/(tabs)/categories");
           } catch (err: any) {
-            Alert.alert("Erro", err.message);
+            Toast.show({
+              type: "error",
+              text1: "Erro",
+              text2: err.message,
+            });
           } finally {
             setIsDeleting(false);
           }
         },
       },
-    ]);
+    });
   };
 
   return (

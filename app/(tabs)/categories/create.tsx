@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
+import Toast from "react-native-toast-message";
 import { useRouter } from "expo-router";
 import { FormScreen } from "../../../src/components/layout/FormScreen";
 import { Button } from "../../../src/components/ui/Button";
@@ -31,7 +32,11 @@ export default function CreateCategoryScreen() {
 
   const handleSave = async () => {
     if (!name.trim()) {
-      return Alert.alert("Atenção", "Informe o nome da categoria");
+      return Toast.show({
+        type: "error",
+        text1: "Atenção",
+        text2: "Informe o nome da categoria",
+      });
     }
 
     setIsSubmitting(true);
@@ -39,7 +44,11 @@ export default function CreateCategoryScreen() {
       await create({ name: name.trim(), color: selectedColor });
       router.replace("/(tabs)/categories");
     } catch (err: any) {
-      Alert.alert("Erro", err.message);
+      Toast.show({
+        type: "error",
+        text1: "Erro",
+        text2: err.message,
+      });
     } finally {
       setIsSubmitting(false);
     }

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { FormScreen } from "../../../src/components/layout/FormScreen";
 import { Button } from "../../../src/components/ui/Button";
@@ -49,7 +49,11 @@ export default function EditTransactionScreen() {
       setCategoryId(tx.categoryId);
       setDate(tx.date.split('T')[0]);
     } catch {
-      Alert.alert("Erro", "Transação não encontrada");
+      Toast.show({
+        type: "error",
+        text1: "Erro",
+        text2: "Transação não encontrada",
+      });
       router.replace("/(tabs)/transactions");
     } finally {
       setIsLoading(false);
@@ -57,9 +61,19 @@ export default function EditTransactionScreen() {
   };
 
   const handleUpdate = async () => {
-    if (!title.trim()) return Alert.alert("Atenção", "Informe o título");
+    if (!title.trim()) {
+      return Toast.show({
+        type: "error",
+        text1: "Atenção",
+        text2: "Informe o título",
+      });
+    }
     if (!amount || Number(amount.replace(",", ".")) <= 0) {
-      return Alert.alert("Atenção", "Informe um valor válido");
+      return Toast.show({
+        type: "error",
+        text1: "Atenção",
+        text2: "Informe um valor válido",
+      });
     }
 
     setIsSubmitting(true);
@@ -74,28 +88,39 @@ export default function EditTransactionScreen() {
       });
       router.replace("/(tabs)/transactions");
     } catch (err: any) {
-      Alert.alert("Erro", err.message);
+      Toast.show({
+        type: "error",
+        text1: "Erro",
+        text2: err.message,
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDelete = () => {
-    Alert.alert("Excluir", "Tem certeza que deseja excluir esta transação?", [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Excluir",
-        style: "destructive",
-        onPress: async () => {
+    Toast.show({
+      type: "confirm",
+      text1: "Excluir",
+      text2: "Tem certeza que deseja excluir esta transação?",
+      position: "bottom",
+      autoHide: false,
+      props: {
+        confirmText: "Excluir",
+        onConfirm: async () => {
           try {
             await remove(id);
             router.replace("/(tabs)/transactions");
           } catch (err: any) {
-            Alert.alert("Erro", err.message);
+            Toast.show({
+              type: "error",
+              text1: "Erro",
+              text2: err.message,
+            });
           }
         },
       },
-    ]);
+    });
   };
 
   if (isLoading) {

@@ -6,7 +6,8 @@ import {
 } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect } from "react";
-import { ActivityIndicator, View, useColorScheme } from "react-native";
+import { ActivityIndicator, Text, TouchableOpacity, View, useColorScheme } from "react-native";
+import Toast from "react-native-toast-message";
 import "../global.css";
 import { Sentry, navigationIntegration } from "../src/lib/sentry";
 import { useAuthStore } from "../src/stores/authStore";
@@ -50,6 +51,62 @@ function RootLayout() {
     }
   }, [isAuthenticated, isLoading, segments]);
 
+  const toastConfig = {
+    confirm: ({ text1, text2, props, hide }: any) => (
+      <View
+        className="mx-4 mb-10 w-[92%] rounded-[28px] p-6 shadow-2xl"
+        style={{
+          backgroundColor: colors.surface,
+          borderWidth: 1,
+          borderColor: colors.border,
+          elevation: 10,
+        }}
+      >
+        <Text className="mb-2 text-xl font-bold" style={{ color: colors.text }}>
+          {text1}
+        </Text>
+        <Text
+          className="mb-6 text-sm leading-6"
+          style={{ color: colors.textSecondary }}
+        >
+          {text2}
+        </Text>
+        <View className="flex-row justify-end gap-3">
+          <TouchableOpacity
+            onPress={() => {
+              props.onCancel?.();
+              Toast.hide();
+            }}
+            className="rounded-full px-5 py-3"
+            style={{ backgroundColor: colors.backgroundMuted }}
+          >
+            <Text
+              className="text-sm font-semibold"
+              style={{ color: colors.text }}
+            >
+              {props.cancelText || "Cancelar"}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              props.onConfirm();
+              Toast.hide();
+            }}
+            className="rounded-full px-5 py-3"
+            style={{ backgroundColor: colors.primary }}
+          >
+            <Text
+              className="text-sm font-semibold"
+              style={{ color: colors.white }}
+            >
+              {props.confirmText || "Confirmar"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    ),
+  };
+
   if (isLoading) {
     return (
       <View
@@ -66,6 +123,7 @@ function RootLayout() {
     <>
       <StatusBar style={isDark ? "light" : "dark"} />
       <Slot />
+      <Toast config={toastConfig} />
     </>
   );
 }

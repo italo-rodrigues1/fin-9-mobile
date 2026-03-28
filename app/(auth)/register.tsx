@@ -1,6 +1,7 @@
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Alert, Text, View } from "react-native";
+import { Text, View } from "react-native";
+import Toast from "react-native-toast-message";
 import { BrandLogo } from "../../src/components/BrandLogo";
 import { FormScreen } from "../../src/components/layout/FormScreen";
 import { Button } from "../../src/components/ui/Button";
@@ -21,26 +22,46 @@ export default function RegisterScreen() {
 
   const handleRegister = async () => {
     if (!name.trim() || !email.trim() || !password.trim()) {
-      Alert.alert("Atenção", "Preencha todos os campos");
+      Toast.show({
+        type: "error",
+        text1: "Atenção",
+        text2: "Preencha todos os campos",
+      });
       return;
     }
     if (password.length < 6) {
-      Alert.alert("Atenção", "A senha deve ter no mínimo 6 caracteres");
+      Toast.show({
+        type: "error",
+        text1: "Atenção",
+        text2: "A senha deve ter no mínimo 6 caracteres",
+      });
       return;
     }
     if (password !== confirmPassword) {
-      Alert.alert("Atenção", "As senhas não coincidem");
+      Toast.show({
+        type: "error",
+        text1: "Atenção",
+        text2: "As senhas não coincidem",
+      });
       return;
     }
     if (!emailValid.some((domain) => email.endsWith(domain))) {
-      Alert.alert("Atenção", "Por favor, utilize um e-mail válido");
+      Toast.show({
+        type: "error",
+        text1: "Atenção",
+        text2: "Por favor, utilize um e-mail válido",
+      });
       return;
     }
 
     try {
       await register(name.trim(), email.trim(), password);
     } catch (err: any) {
-      Alert.alert("Erro", err.message);
+      Toast.show({
+        type: "error",
+        text1: "Erro",
+        text2: err.message,
+      });
     }
   };
 

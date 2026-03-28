@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Alert, ScrollView, Switch, Text, View } from "react-native";
+import { ScrollView, Switch, Text, View } from "react-native";
+import Toast from "react-native-toast-message";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "../../src/components/ui/Button";
 import { Card } from "../../src/components/ui/Card";
@@ -16,65 +17,87 @@ export default function ProfileScreen() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleSave = async () => {
-    if (!name.trim()) return Alert.alert("Atenção", "Informe seu nome");
+    if (!name.trim()) return Toast.show({
+      type: "error",
+      text1: "Atenção",
+      text2: "Informe seu nome",
+    });
     setIsSaving(true);
     try {
       await updateProfile(name.trim());
       setIsEditing(false);
-      Alert.alert("Sucesso", "Perfil atualizado!");
+      Toast.show({
+        type: "success",
+        text1: "Sucesso",
+        text2: "Perfil atualizado!",
+      });
     } catch (err: any) {
-      Alert.alert("Erro", err.message);
+      Toast.show({
+        type: "error",
+        text1: "Erro",
+        text2: err.message,
+      });
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleLogout = () => {
-    Alert.alert("Sair", "Tem certeza que deseja sair?", [
-      { text: "Cancelar", style: "cancel" },
-      { text: "Sair", style: "destructive", onPress: logout },
-    ]);
+    Toast.show({
+      type: "confirm",
+      text1: "Sair",
+      text2: "Tem certeza que deseja sair?",
+      position: "bottom",
+      autoHide: false,
+      props: {
+        confirmText: "Sair",
+        onConfirm: logout,
+      },
+    });
   };
 
   const handleDeleteAccount = () => {
-    Alert.alert(
-      "Excluir conta",
-      "Essa acao ira apagar permanentemente seu perfil e todos os dados vinculados, incluindo despesas, receitas, contas e categorias. Deseja continuar?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Excluir conta",
-          style: "destructive",
-          onPress: () => {
-            Alert.alert(
-              "Confirmacao final",
-              "Essa exclusao nao pode ser desfeita. Confirma a exclusao total da conta?",
-              [
-                { text: "Voltar", style: "cancel" },
-                {
-                  text: "Excluir definitivamente",
-                  style: "destructive",
-                  onPress: async () => {
-                    setIsDeleting(true);
-                    try {
-                      await deleteAccount();
-                      Alert.alert(
-                        "Conta excluida",
-                        "Sua conta e todos os dados relacionados foram removidos.",
-                      );
-                    } catch (err: any) {
-                      Alert.alert("Erro", err.message);
-                    } finally {
-                      setIsDeleting(false);
-                    }
-                  },
-                },
-              ],
-            );
-          },
+    Toast.show({
+      type: "confirm",
+      text1: "Excluir conta",
+      text2: "Essa ação irá apagar permanentemente seu perfil e todos os dados vinculados. Deseja continuar?",
+      position: "bottom",
+      autoHide: false,
+      props: {
+        confirmText: "Continuar",
+        onConfirm: () => {
+          Toast.show({
+            type: "confirm",
+            text1: "Confirmação final",
+            text2: "Essa exclusão não pode ser desfeita. Confirma a exclusão total da conta?",
+            position: "bottom",
+            autoHide: false,
+            props: {
+              confirmText: "Excluir definitivamente",
+              onConfirm: async () => {
+                setIsDeleting(true);
+                try {
+                  await deleteAccount();
+                  Toast.show({
+                    type: "success",
+                    text1: "Conta excluída",
+                    text2: "Sua conta e todos os dados relacionados foram removidos.",
+                  });
+                } catch (err: any) {
+                  Toast.show({
+                    type: "error",
+                    text1: "Erro",
+                    text2: err.message,
+                  });
+                } finally {
+                  setIsDeleting(false);
+                }
+              },
+            },
+          });
         },
-      ],
-    );
+      },
+    });
   };
 
   return (

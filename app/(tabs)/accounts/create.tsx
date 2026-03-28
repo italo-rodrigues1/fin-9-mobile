@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
+import Toast from "react-native-toast-message";
 import { useRouter } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { FormScreen } from "../../../src/components/layout/FormScreen";
@@ -21,10 +22,26 @@ export default function CreateAccountScreen() {
   const { colors } = useTheme();
 
   const handleSubmit = async () => {
-    if (!name.trim()) return Alert.alert("Atenção", "Informe o nome da conta");
-    if (!institution.trim()) return Alert.alert("Atenção", "Informe a instituição");
+    if (!name.trim()) {
+      return Toast.show({
+        type: "error",
+        text1: "Atenção",
+        text2: "Informe o nome da conta",
+      });
+    }
+    if (!institution.trim()) {
+      return Toast.show({
+        type: "error",
+        text1: "Atenção",
+        text2: "Informe a instituição",
+      });
+    }
     if (!balance || Number(balance.replace(',', '.')) < 0) {
-      return Alert.alert("Atenção", "Informe um saldo válido");
+      return Toast.show({
+        type: "error",
+        text1: "Atenção",
+        text2: "Informe um saldo válido",
+      });
     }
 
     setIsSubmitting(true);
@@ -38,7 +55,11 @@ export default function CreateAccountScreen() {
       });
       router.replace("/(tabs)");
     } catch (err: any) {
-      Alert.alert("Erro", err.response?.data?.message || "Não foi possível cadastrar a conta");
+      Toast.show({
+        type: "error",
+        text1: "Erro",
+        text2: err.response?.data?.message || "Não foi possível cadastrar a conta",
+      });
     } finally {
       setIsSubmitting(false);
     }
