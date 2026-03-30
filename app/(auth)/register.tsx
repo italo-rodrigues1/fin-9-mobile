@@ -9,7 +9,7 @@ import { Input } from "../../src/components/ui/Input";
 import { useAuthStore } from "../../src/stores/authStore";
 import { useTheme } from "../../src/theme/useTheme";
 
-const emailValid = ["gmail.com", "outlook.com"];
+const emailValid = ["gmail.com", "outlook.com", "hotmail.com"];
 
 export default function RegisterScreen() {
   const [name, setName] = useState("");
@@ -77,92 +77,92 @@ export default function RegisterScreen() {
         paddingBottom: 72,
       }}
     >
+      <View>
+        <View className="mb-14 items-center">
+          <BrandLogo muted />
+        </View>
+
         <View>
-          <View className="mb-14 items-center">
-            <BrandLogo muted />
-          </View>
-
-          <View>
-            <Text className="text-center text-[18px] font-bold" style={{ color: colors.text }}>
-              Crie sua conta
+          <Text className="text-center text-[18px] font-bold" style={{ color: colors.text }}>
+            Crie sua conta
+          </Text>
+          <Text className="mt-4 text-center text-base" style={{ color: colors.textSecondary }}>
+            Já possui uma conta?{" "}
+            <Text
+              className="font-semibold"
+              style={{ color: colors.primary }}
+              onPress={() => router.back()}
+            >
+              Fazer Login
             </Text>
-            <Text className="mt-4 text-center text-base" style={{ color: colors.textSecondary }}>
-              Já possui uma conta?{" "}
-              <Text
-                className="font-semibold"
-                style={{ color: colors.primary }}
-                onPress={() => router.back()}
-              >
-                Fazer Login
+          </Text>
+        </View>
+
+        <View className="mt-10">
+          <Input
+            label=""
+            value={name}
+            onChangeText={(text) => {
+              clearError();
+              setName(text);
+            }}
+            placeholder="Nome"
+          />
+
+          <Input
+            label=""
+            value={email}
+            onChangeText={(text) => {
+              clearError();
+              setEmail(text);
+            }}
+            placeholder="E-mail"
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+
+          <Input
+            label=""
+            value={password}
+            onChangeText={(text) => {
+              clearError();
+              setPassword(text);
+            }}
+            placeholder="Senha"
+            secureTextEntry
+          />
+
+          <Input
+            label=""
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            placeholder="Confirmar senha"
+            secureTextEntry
+          />
+
+          {error && (
+            <View
+              className="mb-4 rounded-[14px] border p-4"
+              style={{
+                borderColor: `${colors.danger}55`,
+                backgroundColor: `${colors.danger}12`,
+              }}
+            >
+              <Text className="text-center text-sm" style={{ color: colors.danger }}>
+                {error}
               </Text>
-            </Text>
-          </View>
-
-          <View className="mt-10">
-            <Input
-              label=""
-              value={name}
-              onChangeText={(text) => {
-                clearError();
-                setName(text);
-              }}
-              placeholder="Nome"
-            />
-
-            <Input
-              label=""
-              value={email}
-              onChangeText={(text) => {
-                clearError();
-                setEmail(text);
-              }}
-              placeholder="E-mail"
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-
-            <Input
-              label=""
-              value={password}
-              onChangeText={(text) => {
-                clearError();
-                setPassword(text);
-              }}
-              placeholder="Senha"
-              secureTextEntry
-            />
-
-            <Input
-              label=""
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              placeholder="Confirmar senha"
-              secureTextEntry
-            />
-
-            {error && (
-              <View
-                className="mb-4 rounded-[14px] border p-4"
-                style={{
-                  borderColor: `${colors.danger}55`,
-                  backgroundColor: `${colors.danger}12`,
-                }}
-              >
-                <Text className="text-center text-sm" style={{ color: colors.danger }}>
-                  {error}
-                </Text>
-              </View>
-            )}
-
-            <View className="mt-3">
-              <Button
-                title="Criar conta"
-                onPress={handleRegister}
-                isLoading={isLoading}
-              />
             </View>
+          )}
+
+          <View className="mt-3">
+            <Button
+              title="Criar conta"
+              onPress={handleRegister}
+              isLoading={isLoading}
+            />
           </View>
         </View>
+      </View>
     </FormScreen>
   );
 }
