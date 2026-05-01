@@ -2,6 +2,7 @@ import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
+  Alert,
   Modal,
   RefreshControl,
   ScrollView,
@@ -21,6 +22,7 @@ import { TransactionItem } from "../../src/components/TransactionItem";
 import { TransactionItemSkeletonMemoized } from "../../src/components/TransactionItemSkeleton";
 import { Skeleton } from "../../src/components/ui/Skeleton";
 import { dashboardService } from "../../src/services/dashboardService";
+import { useAccountStore } from "../../src/stores/accountStore";
 import { useAuthStore } from "../../src/stores/authStore";
 import { useTransactionStore } from "../../src/stores/transactionStore";
 import { useTheme } from "../../src/theme/useTheme";
@@ -35,6 +37,7 @@ import {
 export default function DashboardScreen() {
   const { user } = useAuthStore();
   const { transactions, fetch: fetchTransactions, setFilters } = useTransactionStore();
+  const { accounts: storeAccounts, fetch: fetchAccounts } = useAccountStore();
   const [summary, setSummary] = useState<MonthlySummary | null>(null);
 
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
@@ -54,7 +57,7 @@ export default function DashboardScreen() {
     try {
       if (!refreshing) setIsLoading(true);
       const [summaryData] = await Promise.all([
-        dashboardService.getSummary(selectedMonth, selectedYear),
+        dashboardService.getSummary(selectedMonth, selectedYear, selectedAccountId),
         fetchTransactions({ month: selectedMonth, year: selectedYear, accountId: selectedAccountId }),
       ]);
       setSummary(summaryData);
@@ -64,7 +67,8 @@ export default function DashboardScreen() {
   useFocusEffect(
     useCallback(() => {
       loadData();
-    }, [loadData]),
+      fetchAccounts();
+    }, [loadData, fetchAccounts]),
   );
 
   const onRefresh = useCallback(async () => {
@@ -219,46 +223,70 @@ export default function DashboardScreen() {
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{ paddingRight: 8 }}
               >
-                {accountCards.map((account) => (
-                  <View
-                    key={account.id}
-                    className="mr-3 w-[276px] overflow-hidden rounded-[22px] px-4 pb-5 pt-4"
-                    style={{ backgroundColor: colors.surface }}
-                  >
-                    <View
-                      className="mb-6 h-10 w-10 items-center justify-center rounded-full"
-                      style={{ backgroundColor: colors.backgroundMuted }}
+                {accountCards.map((account) => {
+                  const isSelected = selectedAccountId === account.id;
+                  return (
+                    <TouchableOpacity
+                      key={account.id}
+                      activeOpacity={0.85}
+                      onPress={() => setSelectedAccountId(isSelected ? undefined : account.id)}
+                      onLongPress={() => {
+                        Alert.alert(
+                          account.name,
+                          account.institution,
+                          [
+                            {
+                              text: "Editar conta",
+                              onPress: () => {
+                                router.push(`/(tabs)/accounts/${account.id}/edit` as never);
+                              },
+                            },
+                            { text: "Cancelar", style: "cancel" },
+                          ],
+                        );
+                      }}
+                      className="mr-3 w-[276px] overflow-hidden rounded-[22px] px-4 pb-5 pt-4"
+                      style={{
+                        backgroundColor: colors.surface,
+                        borderWidth: isSelected ? 2 : 0,
+                        borderColor: isSelected ? account.color : "transparent",
+                      }}
                     >
-                      <MaterialCommunityIcons
-                        name={account.icon as never}
-                        size={22}
-                        color={colors.textSecondary}
+                      <View
+                        className="mb-6 h-10 w-10 items-center justify-center rounded-full"
+                        style={{ backgroundColor: colors.backgroundMuted }}
+                      >
+                        <MaterialCommunityIcons
+                          name={account.icon as never}
+                          size={22}
+                          color={colors.textSecondary}
+                        />
+                      </View>
+                      <Text
+                        className="text-[28px] font-bold tracking-tight"
+                        style={{ color: colors.text }}
+                      >
+                        {account.institution}
+                      </Text>
+                      <Text className="mt-1 text-base" style={{ color: colors.textSecondary }}>
+                        {account.name}
+                      </Text>
+                      <Text
+                        className="mt-8 text-[30px] font-bold"
+                        style={{ color: colors.text }}
+                      >
+                        {formatCurrency(account.balance)}
+                      </Text>
+                      <Text className="text-base" style={{ color: colors.textMuted }}>
+                        Saldo atual
+                      </Text>
+                      <View
+                        className="absolute bottom-0 left-0 right-0 h-[6px] rounded-b-[22px]"
+                        style={{ backgroundColor: account.color }}
                       />
-                    </View>
-                    <Text
-                      className="text-[28px] font-bold tracking-tight"
-                      style={{ color: colors.text }}
-                    >
-                      {account.institution}
-                    </Text>
-                    <Text className="mt-1 text-base" style={{ color: colors.textSecondary }}>
-                      {account.name}
-                    </Text>
-                    <Text
-                      className="mt-8 text-[30px] font-bold"
-                      style={{ color: colors.text }}
-                    >
-                      {formatCurrency(account.balance)}
-                    </Text>
-                    <Text className="text-base" style={{ color: colors.textMuted }}>
-                      Saldo atual
-                    </Text>
-                    <View
-                      className="absolute bottom-0 left-0 right-0 h-[6px] rounded-b-[22px]"
-                      style={{ backgroundColor: account.color }}
-                    />
-                  </View>
-                ))}
+                    </TouchableOpacity>
+                  );
+                })}
               </ScrollView>
             ) : (
               <TouchableOpacity
@@ -420,6 +448,7 @@ export default function DashboardScreen() {
       <QuickActionsMenu
         isOpen={isQuickMenuOpen}
         onToggle={() => setIsQuickMenuOpen((current) => !current)}
+        selectedAccountId={selectedAccountId}
       />
 
       {/* Month & Year Picker Modal */}

@@ -18,6 +18,7 @@ export default function AccountsLayout() {
       }}
     >
       <Stack.Screen name="create" options={{ title: "", }} />
+      <Stack.Screen name="[id]/edit" options={{ title: "Editar Conta" }} />
     </Stack>
   );
 }

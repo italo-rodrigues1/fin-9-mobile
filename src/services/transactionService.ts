@@ -28,6 +28,7 @@ export const transactionService = {
     type: string;
     date: string;
     categoryId: string;
+    accountId: string;
   }): Promise<Transaction> => {
     const { data } = await api.post<Transaction>('/transactions', payload);
     return data;

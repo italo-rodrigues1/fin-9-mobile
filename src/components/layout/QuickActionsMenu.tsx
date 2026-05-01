@@ -9,11 +9,13 @@ import { useTheme } from "../../theme/useTheme";
 interface QuickActionsMenuProps {
   isOpen: boolean;
   onToggle: () => void;
+  selectedAccountId?: string;
 }
 
 export function QuickActionsMenu({
   isOpen,
   onToggle,
+  selectedAccountId,
 }: QuickActionsMenuProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -29,7 +31,7 @@ export function QuickActionsMenu({
         onToggle();
         router.push({
           pathname: "/(tabs)/transactions/create",
-          params: { type: TransactionType.EXPENSE },
+          params: { type: TransactionType.EXPENSE, ...(selectedAccountId && { accountId: selectedAccountId }) },
         });
       },
     },
@@ -42,7 +44,7 @@ export function QuickActionsMenu({
         onToggle();
         router.push({
           pathname: "/(tabs)/transactions/create",
-          params: { type: TransactionType.INCOME },
+          params: { type: TransactionType.INCOME, ...(selectedAccountId && { accountId: selectedAccountId }) },
         });
       },
     },

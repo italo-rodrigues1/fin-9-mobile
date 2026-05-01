@@ -44,6 +44,7 @@ export interface Transaction {
   type: TransactionType;
   date: string;
   categoryId: string;
+  accountId: string;
   userId: string;
   category?: Category;
   createdAt: string;
@@ -80,6 +81,14 @@ export interface CreateAccountPayload {
   name: string;
   institution: string;
   balance: number;
+  color?: string;
+  icon?: string;
+}
+
+export interface UpdateAccountPayload {
+  name?: string;
+  institution?: string;
+  balance?: number;
   color?: string;
   icon?: string;
 }
