@@ -10,6 +10,9 @@ let requestVersion = 0;
 
 interface TransactionState {
   transactions: Transaction[];
+  hasMore: boolean;
+  isLoadingMore: boolean;
+  loadMore: () => Promise<void>;
   isLoading: boolean;
   error: string | null;
   filters: TransactionFilters;
@@ -28,21 +31,27 @@ interface TransactionState {
 
 export const useTransactionStore = create<TransactionState>((set, get) => ({
   transactions: [],
+  hasMore: false,
+  isLoadingMore: false,
   isLoading: false,
   error: null,
   filters: {},
 
   fetch: async (filters, force = false) => {
     const version = ++requestVersion;
-    set({ isLoading: true, error: null });
+    set({ isLoading: true, isLoadingMore: false, error: null });
     try {
       const appliedFilters = filters || get().filters;
       const transactions = await transactionService.getAll(
-        appliedFilters,
+        { ...appliedFilters, skip: 0, take: 30 },
         force,
       );
       if (version !== requestVersion) return;
-      set({ transactions, isLoading: false });
+      set({
+        transactions,
+        isLoading: false,
+        hasMore: transactions.length === 30,
+      });
     } catch (err: any) {
       if (version !== requestVersion) return;
       set({
@@ -52,6 +61,34 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
     }
   },
 
+  loadMore: async () => {
+    if (get().isLoading || get().isLoadingMore || !get().hasMore) return;
+    const version = ++requestVersion;
+    set({ isLoadingMore: true });
+    try {
+      const next = await transactionService.getAll({
+        ...get().filters,
+        skip: get().transactions.length,
+        take: 30,
+      });
+      if (version !== requestVersion) return;
+      set((state) => ({
+        transactions: [
+          ...state.transactions,
+          ...next.filter(
+            (item) => !state.transactions.some((old) => old.id === item.id),
+          ),
+        ],
+        hasMore: next.length === 30,
+        isLoadingMore: false,
+      }));
+    } catch (err) {
+      if (version === requestVersion) {
+        set({ isLoadingMore: false });
+        notify(errorMessage(err, 'Não foi possível carregar mais transações.'));
+      }
+    }
+  },
   create: async (payload) => {
     try {
       await transactionService.create(payload);
@@ -87,6 +124,13 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
   reset: () => {
     requestVersion++;
     readCaches.transactions.clear();
-    set({ transactions: [], isLoading: false, error: null, filters: {} });
+    set({
+      transactions: [],
+      isLoading: false,
+      error: null,
+      filters: {},
+      hasMore: false,
+      isLoadingMore: false,
+    });
   },
 }));

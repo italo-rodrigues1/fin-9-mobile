@@ -40,7 +40,6 @@ export default function ProfileScreen() {
     if (await confirmAction('Sair', 'Tem certeza que deseja sair?', 'Sair')) {
       try {
         await logout();
-        router.replace('/(auth)/welcome');
       } catch {
         notify('Não foi possível sair. Tente novamente.');
       }

@@ -1,273 +1,276 @@
-import { ScreenHeader } from '../../../src/components/ScreenHeader';
-import { QueryState } from '../../../src/components/QueryState';
-import React, { useEffect, useCallback, useState } from 'react';
-import { Alert, View, Text, FlatList, TouchableOpacity } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTransactionStore } from '../../../src/stores/transactionStore';
+import { ScreenHeader } from '../../../src/components/ScreenHeader';
+import { PeriodPicker } from '../../../src/components/PeriodPicker';
+import { QueryState } from '../../../src/components/QueryState';
+import { LoadingSkeleton } from '../../../src/components/LoadingSkeleton';
 import { TransactionItem } from '../../../src/components/TransactionItem';
-import { EmptyState } from '../../../src/components/EmptyState';
+import { Input } from '../../../src/components/ui/Input';
+import { Select } from '../../../src/components/ui/Select';
+import { Button } from '../../../src/components/ui/Button';
 import {
   DateInput,
   isValidDateValue,
 } from '../../../src/components/ui/DateInput';
-import { Transaction, TransactionType } from '../../../src/types';
-import {
-  getCurrentMonth,
-  getCurrentYear,
-  getMonthName,
-} from '../../../src/utils/format';
-import { COLORS } from '../../../src/constants';
-
+import { useTransactionStore } from '../../../src/stores/transactionStore';
+import { useAccountStore } from '../../../src/stores/accountStore';
+import { useCategoryStore } from '../../../src/stores/categoryStore';
+import { TransactionFilters, TransactionType } from '../../../src/types';
+import { getCurrentMonth, getCurrentYear } from '../../../src/utils/format';
 export default function TransactionsListScreen() {
-  const { transactions, fetch, filters, setFilters, isLoading, error } =
-    useTransactionStore();
-  const [showDateFilters, setShowDateFilters] = useState(
-    Boolean(filters.startDate || filters.endDate),
-  );
-  const [startDate, setStartDate] = useState(filters.startDate ?? '');
-  const [endDate, setEndDate] = useState(filters.endDate ?? '');
+  const {
+    transactions,
+    fetch,
+    filters,
+    setFilters,
+    isLoading,
+    error,
+    hasMore,
+    isLoadingMore,
+    loadMore,
+  } = useTransactionStore();
   const router = useRouter();
-
+  const accounts = useAccountStore((state) => state.accounts),
+    categories = useCategoryStore((state) => state.categories);
+  const [search, setSearch] = useState(filters.search || ''),
+    [expanded, setExpanded] = useState(false),
+    [start, setStart] = useState(filters.startDate || ''),
+    [end, setEnd] = useState(filters.endDate || ''),
+    [dateError, setDateError] = useState('');
+  useFocusEffect(
+    useCallback(() => {
+      const next = { ...useTransactionStore.getState().filters };
+      if (!next.startDate && !next.endDate) {
+        next.month ??= getCurrentMonth();
+        next.year ??= getCurrentYear();
+      }
+      setSearch(next.search || '');
+      setStart(next.startDate || '');
+      setEnd(next.endDate || '');
+      setFilters(next);
+      void fetch(next);
+      void useAccountStore.getState().fetch();
+      void useCategoryStore.getState().fetch();
+    }, [fetch, setFilters]),
+  );
   useEffect(() => {
-    const hasCustomRange = Boolean(filters.startDate || filters.endDate);
-    const currentFilters = hasCustomRange
-      ? filters
-      : {
-          ...filters,
-          month: filters.month || getCurrentMonth(),
-          year: filters.year || getCurrentYear(),
-        };
-    setFilters(currentFilters);
-    fetch(currentFilters);
-  }, []);
-
-  const handlePress = useCallback(
-    (item: Transaction) => {
-      router.push(`/(tabs)/transactions/${item.id}`);
-    },
-    [router],
-  );
-
-  const handleFilter = useCallback(
-    (type?: TransactionType) => {
-      const newFilters = { ...filters, type };
-      setFilters(newFilters);
-      fetch(newFilters);
-    },
-    [filters, setFilters, fetch],
-  );
-
-  const changeMonth = (offset: number) => {
-    const currentMonth = filters.month ?? getCurrentMonth();
-    const currentYear = filters.year ?? getCurrentYear();
-    const nextDate = new Date(currentYear, currentMonth - 1 + offset, 1);
-    const newFilters = {
-      ...filters,
-      month: nextDate.getMonth() + 1,
-      year: nextDate.getFullYear(),
-      startDate: undefined,
-      endDate: undefined,
-    };
-
-    setStartDate('');
-    setEndDate('');
-    setFilters(newFilters);
-    void fetch(newFilters);
+    const timer = setTimeout(() => {
+      const next = {
+        ...useTransactionStore.getState().filters,
+        search: search.trim() || undefined,
+      };
+      setFilters(next);
+      void fetch(next);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search, fetch, setFilters]);
+  const apply = (values: Partial<TransactionFilters>) => {
+    const next = { ...filters, ...values };
+    setFilters(next);
+    void fetch(next);
   };
-
-  const applyDateRange = () => {
-    if (!isValidDateValue(startDate) || !isValidDateValue(endDate)) {
-      Alert.alert(
-        'Atenção',
-        'Informe uma data inicial e uma data final válidas',
+  const applyDates = () => {
+    if (!isValidDateValue(start) || !isValidDateValue(end) || start > end) {
+      setDateError(
+        'Informe um intervalo válido, com início anterior ou igual ao fim.',
       );
       return;
     }
-    if (startDate > endDate) {
-      Alert.alert(
-        'Atenção',
-        'A data inicial não pode ser posterior à data final',
-      );
-      return;
-    }
-
-    const newFilters = {
-      ...filters,
+    setDateError('');
+    apply({
       month: undefined,
       year: undefined,
-      startDate,
-      endDate,
-    };
-    setFilters(newFilters);
-    void fetch(newFilters);
-    setShowDateFilters(false);
+      startDate: start,
+      endDate: end,
+    });
   };
-
-  const resetDateRange = () => {
-    const newFilters = {
-      ...filters,
-      month: getCurrentMonth(),
-      year: getCurrentYear(),
-      startDate: undefined,
-      endDate: undefined,
-    };
-    setStartDate('');
-    setEndDate('');
-    setFilters(newFilters);
-    void fetch(newFilters);
-    setShowDateFilters(false);
-  };
-
-  const renderItem = useCallback(
-    ({ item }: { item: Transaction }) => (
-      <TransactionItem item={item} onPress={handlePress} />
-    ),
-    [handlePress],
-  );
-
-  const keyExtractor = useCallback((item: Transaction) => item.id, []);
-  const isCustomRange = Boolean(filters.startDate && filters.endDate);
-  const periodLabel = isCustomRange
-    ? `${filters.startDate?.split('-').reverse().join('/')} a ${filters.endDate?.split('-').reverse().join('/')}`
-    : `${getMonthName(filters.month ?? getCurrentMonth())} de ${filters.year ?? getCurrentYear()}`;
-
   return (
     <SafeAreaView className="flex-1 bg-[#F7F8FA]">
-      <ScreenHeader title="Transações" />
-      <View className="mx-4 mt-4 rounded-lg border border-[#E4E7EC] bg-white p-3">
-        <View className="flex-row items-center">
-          <TouchableOpacity
-            onPress={() => changeMonth(-1)}
-            accessibilityRole="button"
-            accessibilityLabel="Mês anterior"
-            className="h-11 w-11 items-center justify-center rounded-full bg-[#F2F4F7]"
-          >
-            <MaterialCommunityIcons
-              name="chevron-left"
-              size={24}
-              color="#667085"
-            />
-          </TouchableOpacity>
-          <View className="flex-1 items-center px-2">
-            <Text className="text-xs font-medium text-[#667085]">Período</Text>
-            <Text className="mt-1 text-center text-sm font-semibold capitalize text-[#344054]">
-              {periodLabel}
-            </Text>
-          </View>
-          <TouchableOpacity
-            onPress={() => changeMonth(1)}
-            accessibilityRole="button"
-            accessibilityLabel="Próximo mês"
-            className="h-11 w-11 items-center justify-center rounded-full bg-[#F2F4F7]"
-          >
-            <MaterialCommunityIcons
-              name="chevron-right"
-              size={24}
-              color="#667085"
-            />
-          </TouchableOpacity>
-        </View>
-
-        <TouchableOpacity
-          onPress={() => setShowDateFilters((current) => !current)}
-          className="mt-3 flex-row items-center justify-center rounded-lg bg-[#EAFBF0] px-4 py-3"
-          accessibilityRole="button"
-          accessibilityState={{ expanded: showDateFilters }}
-        >
-          <MaterialCommunityIcons
-            name="calendar-filter"
-            size={19}
-            color="#169670"
-          />
-          <Text className="ml-2 font-semibold text-[#169670]">
-            {showDateFilters
-              ? 'Fechar filtro por data'
-              : 'Filtrar por intervalo de datas'}
-          </Text>
-        </TouchableOpacity>
-
-        {showDateFilters ? (
-          <View className="mt-4 border-t border-[#EAECF0] pt-4">
-            <DateInput
-              label="Data inicial"
-              value={startDate}
-              onChange={setStartDate}
-            />
-            <DateInput
-              label="Data final"
-              value={endDate}
-              onChange={setEndDate}
-            />
-            <View className="flex-row gap-3">
-              <TouchableOpacity
-                onPress={resetDateRange}
-                className="flex-1 items-center rounded-lg border border-[#D0D5DD] bg-white px-3 py-3"
-              >
-                <Text className="font-semibold text-[#667085]">Limpar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={applyDateRange}
-                className="flex-1 items-center rounded-lg bg-[#169670] px-3 py-3"
-              >
-                <Text className="font-semibold text-white">Aplicar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        ) : null}
-      </View>
-
-      <View className="flex-row gap-2 px-4 py-4">
-        {[
-          { label: 'Todas', value: undefined },
-          { label: 'Receitas', value: TransactionType.INCOME },
-          { label: 'Despesas', value: TransactionType.EXPENSE },
-        ].map((filter) => (
-          <TouchableOpacity
-            key={filter.label}
-            onPress={() => handleFilter(filter.value)}
-            className={`flex-1 items-center rounded-full px-3 py-3 ${
-              filters.type === filter.value
-                ? 'bg-[#169670]'
-                : 'border border-[#D6DEE6] bg-white'
-            }`}
-          >
-            <Text
-              className={`text-sm font-semibold ${
-                filters.type === filter.value ? 'text-white' : 'text-[#667085]'
-              }`}
-            >
-              {filter.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
       <FlatList
         data={isLoading || error ? [] : transactions}
-        ListHeaderComponent={
-          <QueryState
-            loading={isLoading}
-            error={error}
-            retry={() => void fetch(undefined, true)}
-          />
-        }
-        renderItem={renderItem}
-        keyExtractor={keyExtractor}
-        ListEmptyComponent={
-          isLoading || error ? undefined : (
-            <View className="mt-10">
-              <EmptyState
-                icon="📋"
-                title="Nenhuma transação"
-                description="Toque no botão + para adicionar sua primeira transação"
-              />
-            </View>
-          )
-        }
+        keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
-        showsVerticalScrollIndicator={false}
+        renderItem={({ item }) => (
+          <TransactionItem
+            item={item}
+            onPress={(tx) => router.push('/(tabs)/transactions/' + tx.id)}
+          />
+        )}
+        ListHeaderComponent={
+          <View>
+            <ScreenHeader title="Transações" />
+            <Input
+              label="Buscar por título"
+              value={search}
+              onChangeText={setSearch}
+              placeholder="Ex.: mercado, salário"
+            />
+            {!filters.startDate ? (
+              <PeriodPicker
+                month={filters.month || getCurrentMonth()}
+                year={filters.year || getCurrentYear()}
+                onChange={(period) => {
+                  setStart('');
+                  setEnd('');
+                  apply({
+                    ...period,
+                    startDate: undefined,
+                    endDate: undefined,
+                  });
+                }}
+              />
+            ) : null}
+            {filters.startDate ? (
+              <Text className="mb-3 text-sm text-[#667085]">
+                Intervalo: {filters.startDate} a {filters.endDate}
+              </Text>
+            ) : null}
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityState={{ expanded }}
+              onPress={() => setExpanded(!expanded)}
+              className="mb-4 rounded-lg border border-[#D0D5DD] bg-white p-3"
+            >
+              <Text className="text-center font-semibold text-[#047857]">
+                {expanded
+                  ? 'Fechar filtros'
+                  : 'Conta, categoria e outros filtros'}
+              </Text>
+            </TouchableOpacity>
+            {expanded ? (
+              <View className="mb-4 rounded-lg bg-white p-4">
+                <Select
+                  label="Conta"
+                  value={filters.accountId || ''}
+                  options={[
+                    { value: '', label: 'Todas as contas' },
+                    ...accounts.map((a) => ({
+                      value: a.id,
+                      label: a.name + (a.isArchived ? ' (arquivada)' : ''),
+                    })),
+                  ]}
+                  onChange={(accountId) =>
+                    apply({ accountId: accountId || undefined })
+                  }
+                />
+                <Select
+                  label="Categoria"
+                  value={filters.categoryId || ''}
+                  options={[
+                    { value: '', label: 'Todas as categorias' },
+                    ...categories.map((c) => ({ value: c.id, label: c.name })),
+                  ]}
+                  onChange={(categoryId) =>
+                    apply({ categoryId: categoryId || undefined })
+                  }
+                />
+                <Select
+                  label="Tipo"
+                  value={filters.type || ''}
+                  options={[
+                    { value: '', label: 'Receitas e despesas' },
+                    { value: 'INCOME', label: 'Receitas' },
+                    { value: 'EXPENSE', label: 'Despesas' },
+                  ]}
+                  onChange={(type) =>
+                    apply({
+                      type: (type || undefined) as TransactionType | undefined,
+                    })
+                  }
+                />
+                <Select
+                  label="Situação"
+                  value={filters.status || ''}
+                  options={[
+                    { value: '', label: 'Todas' },
+                    { value: 'CONFIRMED', label: 'Confirmados' },
+                    { value: 'PLANNED', label: 'Previstos' },
+                  ]}
+                  onChange={(status) =>
+                    apply({
+                      status: (status ||
+                        undefined) as TransactionFilters['status'],
+                    })
+                  }
+                />
+                <Select
+                  label="Ordenação"
+                  value={
+                    (filters.orderBy || 'date') +
+                    ':' +
+                    (filters.orderDir || 'desc')
+                  }
+                  options={[
+                    { value: 'date:desc', label: 'Mais recentes' },
+                    { value: 'date:asc', label: 'Mais antigos' },
+                    { value: 'amount:desc', label: 'Maior valor' },
+                    { value: 'amount:asc', label: 'Menor valor' },
+                  ]}
+                  onChange={(value) => {
+                    const [orderBy, orderDir] = value.split(':');
+                    apply({
+                      orderBy: orderBy as 'date' | 'amount',
+                      orderDir: orderDir as 'asc' | 'desc',
+                    });
+                  }}
+                />
+                <DateInput
+                  label="Data inicial"
+                  value={start}
+                  onChange={setStart}
+                />
+                <DateInput label="Data final" value={end} onChange={setEnd} />
+                {dateError ? (
+                  <Text className="mb-3 text-sm text-[#B42318]">
+                    {dateError}
+                  </Text>
+                ) : null}
+                <Button title="Aplicar intervalo" onPress={applyDates} />
+                <View className="mt-3">
+                  <Button
+                    title="Limpar intervalo"
+                    variant="outline"
+                    onPress={() => {
+                      setStart('');
+                      setEnd('');
+                      apply({
+                        startDate: undefined,
+                        endDate: undefined,
+                        month: getCurrentMonth(),
+                        year: getCurrentYear(),
+                      });
+                    }}
+                  />
+                </View>
+              </View>
+            ) : null}
+            <QueryState
+              loading={isLoading}
+              error={error}
+              retry={() => void fetch(undefined, true)}
+            />
+          </View>
+        }
+        ListEmptyComponent={
+          !isLoading && !error ? (
+            <Text className="p-6 text-center text-[#667085]">
+              Nenhum lançamento encontrado para esses filtros.
+            </Text>
+          ) : undefined
+        }
+        ListFooterComponent={
+          isLoadingMore ? (
+            <LoadingSkeleton variant="field" />
+          ) : hasMore && !isLoading && !error ? (
+            <Button
+              title="Carregar mais"
+              variant="outline"
+              onPress={loadMore}
+            />
+          ) : undefined
+        }
       />
     </SafeAreaView>
   );

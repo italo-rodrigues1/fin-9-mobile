@@ -20,6 +20,16 @@ export const accountService = {
     return data;
   },
 
+  update: async (
+    id: string,
+    payload: Partial<
+      Pick<Account, 'name' | 'institution' | 'color' | 'icon' | 'isArchived'>
+    >,
+  ) => {
+    const { data } = await api.patch<Account>('/accounts/' + id, payload);
+    readCaches.accounts.clear();
+    return data;
+  },
   delete: async (id: string): Promise<void> => {
     await api.delete(`/accounts/${id}`);
     readCaches.accounts.clear();

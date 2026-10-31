@@ -8,6 +8,11 @@ export const transactionService = {
     force = false,
   ): Promise<Transaction[]> => {
     const params = new URLSearchParams();
+    if (filters?.search) params.set('search', filters.search);
+    if (filters?.accountId) params.set('accountId', filters.accountId);
+    if (filters?.status) params.set('status', filters.status);
+    if (filters?.skip !== undefined) params.set('skip', String(filters.skip));
+    if (filters?.take !== undefined) params.set('take', String(filters.take));
     if (filters?.month) params.set('month', String(filters.month));
     if (filters?.year) params.set('year', String(filters.year));
     if (filters?.startDate) params.set('startDate', filters.startDate);
@@ -34,6 +39,7 @@ export const transactionService = {
   },
 
   create: async (payload: {
+    status?: 'CONFIRMED' | 'PLANNED';
     title: string;
     description?: string;
     amount: number;
@@ -51,6 +57,7 @@ export const transactionService = {
   update: async (
     id: string,
     payload: Partial<{
+      status?: 'CONFIRMED' | 'PLANNED';
       title: string;
       description: string;
       amount: number;

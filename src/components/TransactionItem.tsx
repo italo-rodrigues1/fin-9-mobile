@@ -45,6 +45,7 @@ function TransactionItemComponent({ item, onPress }: TransactionItemProps) {
         </Text>
         <Text className="text-xs font-medium text-[#667085]">
           {formatDateShort(item.date)}
+          {item.status === 'PLANNED' ? ' · Previsto' : ''}
         </Text>
       </View>
 

@@ -1,7 +1,7 @@
 import { ConfirmationDialog } from '../src/components/ConfirmationDialog';
 import '../global.css';
 import React, { useEffect } from 'react';
-import { Stack, useRouter, useSegments } from 'expo-router';
+import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
 import { LoadingSkeleton } from '../src/components/LoadingSkeleton';
@@ -11,24 +11,10 @@ import { COLORS } from '../src/constants';
 
 export default function RootLayout() {
   const { isAuthenticated, isHydrated, loadToken } = useAuthStore();
-  const segments = useSegments();
-  const router = useRouter();
 
   useEffect(() => {
     loadToken();
   }, []);
-
-  useEffect(() => {
-    if (!isHydrated) return;
-
-    const inAuthGroup = segments[0] === '(auth)';
-
-    if (!isAuthenticated && !inAuthGroup) {
-      router.replace('/(auth)/welcome');
-    } else if (isAuthenticated && inAuthGroup) {
-      router.replace('/(tabs)');
-    }
-  }, [isAuthenticated, isHydrated, segments]);
 
   if (!isHydrated) {
     return (
@@ -51,11 +37,22 @@ export default function RootLayout() {
           contentStyle: { backgroundColor: COLORS.background },
         }}
       >
-        <Stack.Screen name="(auth)" />
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="accounts/create" />
-        <Stack.Screen name="profile" />
-        <Stack.Screen name="categories" />
+        <Stack.Screen name="index" />
+        <Stack.Protected guard={!isAuthenticated} redirectTo="/(tabs)">
+          <Stack.Screen name="(auth)" />
+        </Stack.Protected>
+        <Stack.Protected guard={isAuthenticated} redirectTo="/(auth)/welcome">
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="accounts/create" />
+          <Stack.Screen name="accounts/detail" />
+          <Stack.Screen name="profile" />
+          <Stack.Screen name="categories" />
+          <Stack.Screen name="planning" />
+          <Stack.Screen name="recurrence" />
+          <Stack.Screen name="budgets" />
+          <Stack.Screen name="transfer" />
+          <Stack.Screen name="transfers" />
+        </Stack.Protected>
       </Stack>
       <Feedback />
       <ConfirmationDialog />

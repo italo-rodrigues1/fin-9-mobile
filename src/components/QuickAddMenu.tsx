@@ -14,6 +14,15 @@ export function QuickAddMenu() {
   };
   const actions = [
     {
+      label: 'Transferência',
+      icon: 'repeat' as const,
+      color: '#475467',
+      press: () => {
+        setOpen(false);
+        router.push('/transfer');
+      },
+    },
+    {
       label: 'Nova despesa',
       icon: 'arrow-down-right' as const,
       color: '#B42318',

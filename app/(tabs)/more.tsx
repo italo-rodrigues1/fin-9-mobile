@@ -15,7 +15,6 @@ export default function MoreScreen() {
       return;
     try {
       await logout();
-      router.replace('/(auth)/welcome');
     } catch {
       notify('Não foi possível sair. Tente novamente.');
     }
@@ -29,6 +28,9 @@ export default function MoreScreen() {
       <View className="mx-4 overflow-hidden rounded-lg border border-[#E4E7EC] bg-white">
         {(
           [
+            { title: 'Planejamento', href: '/planning', icon: 'calendar' },
+            { title: 'Orçamentos', href: '/budgets', icon: 'pie-chart' },
+            { title: 'Transferências', href: '/transfers', icon: 'repeat' },
             { title: 'Categorias', href: '/categories', icon: 'tag' },
             {
               title: 'Perfil e configurações',

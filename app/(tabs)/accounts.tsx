@@ -1,6 +1,6 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { FlatList, Text, View } from 'react-native';
+import { FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAccountStore } from '../../src/stores/accountStore';
 import { usePrivacyStore } from '../../src/stores/privacyStore';
@@ -13,6 +13,7 @@ export default function AccountsScreen() {
   const { accounts, fetch, isLoading, error } = useAccountStore();
   const { showValues, toggle } = usePrivacyStore();
   const router = useRouter();
+  const [archived, setArchived] = useState(false);
   useFocusEffect(
     useCallback(() => {
       void fetch();
@@ -37,13 +38,33 @@ export default function AccountsScreen() {
           />
         </View>
       </View>
+      <View className="mx-4 mb-4 flex-row gap-3">
+        <TouchableOpacity onPress={() => setArchived(false)}>
+          <Text
+            className={archived ? 'text-[#667085]' : 'font-bold text-[#047857]'}
+          >
+            Ativas
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => setArchived(true)}>
+          <Text
+            className={archived ? 'font-bold text-[#047857]' : 'text-[#667085]'}
+          >
+            Arquivadas
+          </Text>
+        </TouchableOpacity>
+      </View>
       <QueryState
         loading={isLoading}
         error={error}
         retry={() => void fetch(true)}
       />
       <FlatList
-        data={error || isLoading ? [] : accounts}
+        data={
+          error || isLoading
+            ? []
+            : accounts.filter((a) => Boolean(a.isArchived) === archived)
+        }
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ padding: 16 }}
         ListEmptyComponent={
@@ -56,7 +77,15 @@ export default function AccountsScreen() {
           ) : undefined
         }
         renderItem={({ item }) => (
-          <View
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel={'Detalhes da conta ' + item.name}
+            onPress={() =>
+              router.push({
+                pathname: '/accounts/detail',
+                params: { id: item.id },
+              })
+            }
             className="mb-3 rounded-lg border border-[#E4E7EC] bg-white p-5"
             style={{ borderLeftColor: item.color, borderLeftWidth: 4 }}
           >
@@ -69,7 +98,7 @@ export default function AccountsScreen() {
             <Text className="mt-4 text-2xl font-bold text-[#101828]">
               {showValues ? formatCurrency(item.balance) : 'R$ ••••••'}
             </Text>
-          </View>
+          </TouchableOpacity>
         )}
       />
     </SafeAreaView>

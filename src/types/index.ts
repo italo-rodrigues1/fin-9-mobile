@@ -25,6 +25,7 @@ export interface Category {
 }
 
 export interface Account {
+  isArchived?: boolean;
   id: string;
   name: string;
   institution: string;
@@ -37,6 +38,9 @@ export interface Account {
 }
 
 export interface Transaction {
+  status?: 'CONFIRMED' | 'PLANNED';
+  recurrenceId?: string | null;
+  occurrenceDate?: string | null;
   id: string;
   title: string;
   description?: string;
@@ -68,6 +72,11 @@ export interface CategorySummary {
 }
 
 export interface TransactionFilters {
+  search?: string;
+  accountId?: string;
+  skip?: number;
+  take?: number;
+  status?: 'CONFIRMED' | 'PLANNED';
   month?: number;
   year?: number;
   startDate?: string;
@@ -84,4 +93,58 @@ export interface CreateAccountPayload {
   balance: number;
   color?: string;
   icon?: string;
+}
+
+export interface FinancialReport extends MonthlySummary {
+  currentBalance: number;
+  plannedIncome: number;
+  plannedExpense: number;
+  projectedBalance: number;
+  history: (MonthlySummary & { month: number; year: number })[];
+  previous: {
+    month: number;
+    year: number;
+    totalIncome: number;
+    totalExpense: number;
+    balance: number;
+  };
+}
+export interface Transfer {
+  id: string;
+  fromAccountId: string;
+  toAccountId: string;
+  amount: number;
+  date: string;
+  title: string;
+  fromAccount?: Account;
+  toAccount?: Account;
+}
+export interface Recurrence {
+  id: string;
+  title: string;
+  amount: number;
+  type: TransactionType;
+  accountId: string;
+  categoryId: string;
+  interval: 'WEEKLY' | 'MONTHLY' | 'YEARLY';
+  startDate: string;
+  endDate?: string | null;
+  active: boolean;
+}
+export interface Budget {
+  id: string;
+  categoryId: string;
+  category: Category;
+  month: number;
+  year: number;
+  amount: number;
+  used: number;
+  remaining: number;
+  percentage: number;
+  alert: 'OK' | 'WARNING' | 'EXCEEDED';
+}
+export interface Statement {
+  account: Account;
+  entries: (Transaction & { kind: 'TRANSACTION' | 'TRANSFER' })[];
+  hasMore: boolean;
 }

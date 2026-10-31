@@ -1,350 +1,294 @@
-import { LoadingSkeleton } from '../../src/components/LoadingSkeleton';
-import { notify } from '../../src/stores/feedbackStore';
-import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useTransactionStore } from '../../src/stores/transactionStore';
+import { Feather } from '@expo/vector-icons';
 import { useCallback, useState } from 'react';
+import { useRouter } from 'expo-router';
 import {
-  Alert,
   FlatList,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
-import { QueryState } from '../../src/components/QueryState';
-import { usePrivacyStore } from '../../src/stores/privacyStore';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { BrandLogo } from '../../src/components/BrandLogo';
-import { EmptyState } from '../../src/components/EmptyState';
+import { Button } from '../../src/components/ui/Button';
+import { PeriodPicker } from '../../src/components/PeriodPicker';
+import { QueryState } from '../../src/components/QueryState';
 import { TransactionItem } from '../../src/components/TransactionItem';
-import { COLORS } from '../../src/constants';
-import { useAccountStore } from '../../src/stores/accountStore';
+import { FinancialCharts } from '../../src/components/FinancialCharts';
+import { useResource } from '../../src/hooks/useResource';
+import { usePrivacyStore } from '../../src/stores/privacyStore';
 import { useAuthStore } from '../../src/stores/authStore';
-import { useTransactionStore } from '../../src/stores/transactionStore';
-import { Account, Transaction } from '../../src/types';
-import { confirmAction } from '../../src/utils/confirmAction';
+import { dashboardService } from '../../src/services/dashboardService';
+import { planningService } from '../../src/services/planningService';
+import { transactionService } from '../../src/services/transactionService';
 import {
   formatCurrency,
   getCurrentMonth,
   getCurrentYear,
   getMonthName,
 } from '../../src/utils/format';
-
 export default function DashboardScreen() {
-  const { user } = useAuthStore();
-  const {
-    transactions,
-    fetch: fetchTransactions,
-    setFilters: setTransactionFilters,
-  } = useTransactionStore();
-  const {
-    accounts,
-    fetch: fetchAccounts,
-    remove: removeAccount,
-  } = useAccountStore();
-  const { showValues, toggle: toggleValues } = usePrivacyStore();
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const accountError = useAccountStore((state) => state.error);
-  const transactionError = useTransactionStore((state) => state.error);
-  const [selectedPeriod, setSelectedPeriod] = useState(() => ({
+  const router = useRouter(),
+    user = useAuthStore((state) => state.user),
+    { showValues, toggle } = usePrivacyStore();
+  const [period, setPeriod] = useState({
     month: getCurrentMonth(),
     year: getCurrentYear(),
-  }));
-  const router = useRouter();
-  const insets = useSafeAreaInsets();
-
-  const { month, year } = selectedPeriod;
-
-  const changeMonth = useCallback((offset: number) => {
-    setSelectedPeriod((current) => {
-      const next = new Date(current.year, current.month - 1 + offset, 1);
-      return { month: next.getMonth() + 1, year: next.getFullYear() };
-    });
-  }, []);
-
-  const loadData = useCallback(
-    async (force = false) => {
-      setLoading(true);
-      setLoadError(null);
-      try {
-        setTransactionFilters({ month, year });
-        await Promise.all([
-          fetchTransactions({ month, year }, force),
-          fetchAccounts(force),
-        ]);
-      } catch {
-        setLoadError('Não foi possível atualizar suas informações.');
-      } finally {
-        setLoading(false);
-      }
-    },
-    [fetchAccounts, fetchTransactions, month, setTransactionFilters, year],
+  });
+  const { month, year } = period;
+  const { data, loading, error, reload } = useResource(
+    useCallback(async () => {
+      const report = await dashboardService.getSummary(month, year);
+      const [recent, budgets, upcoming] = await Promise.all([
+        transactionService.getAll({ month, year, take: 5 }),
+        planningService.budgets(month, year),
+        planningService.upcoming(),
+      ]);
+      return { report, recent, budgets, upcoming };
+    }, [month, year]),
   );
-
-  useFocusEffect(
-    useCallback(() => {
-      loadData();
-    }, [loadData]),
-  );
-
-  const handleTransactionPress = useCallback(
-    (item: Transaction) => {
-      router.push(`/(tabs)/transactions/${item.id}`);
-    },
-    [router],
-  );
-
-  const renderItem = useCallback(
-    ({ item }: { item: Transaction }) => (
-      <TransactionItem item={item} onPress={handleTransactionPress} />
-    ),
-    [handleTransactionPress],
-  );
-
-  const keyExtractor = useCallback((item: Transaction) => item.id, []);
-
-  const handleDeleteAccount = useCallback(
-    async (account: Account) => {
-      const confirmed = await confirmAction(
-        'Excluir conta',
-        `Tem certeza que deseja excluir a conta ${account.name}?`,
-        'Excluir',
-      );
-      if (!confirmed) return;
-
-      try {
-        await removeAccount(account.id);
-      } catch (error: any) {
-        notify(error.message);
-      }
-    },
-    [removeAccount],
-  );
-
-  const recentTransactions = transactions.slice(0, 5);
-  const totalAccountBalance = accounts.reduce(
-    (total, account) => total + account.balance,
-    0,
-  );
-  const balanceValue = formatCurrency(totalAccountBalance);
-  const displayedBalance = showValues ? balanceValue : 'R$ ••••••';
-  const accountCards = accounts;
-  const currentMonthLabel = getMonthName(month).slice(0, 3);
-
+  const money = (value: number) =>
+    showValues ? formatCurrency(value) : 'R$ ••••••';
   return (
     <SafeAreaView className="flex-1 bg-[#F7F8FA]">
       <FlatList
-        data={
-          loading || loadError || transactionError ? [] : recentTransactions
-        }
-        renderItem={renderItem}
-        keyExtractor={keyExtractor}
+        data={!loading && !error ? data?.recent || [] : []}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
+        renderItem={({ item }) => (
+          <TransactionItem
+            item={item}
+            onPress={(tx) => router.push('/(tabs)/transactions/' + tx.id)}
+          />
+        )}
         ListHeaderComponent={
-          loading ? (
-            <LoadingSkeleton variant="screen" />
-          ) : (
-            <View className="px-4 pb-6 pt-4">
-              <QueryState
-                loading={loading}
-                error={loadError || accountError || transactionError}
-                retry={() => void loadData(true)}
-              />
-              <View className="mb-4 flex-row items-center justify-between px-1">
-                <BrandLogo />
-                <View className="flex-row items-center gap-3">
-                  <TouchableOpacity
-                    accessibilityRole="button"
-                    accessibilityLabel="Abrir perfil"
-                    onPress={() => router.push('/profile')}
-                    activeOpacity={0.8}
-                    className="h-11 w-11 items-center justify-center rounded-lg bg-[#E9FBF3]"
-                  >
-                    <Text className="font-semibold text-[#169670]">
-                      {(user?.name || 'EA').slice(0, 2).toUpperCase()}
+          <View>
+            <View className="mb-5 flex-row items-center justify-between">
+              <BrandLogo />
+              <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel="Abrir perfil"
+                onPress={() => router.push('/profile')}
+                className="h-11 w-11 items-center justify-center rounded-lg bg-[#E7F8F1]"
+              >
+                <Text className="font-bold text-[#047857]">
+                  {(user?.name || 'F9').slice(0, 2).toUpperCase()}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <PeriodPicker {...period} onChange={setPeriod} />
+            <QueryState loading={loading} error={error} retry={reload} />
+            {!loading && !error && data ? (
+              <>
+                <View className="mb-4 rounded-lg bg-[#064E3B] p-5">
+                  <View className="flex-row items-center justify-between">
+                    <Text className="text-sm text-white">
+                      Saldo atual das contas
                     </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-              <View className="rounded-lg bg-[#064E3B] px-5 pb-5 pt-5">
-                <View className="flex-row items-start justify-between">
-                  <View>
-                    <Text className="text-sm text-white/90">Saldo total</Text>
-                    <Text className="mt-2 text-[22px] font-bold text-white">
-                      {displayedBalance}
-                    </Text>
+                    <TouchableOpacity
+                      accessibilityRole="button"
+                      accessibilityLabel={
+                        showValues ? 'Ocultar valores' : 'Mostrar valores'
+                      }
+                      onPress={toggle}
+                      className="h-11 w-11 items-center justify-center"
+                    >
+                      <Feather
+                        name={showValues ? 'eye' : 'eye-off'}
+                        size={20}
+                        color="#FFFFFF"
+                      />
+                    </TouchableOpacity>
                   </View>
-                  <TouchableOpacity
-                    accessibilityRole="button"
-                    accessibilityLabel={
-                      showValues ? 'Ocultar valores' : 'Mostrar valores'
-                    }
-                    onPress={() => toggleValues()}
-                    className="h-10 w-10 items-center justify-center rounded-lg bg-white/15"
-                    activeOpacity={0.7}
-                  >
-                    <Feather
-                      name={showValues ? 'eye' : 'eye-off'}
-                      size={18}
-                      color="#FFFFFF"
-                    />
-                  </TouchableOpacity>
-                </View>
-
-                <View className="mb-3 mt-8 flex-row items-center justify-between">
-                  <Text className="text-xl font-semibold text-white">
-                    Minhas Contas
+                  <Text className="text-3xl font-bold text-white">
+                    {money(data.report.currentBalance)}
+                  </Text>
+                  <Text className="mt-2 text-xs leading-5 text-white/80">
+                    Inclui contas arquivadas. O resultado do mês aparece abaixo.
                   </Text>
                 </View>
-
-                {accountCards.length > 0 ? (
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ paddingRight: 8 }}
-                  >
-                    {accountCards.map((account) => (
-                      <View
-                        key={account.id}
-                        className="mr-3 w-[276px] overflow-hidden rounded-lg bg-white px-4 pb-5 pt-4"
+                <View className="mb-4 flex-row flex-wrap justify-between">
+                  {[
+                    {
+                      label: 'Receitas do mês',
+                      value: data.report.totalIncome,
+                      color: '#047857',
+                    },
+                    {
+                      label: 'Despesas do mês',
+                      value: data.report.totalExpense,
+                      color: '#B42318',
+                    },
+                    {
+                      label: 'Resultado mensal',
+                      value: data.report.balance,
+                      color: '#101828',
+                    },
+                    {
+                      label: 'Saldo previsto',
+                      value: data.report.projectedBalance,
+                      color: '#344054',
+                    },
+                  ].map((item) => (
+                    <View
+                      key={item.label}
+                      style={{ width: '48%' }}
+                      className="mb-3 rounded-lg border border-[#E4E7EC] bg-white p-3"
+                    >
+                      <Text className="text-xs text-[#667085]">
+                        {item.label}
+                      </Text>
+                      <Text
+                        style={{ color: item.color }}
+                        className="mt-2 text-lg font-bold"
                       >
-                        <View className="mb-4 flex-row items-center justify-between">
-                          <View className="h-10 w-10 items-center justify-center rounded-lg bg-[#F2F4F7]">
-                            <MaterialCommunityIcons
-                              name={account.icon as never}
-                              size={22}
-                              color="#4B5563"
-                            />
-                          </View>
-                          <TouchableOpacity
-                            onPress={() => handleDeleteAccount(account)}
-                            className="h-10 w-10 items-center justify-center rounded-lg bg-[#FFF1F1]"
-                            accessibilityLabel={`Excluir conta ${account.name}`}
-                          >
-                            <MaterialCommunityIcons
-                              name="trash-can-outline"
-                              size={20}
-                              color="#D92D20"
-                            />
-                          </TouchableOpacity>
-                        </View>
-                        <Text
-                          numberOfLines={1}
-                          ellipsizeMode="tail"
-                          className="text-[20px] font-bold tracking-tight text-[#344054]"
-                        >
-                          {account.institution}
-                        </Text>
-                        <Text
-                          numberOfLines={1}
-                          ellipsizeMode="tail"
-                          className="mt-1 text-base text-[#667085]"
-                        >
-                          {account.name}
-                        </Text>
-                        <Text
-                          numberOfLines={1}
-                          ellipsizeMode="tail"
-                          className="mt-4 text-[24px] font-bold text-[#344054]"
-                          accessibilityLabel={
-                            showValues
-                              ? `Saldo ${showValues ? formatCurrency(account.balance) : 'R$ ••••••'}`
-                              : 'Saldo oculto'
-                          }
-                        >
-                          {showValues
-                            ? formatCurrency(account.balance)
-                            : 'R$ ••••••'}
-                        </Text>
-                        <Text className="text-base text-[#667085]">
-                          Saldo atual
-                        </Text>
-                        <View
-                          className="absolute bottom-0 left-0 right-0 h-[6px] rounded-b-lg"
-                          style={{ backgroundColor: account.color }}
-                        />
-                      </View>
-                    ))}
-                  </ScrollView>
-                ) : loading || accountError ? null : (
-                  <TouchableOpacity
-                    activeOpacity={0.85}
-                    onPress={() => router.push('/accounts/create')}
-                    className="items-center rounded-lg border-2 border-dashed border-[#2DCAA0] px-5 py-10"
-                    style={{ minHeight: 140 }}
-                  >
-                    <View className="mt-2 h-16 w-16 items-center justify-center rounded-lg border-2 border-dashed border-white">
-                      <Feather name="credit-card" size={28} color="#FFFFFF" />
+                        {money(item.value)}
+                      </Text>
                     </View>
-                    <Text className="mt-8 text-center text-[17px] font-semibold leading-8 text-white">
-                      Cadastre uma{'\n'}nova conta
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-
-              <View className="mt-5 rounded-lg bg-[#F2F4F7] px-4 py-4">
-                <View className="mb-4 flex-row items-center justify-between">
-                  <Text className="text-base font-semibold text-[#344054]">
-                    Transações
+                  ))}
+                  <Text className="text-xs leading-5 text-[#667085]">
+                    Saldo previsto = saldo atual + receitas previstas − despesas
+                    previstas do mês selecionado.
                   </Text>
-
+                </View>
+                <View className="mb-4 rounded-lg border border-[#E4E7EC] bg-white p-4">
+                  <Text className="mb-2 font-semibold text-[#344054]">
+                    Comparação com {getMonthName(data.report.previous.month)}{' '}
+                    {data.report.previous.year}
+                  </Text>
+                  <Text className="text-sm leading-6 text-[#667085]">
+                    Receitas: {money(data.report.previous.totalIncome)} ·
+                    despesas: {money(data.report.previous.totalExpense)} ·
+                    resultado: {money(data.report.previous.balance)}.
+                  </Text>
+                  <Text className="mt-2 text-sm text-[#344054]">
+                    Variação do resultado:{' '}
+                    {money(data.report.balance - data.report.previous.balance)}.
+                  </Text>
+                </View>
+                <FinancialCharts report={data.report} />
+                <View className="mb-4">
+                  <Text className="mb-3 text-base font-semibold text-[#101828]">
+                    Minhas contas
+                  </Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    {data.report.accounts
+                      .filter((a) => !a.isArchived)
+                      .map((account) => (
+                        <TouchableOpacity
+                          key={account.id}
+                          accessibilityRole="button"
+                          accessibilityLabel={
+                            'Detalhes da conta ' + account.name
+                          }
+                          onPress={() =>
+                            router.push({
+                              pathname: '/accounts/detail',
+                              params: { id: account.id },
+                            })
+                          }
+                          className="mr-3 w-52 rounded-lg border border-[#E4E7EC] bg-white p-4"
+                          style={{
+                            borderTopColor: account.color,
+                            borderTopWidth: 3,
+                          }}
+                        >
+                          <Text className="text-xs text-[#667085]">
+                            {account.institution}
+                          </Text>
+                          <Text className="mt-1 text-base font-semibold text-[#344054]">
+                            {account.name}
+                          </Text>
+                          <Text className="mt-4 text-xl font-bold text-[#101828]">
+                            {money(account.balance)}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                  </ScrollView>
+                  {!data.report.accounts.some((a) => !a.isArchived) ? (
+                    <Button
+                      title="Cadastrar conta"
+                      onPress={() => router.push('/accounts/create')}
+                    />
+                  ) : null}
+                </View>
+                {data.upcoming.length ? (
+                  <View className="mb-4 rounded-lg border border-[#FEDF89] bg-[#FFFAEB] p-4">
+                    <Text className="font-semibold text-[#93370D]">
+                      Próximos compromissos
+                    </Text>
+                    {data.upcoming.slice(0, 3).map((item) => (
+                      <TouchableOpacity
+                        key={item.id}
+                        accessibilityRole="button"
+                        onPress={() =>
+                          router.push('/(tabs)/transactions/' + item.id)
+                        }
+                        className="mt-3"
+                      >
+                        <Text className="text-sm text-[#475467]">
+                          {item.date
+                            .slice(0, 10)
+                            .split('-')
+                            .reverse()
+                            .join('/')}{' '}
+                          · {item.title} · {money(item.amount)}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                    <TouchableOpacity
+                      accessibilityRole="button"
+                      onPress={() => router.push('/planning')}
+                    >
+                      <Text className="mt-3 font-semibold text-[#047857]">
+                        Ver planejamento
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : null}
+                {data.budgets
+                  .filter((b) => b.alert !== 'OK')
+                  .map((b) => (
+                    <TouchableOpacity
+                      key={b.id}
+                      onPress={() => router.push('/budgets')}
+                      className="mb-3 rounded-lg border border-[#FECDCA] bg-[#FEF3F2] p-4"
+                    >
+                      <Text className="font-semibold text-[#B42318]">
+                        {b.category.name}:{' '}
+                        {showValues
+                          ? b.percentage + '% do orçamento utilizado'
+                          : 'alerta de orçamento'}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                <View className="mb-4 mt-2 flex-row justify-between">
+                  <Text className="text-base font-semibold text-[#101828]">
+                    Movimentações do mês
+                  </Text>
                   <TouchableOpacity
-                    onPress={() => router.push('/(tabs)/transactions')}
+                    onPress={() => {
+                      useTransactionStore
+                        .getState()
+                        .setFilters({ month, year });
+                      router.push('/(tabs)/transactions');
+                    }}
                   >
-                    <Text className="font-medium text-[#169670]">
+                    <Text className="font-semibold text-[#047857]">
                       Ver todas
                     </Text>
                   </TouchableOpacity>
                 </View>
-
-                <View className="mb-4 flex-row items-center justify-between px-3">
-                  <TouchableOpacity
-                    onPress={() => changeMonth(-1)}
-                    accessibilityRole="button"
-                    accessibilityLabel="Mês anterior"
-                    className="h-11 w-11 items-center justify-center rounded-lg bg-white"
-                  >
-                    <Feather name="chevron-left" size={22} color="#667085" />
-                  </TouchableOpacity>
-                  <View className="rounded-lg bg-white px-6 py-3">
-                    <Text className="font-semibold capitalize text-[#344054]">
-                      {currentMonthLabel} {year}
-                    </Text>
-                  </View>
-                  <TouchableOpacity
-                    onPress={() => changeMonth(1)}
-                    accessibilityRole="button"
-                    accessibilityLabel="Próximo mês"
-                    className="h-11 w-11 items-center justify-center rounded-lg bg-white"
-                  >
-                    <Feather name="chevron-right" size={22} color="#667085" />
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </View>
-          )
+                {!data.recent.length ? (
+                  <Text className="mb-5 text-[#667085]">
+                    Nenhum lançamento nesse mês.
+                  </Text>
+                ) : null}
+              </>
+            ) : null}
+          </View>
         }
-        ListEmptyComponent={
-          loading || loadError || transactionError ? undefined : (
-            <View className="px-4">
-              <View className="rounded-lg bg-[#F2F4F7] p-6">
-                <EmptyState
-                  icon="🔎"
-                  title="Nenhuma transação"
-                  description="Você ainda não cadastrou nada, você pode começar por suas contas, depois receitas e despesas :)"
-                />
-              </View>
-            </View>
-          )
-        }
-        ListFooterComponent={<View className="h-3" />}
-        contentContainerStyle={{ paddingBottom: 24 + insets.bottom }}
-        showsVerticalScrollIndicator={false}
       />
     </SafeAreaView>
   );

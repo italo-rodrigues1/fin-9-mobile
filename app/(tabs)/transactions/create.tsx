@@ -1,3 +1,4 @@
+import { usePrivacyStore } from '../../../src/stores/privacyStore';
 import { LoadingSkeleton } from '../../../src/components/LoadingSkeleton';
 import { QueryState } from '../../../src/components/QueryState';
 import { notify } from '../../../src/stores/feedbackStore';
@@ -46,11 +47,19 @@ import {
 } from '../../../src/utils/format';
 
 export default function CreateTransactionScreen() {
-  const params = useLocalSearchParams<{ id?: string; type?: string }>();
+  const params = useLocalSearchParams<{
+    id?: string;
+    type?: string;
+    status?: string;
+  }>();
   const transactionId = params.id;
   const isEditing = Boolean(transactionId);
   const saving = React.useRef(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [status, setStatus] = useState<'CONFIRMED' | 'PLANNED'>(
+    params.status === 'PLANNED' ? 'PLANNED' : 'CONFIRMED',
+  );
+  const [recurrenceId, setRecurrenceId] = useState<string | null>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
@@ -75,11 +84,17 @@ export default function CreateTransactionScreen() {
     error: accountError,
   } = useAccountStore();
   const router = useRouter();
-  const accountOptions = accounts.map((account) => ({
-    value: account.id,
-    label: account.name,
-    subtitle: `${account.institution} • ${formatCurrency(account.balance)}`,
-  }));
+  const showValues = usePrivacyStore((state) => state.showValues);
+  const accountOptions = accounts
+    .filter(
+      (account) =>
+        !account.isArchived || (isEditing && account.id === accountId),
+    )
+    .map((account) => ({
+      value: account.id,
+      label: account.name,
+      subtitle: `${account.institution} • ${showValues ? formatCurrency(account.balance) : 'R$ ••••••'}`,
+    }));
 
   useFocusEffect(
     useCallback(() => {
@@ -90,9 +105,12 @@ export default function CreateTransactionScreen() {
 
   React.useEffect(() => {
     setAccountId((current) =>
-      accounts.some((account) => account.id === current)
+      accounts.some(
+        (account) =>
+          account.id === current && (!account.isArchived || isEditing),
+      )
         ? current
-        : (accounts[0]?.id ?? ''),
+        : (accounts.find((account) => !account.isArchived)?.id ?? ''),
     );
   }, [accounts]);
 
@@ -118,6 +136,8 @@ export default function CreateTransactionScreen() {
       .getById(transactionId)
       .then((transaction) => {
         if (!isActive) return;
+        setStatus(transaction.status || 'CONFIRMED');
+        setRecurrenceId(transaction.recurrenceId || null);
         setTitle(transaction.title);
         setDescription(transaction.description ?? '');
         setAmount(formatCurrencyInput(transaction.amount));
@@ -160,6 +180,7 @@ export default function CreateTransactionScreen() {
     setIsSubmitting(true);
     try {
       const payload = {
+        status,
         title: title.trim(),
         description: description.trim() || undefined,
         amount: parsedAmount,
@@ -289,6 +310,37 @@ export default function CreateTransactionScreen() {
                 </TouchableOpacity>
               </View>
 
+              <Select
+                label="Situação"
+                value={status}
+                options={[
+                  { value: 'CONFIRMED', label: 'Confirmado — altera o saldo' },
+                  {
+                    value: 'PLANNED',
+                    label: 'Previsto — ainda não pago ou recebido',
+                  },
+                ]}
+                onChange={(value) =>
+                  setStatus(value as 'CONFIRMED' | 'PLANNED')
+                }
+              />
+              {recurrenceId ? (
+                <View className="mb-4">
+                  <Button
+                    title="Editar próximas da recorrência"
+                    variant="outline"
+                    onPress={() =>
+                      router.push({
+                        pathname: '/recurrence',
+                        params: { id: recurrenceId },
+                      })
+                    }
+                  />
+                  <Text className="mt-2 text-sm text-[#667085]">
+                    Salvar aqui altera somente esta ocorrência.
+                  </Text>
+                </View>
+              ) : null}
               <Input
                 label="Título"
                 error={errors.title}

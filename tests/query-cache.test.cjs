@@ -193,3 +193,87 @@ test('dashboard and form refocus share actual account and transaction service re
   await useAccountStore.getState().fetch(true);
   assert.equal(counts.accounts, 2);
 });
+
+test('transaction pages append progressively without losing the first page', async () => {
+  const all = Array.from({ length: 40 }, (_, index) => ({
+    id: String(index),
+    title: 'Item ' + index,
+  }));
+  const load = harness({
+    get: async (url) => {
+      const params = new URL(url, 'http://localhost').searchParams;
+      const skip = Number(params.get('skip') || 0),
+        take = Number(params.get('take') || 30);
+      return { data: all.slice(skip, skip + take) };
+    },
+  });
+  const { useTransactionStore } = load('stores/transactionStore.ts');
+  await useTransactionStore.getState().fetch({ month: 10, year: 2026 });
+  assert.equal(useTransactionStore.getState().transactions.length, 30);
+  assert.equal(useTransactionStore.getState().hasMore, true);
+  await useTransactionStore.getState().loadMore();
+  assert.equal(useTransactionStore.getState().transactions.length, 40);
+  assert.equal(useTransactionStore.getState().hasMore, false);
+  assert.equal(
+    new Set(useTransactionStore.getState().transactions.map((row) => row.id))
+      .size,
+    40,
+  );
+});
+test('changing filters discards a pending page from the previous history', async () => {
+  const nextPage = deferred();
+  const load = harness({
+    get: async (url) => {
+      const params = new URL(url, 'http://localhost').searchParams;
+      if (params.get('month') === '11') return { data: [{ id: 'november' }] };
+      if (params.get('skip') === '30') return nextPage.promise;
+      return {
+        data: Array.from({ length: 30 }, (_, index) => ({
+          id: 'oct-' + index,
+        })),
+      };
+    },
+  });
+  const { useTransactionStore } = load('stores/transactionStore.ts');
+  useTransactionStore.getState().setFilters({ month: 10, year: 2026 });
+  await useTransactionStore.getState().fetch();
+  const loading = useTransactionStore.getState().loadMore();
+  await Promise.resolve();
+  await useTransactionStore.getState().fetch({ month: 11, year: 2026 });
+  nextPage.resolve({ data: [{ id: 'stale' }] });
+  await loading;
+  assert.deepEqual(
+    useTransactionStore.getState().transactions.map((row) => row.id),
+    ['november'],
+  );
+  assert.equal(useTransactionStore.getState().isLoadingMore, false);
+});
+test('transaction requests preserve combined filters and special search characters', async () => {
+  let requested;
+  const load = harness({
+    get: async (url) => {
+      requested = new URL(url, 'http://localhost');
+      return { data: [] };
+    },
+  });
+  const { transactionService } = load('services/transactionService.ts');
+  await transactionService.getAll({
+    search: 'Pão & café',
+    accountId: 'account',
+    categoryId: 'food',
+    type: 'EXPENSE',
+    status: 'PLANNED',
+    startDate: '2026-10-01',
+    endDate: '2026-10-31',
+    orderBy: 'amount',
+    orderDir: 'asc',
+    skip: 30,
+    take: 30,
+  });
+  assert.equal(requested.searchParams.get('search'), 'Pão & café');
+  assert.equal(requested.searchParams.get('accountId'), 'account');
+  assert.equal(requested.searchParams.get('categoryId'), 'food');
+  assert.equal(requested.searchParams.get('status'), 'PLANNED');
+  assert.equal(requested.searchParams.get('orderDir'), 'asc');
+  assert.equal(requested.searchParams.get('skip'), '30');
+});
