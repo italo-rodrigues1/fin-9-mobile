@@ -72,3 +72,44 @@ test('API errors render validation arrays, connection failures, and fallback mes
   assert.match(errorMessage({ request: {} }, 'Erro'), /conexão/);
   assert.equal(errorMessage({}, 'Erro ao salvar'), 'Erro ao salvar');
 });
+
+const { useConfirmationStore } = load('stores/confirmationStore.ts');
+test('confirmation cancellation resolves false and clears the pending dialog', async () => {
+  const pending = useConfirmationStore
+    .getState()
+    .ask('Sair', 'Encerrar a sessão?', 'Sair');
+  assert.equal(useConfirmationStore.getState().request.title, 'Sair');
+  useConfirmationStore.getState().answer(false);
+  assert.equal(await pending, false);
+  assert.equal(useConfirmationStore.getState().request, null);
+});
+test('repeated taps do not replace an outstanding confirmation', async () => {
+  const first = useConfirmationStore
+    .getState()
+    .ask('Sair', 'Encerrar a sessão?', 'Sair');
+  assert.equal(
+    await useConfirmationStore
+      .getState()
+      .ask('Outra ação', 'Teste', 'Continuar'),
+    false,
+  );
+  assert.equal(useConfirmationStore.getState().request.title, 'Sair');
+  useConfirmationStore.getState().answer(true);
+  assert.equal(await first, true);
+});
+test('two-step confirmations each require a separate answer', async () => {
+  const first = useConfirmationStore
+    .getState()
+    .ask('Excluir', 'Continuar?', 'Continuar');
+  useConfirmationStore.getState().answer(true);
+  assert.equal(await first, true);
+  const final = useConfirmationStore
+    .getState()
+    .ask('Confirmação final', 'Não pode ser desfeito', 'Excluir');
+  assert.equal(
+    useConfirmationStore.getState().request.title,
+    'Confirmação final',
+  );
+  useConfirmationStore.getState().answer(false);
+  assert.equal(await final, false);
+});

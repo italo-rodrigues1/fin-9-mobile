@@ -40,3 +40,17 @@ A fase fica aberta apenas para homologação nativa. Nenhuma funcionalidade do P
 - [x] Validar limites com controladores reais e repositórios simulados: 120 leituras de contas permitidas, a seguinte retorna 429 com Retry-After; 15 consultas mensais permitidas; sexta tentativa de login bloqueada.
 - [x] Testes: 56 no backend e 13 no mobile; TypeScript, lint dos arquivos de backend alterados e build NestJS.
 - [ ] Revalidar navegação Android após instalar/recarregar a versão corrigida.
+
+## Ajustes de perfil, carregamento e navegação — 31/10/2026
+
+- [x] Perfil e Categorias em rotas da pilha principal; abrir Perfil pelo avatar ou pelo menu Mais.
+- [x] Saída da conta disponível no Perfil e diretamente em Mais.
+- [x] Confirmação dentro do app, sem depender de window.confirm/Alert nativo; cancelamento e confirmação dupla mantidos.
+- [x] Novo registro na posição central da barra inferior, com painel de nova receita, despesa e conta; removido o botão flutuante das telas.
+- [x] Todos os carregamentos por skeleton: hidratação, transição, listas, campos e botões. Animação respeita reduzir movimento.
+- [x] Atualização por ação explícita Atualizar; controles nativos de puxar para atualizar removidos para evitar seus spinners.
+- [x] Rotas carregadas de forma síncrona para evitar o placeholder de bundling do Expo Router; fallback de navegação com skeleton.
+- [x] TypeScript e 16 testes mobile passaram, incluindo cancelamento de confirmação, toques repetidos e confirmação em duas etapas.
+- [x] Navegador com dados fictícios: login com skeleton, acesso ao Perfil por dois caminhos, cancelar logout, confirmar logout até boas-vindas, logout por Mais e novo registro central abrindo receita.
+- [x] Bundles finais de Android e web gerados com a configuração normal da aplicação.
+- [ ] Revalidar no aparelho Android após reiniciar Metro com npx expo start -c e recarregar o aplicativo.

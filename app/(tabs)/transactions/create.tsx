@@ -1,3 +1,4 @@
+import { LoadingSkeleton } from '../../../src/components/LoadingSkeleton';
 import { QueryState } from '../../../src/components/QueryState';
 import { notify } from '../../../src/stores/feedbackStore';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -9,7 +10,6 @@ import {
 } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -208,8 +208,8 @@ export default function CreateTransactionScreen() {
 
   if (isLoadingTransaction) {
     return (
-      <View className="flex-1 items-center justify-center bg-[#F7F8FA]">
-        <ActivityIndicator size="large" color="#169670" />
+      <View className="flex-1 bg-[#F7F8FA] pt-8">
+        <LoadingSkeleton variant="form" label="Carregando lançamento" />
       </View>
     );
   }
@@ -330,11 +330,7 @@ export default function CreateTransactionScreen() {
                   </Text>
                 ) : null}
                 {isLoadingAccounts ? (
-                  <View className="rounded-lg bg-[#F9FAFB] px-4 py-4">
-                    <Text className="text-sm text-[#667085]">
-                      Carregando contas...
-                    </Text>
-                  </View>
+                  <LoadingSkeleton variant="field" label="Carregando contas" />
                 ) : accountError ? (
                   <View className="rounded-lg border border-[#FFB4B4] bg-[#FFF1F1] px-4 py-4">
                     <Text className="text-sm text-[#B42318]">

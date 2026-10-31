@@ -1,20 +1,14 @@
+import { ScreenHeader } from '../../../src/components/ScreenHeader';
+import { RefreshButton } from '../../../src/components/RefreshButton';
 import { QueryState } from '../../../src/components/QueryState';
 import React, { useEffect, useCallback, useState } from 'react';
-import {
-  Alert,
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  RefreshControl,
-} from 'react-native';
+import { Alert, View, Text, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTransactionStore } from '../../../src/stores/transactionStore';
 import { TransactionItem } from '../../../src/components/TransactionItem';
 import { EmptyState } from '../../../src/components/EmptyState';
-import { QuickAddMenu } from '../../../src/components/QuickAddMenu';
 import {
   DateInput,
   isValidDateValue,
@@ -30,7 +24,6 @@ import { COLORS } from '../../../src/constants';
 export default function TransactionsListScreen() {
   const { transactions, fetch, filters, setFilters, isLoading, error } =
     useTransactionStore();
-  const [refreshing, setRefreshing] = useState(false);
   const [showDateFilters, setShowDateFilters] = useState(
     Boolean(filters.startDate || filters.endDate),
   );
@@ -52,9 +45,7 @@ export default function TransactionsListScreen() {
   }, []);
 
   const onRefresh = useCallback(async () => {
-    setRefreshing(true);
     await fetch(undefined, true);
-    setRefreshing(false);
   }, [fetch]);
 
   const handlePress = useCallback(
@@ -149,6 +140,10 @@ export default function TransactionsListScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-[#F7F8FA]">
+      <ScreenHeader
+        title="Transações"
+        right={<RefreshButton onPress={onRefresh} loading={isLoading} />}
+      />
       <View className="mx-4 mt-4 rounded-lg border border-[#E4E7EC] bg-white p-3">
         <View className="flex-row items-center">
           <TouchableOpacity
@@ -268,13 +263,6 @@ export default function TransactionsListScreen() {
         }
         renderItem={renderItem}
         keyExtractor={keyExtractor}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={COLORS.primary}
-          />
-        }
         ListEmptyComponent={
           isLoading || error ? undefined : (
             <View className="mt-10">
@@ -286,11 +274,9 @@ export default function TransactionsListScreen() {
             </View>
           )
         }
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
         showsVerticalScrollIndicator={false}
       />
-
-      <QuickAddMenu />
     </SafeAreaView>
   );
 }

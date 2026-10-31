@@ -1,10 +1,6 @@
 import React from 'react';
-import {
-  TouchableOpacity,
-  Text,
-  ActivityIndicator,
-  ViewStyle,
-} from 'react-native';
+import { TouchableOpacity, Text, ViewStyle } from 'react-native';
+import { LoadingSkeleton } from '../LoadingSkeleton';
 import { COLORS } from '../../constants';
 
 interface ButtonProps {
@@ -48,9 +44,6 @@ export function Button({
     outline: 'transparent',
   }[variant];
 
-  const spinnerColor =
-    variant === 'primary' || variant === 'danger' ? '#FFFFFF' : COLORS.text;
-
   return (
     <TouchableOpacity
       className={`${baseClass} ${variantClass} ${disabled || isLoading ? 'opacity-60' : ''}`}
@@ -66,7 +59,11 @@ export function Button({
       style={[{ backgroundColor }, style]}
     >
       {isLoading ? (
-        <ActivityIndicator color={spinnerColor} />
+        <LoadingSkeleton
+          variant="button"
+          label={`${title}: processando`}
+          light={variant === 'primary' || variant === 'danger'}
+        />
       ) : (
         <Text className={textClass}>{title}</Text>
       )}

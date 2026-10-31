@@ -1,23 +1,17 @@
-import { confirmAction } from '../../src/utils/confirmAction';
-import { QueryState } from '../../src/components/QueryState';
-import { notify } from '../../src/stores/feedbackStore';
+import { confirmAction } from '../src/utils/confirmAction';
+import { RefreshButton } from '../src/components/RefreshButton';
+import { QueryState } from '../src/components/QueryState';
+import { notify } from '../src/stores/feedbackStore';
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  Alert,
-  RefreshControl,
-} from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useCategoryStore } from '../../src/stores/categoryStore';
-import { Category } from '../../src/types';
-import { CATEGORY_ICONS, INPUT_LIMITS } from '../../src/constants';
-import { EmptyState } from '../../src/components/EmptyState';
-import { Input } from '../../src/components/ui/Input';
-import { Button } from '../../src/components/ui/Button';
-import { ScreenHeader } from '../../src/components/ScreenHeader';
+import { useCategoryStore } from '../src/stores/categoryStore';
+import { Category } from '../src/types';
+import { CATEGORY_ICONS, INPUT_LIMITS } from '../src/constants';
+import { EmptyState } from '../src/components/EmptyState';
+import { Input } from '../src/components/ui/Input';
+import { Button } from '../src/components/ui/Button';
+import { ScreenHeader } from '../src/components/ScreenHeader';
 
 const COLORS = [
   '#ef4444',
@@ -41,16 +35,13 @@ export default function CategoriesScreen() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [selectedColor, setSelectedColor] = useState(COLORS[0]);
-  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     fetch();
   }, []);
 
   const onRefresh = useCallback(async () => {
-    setRefreshing(true);
     await fetch(true);
-    setRefreshing(false);
   }, [fetch]);
 
   const resetForm = () => {
@@ -148,22 +139,26 @@ export default function CategoriesScreen() {
     <SafeAreaView className="flex-1 bg-[#F7F8FA]">
       <ScreenHeader
         title="Categorias"
-        dark
         right={
-          <TouchableOpacity
-            onPress={() => {
-              resetForm();
-              setShowForm(!showForm);
-            }}
-            className="rounded-lg bg-primary-500 px-4 py-3 shadow-sm active:bg-primary-600"
-          >
-            <Text className="text-sm font-bold tracking-wide text-emerald-950">
-              {showForm ? 'FECHAR' : 'Nova categoria'}
-            </Text>
-          </TouchableOpacity>
+          <View className="flex-row items-center gap-2">
+            <TouchableOpacity
+              onPress={() => {
+                resetForm();
+                setShowForm(!showForm);
+              }}
+              className="rounded-lg bg-primary-500 px-4 py-3 shadow-sm active:bg-primary-600"
+            >
+              <Text className="text-sm font-bold tracking-wide text-emerald-950">
+                {showForm ? 'FECHAR' : 'Nova categoria'}
+              </Text>
+            </TouchableOpacity>
+          </View>
         }
       />
 
+      <View className="mx-4 mb-3 self-end">
+        <RefreshButton onPress={onRefresh} loading={isLoading} />
+      </View>
       {showForm && (
         <View className="mx-6 mb-6 p-6 bg-white rounded-lg border border-slate-200 shadow-xl">
           <Input
@@ -206,13 +201,6 @@ export default function CategoriesScreen() {
         }
         renderItem={renderItem}
         keyExtractor={keyExtractor}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="#10b981"
-          />
-        }
         ListEmptyComponent={
           isLoading || error ? undefined : (
             <View className="mt-10">

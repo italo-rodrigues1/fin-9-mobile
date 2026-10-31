@@ -1,16 +1,18 @@
-import { confirmAction } from '../../src/utils/confirmAction';
-import { notify } from '../../src/stores/feedbackStore';
+import { useRouter } from 'expo-router';
+import { confirmAction } from '../src/utils/confirmAction';
+import { notify } from '../src/stores/feedbackStore';
 import React, { useState } from 'react';
 import { View, Text, Alert, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAuthStore } from '../../src/stores/authStore';
-import { Button } from '../../src/components/ui/Button';
-import { Input } from '../../src/components/ui/Input';
-import { Card } from '../../src/components/ui/Card';
-import { ScreenHeader } from '../../src/components/ScreenHeader';
-import { INPUT_LIMITS } from '../../src/constants';
+import { useAuthStore } from '../src/stores/authStore';
+import { Button } from '../src/components/ui/Button';
+import { Input } from '../src/components/ui/Input';
+import { Card } from '../src/components/ui/Card';
+import { ScreenHeader } from '../src/components/ScreenHeader';
+import { INPUT_LIMITS } from '../src/constants';
 
 export default function ProfileScreen() {
+  const router = useRouter();
   const { user, logout, updateProfile, deleteAccount } = useAuthStore();
   const [nameError, setNameError] = useState('');
   const [name, setName] = useState(user?.name || '');
@@ -38,6 +40,7 @@ export default function ProfileScreen() {
     if (await confirmAction('Sair', 'Tem certeza que deseja sair?', 'Sair')) {
       try {
         await logout();
+        router.replace('/(auth)/welcome');
       } catch {
         notify('Não foi possível sair. Tente novamente.');
       }

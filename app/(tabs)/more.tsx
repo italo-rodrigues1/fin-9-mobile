@@ -1,3 +1,7 @@
+import { confirmAction } from '../../src/utils/confirmAction';
+import { useAuthStore } from '../../src/stores/authStore';
+import { notify } from '../../src/stores/feedbackStore';
+import { Button } from '../../src/components/ui/Button';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Text, TouchableOpacity, View } from 'react-native';
@@ -5,6 +9,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 export default function MoreScreen() {
   const router = useRouter();
+  const logout = useAuthStore((state) => state.logout);
+  const handleLogout = async () => {
+    if (!(await confirmAction('Sair', 'Tem certeza que deseja sair?', 'Sair')))
+      return;
+    try {
+      await logout();
+      router.replace('/(auth)/welcome');
+    } catch {
+      notify('Não foi possível sair. Tente novamente.');
+    }
+  };
   return (
     <SafeAreaView className="flex-1 bg-[#F7F8FA]">
       <ScreenHeader
@@ -14,10 +29,10 @@ export default function MoreScreen() {
       <View className="mx-4 overflow-hidden rounded-lg border border-[#E4E7EC] bg-white">
         {(
           [
-            { title: 'Categorias', href: '/(tabs)/categories', icon: 'tag' },
+            { title: 'Categorias', href: '/categories', icon: 'tag' },
             {
               title: 'Perfil e configurações',
-              href: '/(tabs)/profile',
+              href: '/profile',
               icon: 'user',
             },
           ] as const
@@ -25,6 +40,7 @@ export default function MoreScreen() {
           <TouchableOpacity
             key={item.href}
             accessibilityRole="button"
+            accessibilityLabel={item.title}
             onPress={() => router.push(item.href)}
             className="flex-row items-center border-b border-[#EAECF0] p-5"
           >
@@ -35,6 +51,13 @@ export default function MoreScreen() {
             <Feather name="chevron-right" size={20} color="#667085" />
           </TouchableOpacity>
         ))}
+      </View>
+      <View className="p-4">
+        <Button
+          title="Sair da conta"
+          onPress={handleLogout}
+          variant="outline"
+        />
       </View>
     </SafeAreaView>
   );

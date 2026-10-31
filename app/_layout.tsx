@@ -1,8 +1,10 @@
+import { ConfirmationDialog } from '../src/components/ConfirmationDialog';
 import '../global.css';
 import React, { useEffect } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { View, ActivityIndicator } from 'react-native';
+import { View } from 'react-native';
+import { LoadingSkeleton } from '../src/components/LoadingSkeleton';
 import { useAuthStore } from '../src/stores/authStore';
 import { Feedback } from '../src/components/Feedback';
 import { COLORS } from '../src/constants';
@@ -31,11 +33,11 @@ export default function RootLayout() {
   if (!isHydrated) {
     return (
       <View
-        className="flex-1 items-center justify-center"
-        style={{ backgroundColor: COLORS.primary }}
+        className="flex-1 pt-14"
+        style={{ backgroundColor: COLORS.background }}
       >
-        <ActivityIndicator size="large" color="#FFFFFF" />
-        <StatusBar style="light" />
+        <LoadingSkeleton variant="screen" label="Preparando aplicativo" />
+        <StatusBar style="dark" />
       </View>
     );
   }
@@ -52,8 +54,19 @@ export default function RootLayout() {
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="accounts/create" />
+        <Stack.Screen name="profile" />
+        <Stack.Screen name="categories" />
       </Stack>
       <Feedback />
+      <ConfirmationDialog />
     </>
+  );
+}
+
+export function SuspenseFallback() {
+  return (
+    <View className="flex-1 bg-[#F7F8FA] pt-14">
+      <LoadingSkeleton variant="screen" label="Carregando tela" />
+    </View>
   );
 }
