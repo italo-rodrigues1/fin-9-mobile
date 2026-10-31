@@ -1,4 +1,3 @@
-import { RefreshButton } from '../../src/components/RefreshButton';
 import { useCallback } from 'react';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { FlatList, Text, View } from 'react-native';
@@ -23,9 +22,6 @@ export default function AccountsScreen() {
     <SafeAreaView className="flex-1 bg-[#F7F8FA]">
       <ScreenHeader
         title="Contas"
-        right={
-          <RefreshButton onPress={() => void fetch(true)} loading={isLoading} />
-        }
         subtitle="Seus saldos, organizados por instituição."
       />
       <View className="mx-4 mb-4">

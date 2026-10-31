@@ -1,5 +1,4 @@
 import { confirmAction } from '../src/utils/confirmAction';
-import { RefreshButton } from '../src/components/RefreshButton';
 import { QueryState } from '../src/components/QueryState';
 import { notify } from '../src/stores/feedbackStore';
 import React, { useState, useEffect, useCallback } from 'react';
@@ -39,10 +38,6 @@ export default function CategoriesScreen() {
   useEffect(() => {
     fetch();
   }, []);
-
-  const onRefresh = useCallback(async () => {
-    await fetch(true);
-  }, [fetch]);
 
   const resetForm = () => {
     setName('');
@@ -156,9 +151,6 @@ export default function CategoriesScreen() {
         }
       />
 
-      <View className="mx-4 mb-3 self-end">
-        <RefreshButton onPress={onRefresh} loading={isLoading} />
-      </View>
       {showForm && (
         <View className="mx-6 mb-6 p-6 bg-white rounded-lg border border-slate-200 shadow-xl">
           <Input

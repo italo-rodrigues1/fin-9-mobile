@@ -14,7 +14,7 @@ export default function TransactionsLayout() {
         headerLeft: () => <BackButton backgroundColor="transparent" />,
       }}
     >
-      <Stack.Screen name="index" options={{ title: 'Transações' }} />
+      <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="create" options={{ title: 'Nova Transação' }} />
       <Stack.Screen name="[id]" options={{ title: 'Editar Transação' }} />
     </Stack>

@@ -15,7 +15,6 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
-import { RefreshButton } from '../../src/components/RefreshButton';
 import { QueryState } from '../../src/components/QueryState';
 import { usePrivacyStore } from '../../src/stores/privacyStore';
 import { BrandLogo } from '../../src/components/BrandLogo';
@@ -92,10 +91,6 @@ export default function DashboardScreen() {
     }, [loadData]),
   );
 
-  const onRefresh = useCallback(async () => {
-    await loadData(true);
-  }, [loadData]);
-
   const handleTransactionPress = useCallback(
     (item: Transaction) => {
       router.push(`/(tabs)/transactions/${item.id}`);
@@ -161,7 +156,6 @@ export default function DashboardScreen() {
               <View className="mb-4 flex-row items-center justify-between px-1">
                 <BrandLogo />
                 <View className="flex-row items-center gap-3">
-                  <RefreshButton onPress={onRefresh} loading={loading} />
                   <TouchableOpacity
                     accessibilityRole="button"
                     accessibilityLabel="Abrir perfil"

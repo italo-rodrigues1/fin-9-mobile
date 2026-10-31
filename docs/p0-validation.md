@@ -48,9 +48,16 @@ A fase fica aberta apenas para homologação nativa. Nenhuma funcionalidade do P
 - [x] Confirmação dentro do app, sem depender de window.confirm/Alert nativo; cancelamento e confirmação dupla mantidos.
 - [x] Novo registro na posição central da barra inferior, com painel de nova receita, despesa e conta; removido o botão flutuante das telas.
 - [x] Todos os carregamentos por skeleton: hidratação, transição, listas, campos e botões. Animação respeita reduzir movimento.
-- [x] Atualização por ação explícita Atualizar; controles nativos de puxar para atualizar removidos para evitar seus spinners.
+- [x] Controles nativos de puxar para atualizar removidos para evitar seus spinners. Os botões Atualizar adicionados nesta revisão foram retirados no ajuste final abaixo.
 - [x] Rotas carregadas de forma síncrona para evitar o placeholder de bundling do Expo Router; fallback de navegação com skeleton.
 - [x] TypeScript e 16 testes mobile passaram, incluindo cancelamento de confirmação, toques repetidos e confirmação em duas etapas.
 - [x] Navegador com dados fictícios: login com skeleton, acesso ao Perfil por dois caminhos, cancelar logout, confirmar logout até boas-vindas, logout por Mais e novo registro central abrindo receita.
 - [x] Bundles finais de Android e web gerados com a configuração normal da aplicação.
 - [ ] Revalidar no aparelho Android após reiniciar Metro com npx expo start -c e recarregar o aplicativo.
+
+## Ajustes finais antes do P1 — 31/10/2026
+
+- [x] Remover todos os botões Atualizar, seus handlers e o componente RefreshButton.
+- [x] Manter carregamento automático existente e Tentar novamente apenas em estados de erro.
+- [x] Remover o título duplicado de Transações: a lista usa ScreenHeader e seu cabeçalho nativo fica oculto; criação e edição mantêm os cabeçalhos da pilha.
+- [x] Verificação final: TypeScript, 16 testes mobile e revisão do diff passaram; sem referências ao componente ou aos botões Atualizar no código da aplicação.

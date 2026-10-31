@@ -1,5 +1,4 @@
 import { ScreenHeader } from '../../../src/components/ScreenHeader';
-import { RefreshButton } from '../../../src/components/RefreshButton';
 import { QueryState } from '../../../src/components/QueryState';
 import React, { useEffect, useCallback, useState } from 'react';
 import { Alert, View, Text, FlatList, TouchableOpacity } from 'react-native';
@@ -43,10 +42,6 @@ export default function TransactionsListScreen() {
     setFilters(currentFilters);
     fetch(currentFilters);
   }, []);
-
-  const onRefresh = useCallback(async () => {
-    await fetch(undefined, true);
-  }, [fetch]);
 
   const handlePress = useCallback(
     (item: Transaction) => {
@@ -140,10 +135,7 @@ export default function TransactionsListScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-[#F7F8FA]">
-      <ScreenHeader
-        title="Transações"
-        right={<RefreshButton onPress={onRefresh} loading={isLoading} />}
-      />
+      <ScreenHeader title="Transações" />
       <View className="mx-4 mt-4 rounded-lg border border-[#E4E7EC] bg-white p-3">
         <View className="flex-row items-center">
           <TouchableOpacity
