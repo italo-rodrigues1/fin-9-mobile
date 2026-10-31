@@ -12,6 +12,7 @@ interface InputProps {
   error?: string;
   multiline?: boolean;
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+  onFocus?: () => void;
 }
 
 export function Input({
@@ -24,6 +25,7 @@ export function Input({
   error,
   multiline,
   autoCapitalize = 'sentences',
+  onFocus,
 }: InputProps) {
   return (
     <View className="mb-4">
@@ -40,6 +42,7 @@ export function Input({
         keyboardType={keyboardType}
         multiline={multiline}
         autoCapitalize={autoCapitalize}
+        onFocus={onFocus}
         textAlignVertical={multiline ? 'top' : 'center'}
       />
       {error && <Text className="mt-2 ml-1 text-xs text-[#FF6B6B]">{error}</Text>}
