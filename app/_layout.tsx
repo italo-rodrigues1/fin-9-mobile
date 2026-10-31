@@ -52,6 +52,10 @@ export default function RootLayout() {
           <Stack.Screen name="budgets" />
           <Stack.Screen name="transfer" />
           <Stack.Screen name="transfers" />
+          <Stack.Screen name="goals/index" />
+          <Stack.Screen name="goals/detail" />
+          <Stack.Screen name="goals/edit" />
+          <Stack.Screen name="goals/contribution" />
         </Stack.Protected>
       </Stack>
       <Feedback />

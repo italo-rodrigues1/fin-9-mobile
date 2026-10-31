@@ -148,3 +148,59 @@ export interface Statement {
   entries: (Transaction & { kind: 'TRANSACTION' | 'TRANSFER' })[];
   hasMore: boolean;
 }
+
+export interface Goal {
+  id: string;
+  name: string;
+  targetAmount: number;
+  deadline: string | null;
+  allocatedAmount: number;
+  currentAmount: number;
+  shortfall: number;
+  remainingAmount: number;
+  percentage: number;
+  status: 'COMPLETED' | 'REVIEW' | 'OVERDUE' | 'IN_PROGRESS';
+}
+export interface GoalFundingAccount {
+  id: string;
+  name: string;
+  institution: string;
+  isArchived: boolean;
+  balance: number;
+  allocatedAmount: number;
+  availableAmount: number;
+}
+export interface GoalContribution {
+  id: string;
+  goalId: string;
+  accountId: string;
+  amount: number;
+  date: string;
+  note: string | null;
+  account?: Pick<
+    GoalFundingAccount,
+    'id' | 'name' | 'institution' | 'isArchived'
+  >;
+}
+export interface GoalOverview {
+  goals: Goal[];
+  accounts: GoalFundingAccount[];
+}
+export interface GoalDetail {
+  goal: Goal;
+  accounts: GoalFundingAccount[];
+  contributions: GoalContribution[];
+  hasMore: boolean;
+}
+export interface SaveGoal {
+  name: string;
+  targetAmount: number;
+  deadline: string | null;
+}
+export interface SaveGoalContribution {
+  accountId: string;
+  amount: number;
+  date: string;
+  note?: string;
+  requestId?: string;
+}

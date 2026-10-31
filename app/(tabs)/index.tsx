@@ -15,6 +15,8 @@ import { Button } from '../../src/components/ui/Button';
 import { PeriodPicker } from '../../src/components/PeriodPicker';
 import { QueryState } from '../../src/components/QueryState';
 import { TransactionItem } from '../../src/components/TransactionItem';
+import { GoalCard } from '../../src/components/GoalCard';
+import { goalService } from '../../src/services/goalService';
 import { FinancialCharts } from '../../src/components/FinancialCharts';
 import { useResource } from '../../src/hooks/useResource';
 import { usePrivacyStore } from '../../src/stores/privacyStore';
@@ -40,12 +42,13 @@ export default function DashboardScreen() {
   const { data, loading, error, reload } = useResource(
     useCallback(async () => {
       const report = await dashboardService.getSummary(month, year);
-      const [recent, budgets, upcoming] = await Promise.all([
+      const [recent, budgets, upcoming, goals] = await Promise.all([
         transactionService.getAll({ month, year, take: 5 }),
         planningService.budgets(month, year),
         planningService.upcoming(),
+        goalService.overview(),
       ]);
-      return { report, recent, budgets, upcoming };
+      return { report, recent, budgets, upcoming, goals };
     }, [month, year]),
   );
   const money = (value: number) =>
@@ -168,6 +171,48 @@ export default function DashboardScreen() {
                   </Text>
                 </View>
                 <FinancialCharts report={data.report} />
+                <View className="mb-4">
+                  <View className="mb-3 flex-row items-center justify-between">
+                    <Text className="text-base font-semibold text-[#101828]">
+                      Metas financeiras
+                    </Text>
+                    <TouchableOpacity
+                      accessibilityRole="button"
+                      onPress={() => router.push('/goals')}
+                    >
+                      <Text className="p-2 font-semibold text-[#047857]">
+                        Ver metas
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                  <Text className="mb-3 text-sm leading-6 text-[#667085]">
+                    Dinheiro já incluído no saldo das contas. O progresso
+                    considera o saldo atual.
+                  </Text>
+                  {data.goals.goals.length ? (
+                    data.goals.goals.slice(0, 3).map((goal) => (
+                      <TouchableOpacity
+                        key={goal.id}
+                        accessibilityRole="button"
+                        accessibilityLabel={'Abrir meta ' + goal.name}
+                        onPress={() =>
+                          router.push({
+                            pathname: '/goals/detail',
+                            params: { id: goal.id },
+                          })
+                        }
+                      >
+                        <GoalCard goal={goal} />
+                      </TouchableOpacity>
+                    ))
+                  ) : (
+                    <Button
+                      title="Criar primeira meta"
+                      variant="outline"
+                      onPress={() => router.push('/goals/edit')}
+                    />
+                  )}
+                </View>
                 <View className="mb-4">
                   <Text className="mb-3 text-base font-semibold text-[#101828]">
                     Minhas contas
