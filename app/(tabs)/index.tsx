@@ -15,6 +15,8 @@ import { Button } from '../../src/components/ui/Button';
 import { PeriodPicker } from '../../src/components/PeriodPicker';
 import { QueryState } from '../../src/components/QueryState';
 import { TransactionItem } from '../../src/components/TransactionItem';
+import { CreditCardSummary } from '../../src/components/CreditCardSummary';
+import { cardService } from '../../src/services/cardService';
 import { GoalCard } from '../../src/components/GoalCard';
 import { goalService } from '../../src/services/goalService';
 import { FinancialCharts } from '../../src/components/FinancialCharts';
@@ -42,13 +44,14 @@ export default function DashboardScreen() {
   const { data, loading, error, reload } = useResource(
     useCallback(async () => {
       const report = await dashboardService.getSummary(month, year);
-      const [recent, budgets, upcoming, goals] = await Promise.all([
+      const [recent, budgets, upcoming, goals, cards] = await Promise.all([
         transactionService.getAll({ month, year, take: 5 }),
         planningService.budgets(month, year),
         planningService.upcoming(),
         goalService.overview(),
+        cardService.list(),
       ]);
-      return { report, recent, budgets, upcoming, goals };
+      return { report, recent, budgets, upcoming, goals, cards };
     }, [month, year]),
   );
   const money = (value: number) =>
@@ -152,7 +155,8 @@ export default function DashboardScreen() {
                   ))}
                   <Text className="text-xs leading-5 text-[#667085]">
                     Saldo previsto = saldo atual + receitas previstas − despesas
-                    previstas do mês selecionado.
+                    previstas do mês selecionado, incluindo faturas não pagas
+                    com vencimento no mês.
                   </Text>
                 </View>
                 <View className="mb-4 rounded-lg border border-[#E4E7EC] bg-white p-4">
@@ -171,6 +175,47 @@ export default function DashboardScreen() {
                   </Text>
                 </View>
                 <FinancialCharts report={data.report} />
+                <View className="mb-4">
+                  <View className="mb-3 flex-row items-center justify-between">
+                    <Text className="text-base font-semibold text-[#101828]">
+                      Cartões de crédito
+                    </Text>
+                    <TouchableOpacity
+                      accessibilityRole="button"
+                      onPress={() => router.push('/cards')}
+                    >
+                      <Text className="p-2 font-semibold text-[#047857]">
+                        Ver cartões
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                  {data.cards.filter((c) => !c.isArchived).length ? (
+                    data.cards
+                      .filter((c) => !c.isArchived)
+                      .slice(0, 2)
+                      .map((c) => (
+                        <TouchableOpacity
+                          key={c.id}
+                          accessibilityRole="button"
+                          accessibilityLabel={'Abrir cartão ' + c.name}
+                          onPress={() =>
+                            router.push({
+                              pathname: '/cards/detail',
+                              params: { id: c.id },
+                            })
+                          }
+                        >
+                          <CreditCardSummary card={c} />
+                        </TouchableOpacity>
+                      ))
+                  ) : (
+                    <Button
+                      title="Cadastrar cartão"
+                      variant="outline"
+                      onPress={() => router.push('/cards/edit')}
+                    />
+                  )}
+                </View>
                 <View className="mb-4">
                   <View className="mb-3 flex-row items-center justify-between">
                     <Text className="text-base font-semibold text-[#101828]">

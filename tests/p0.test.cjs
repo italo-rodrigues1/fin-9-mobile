@@ -113,3 +113,42 @@ test('two-step confirmations each require a separate answer', async () => {
   useConfirmationStore.getState().answer(false);
   assert.equal(await final, false);
 });
+
+const { previewCardSchedule } = load('utils/cardSchedule.ts');
+test('credit card preview matches exact cent splits and future invoice dates', () => {
+  const rows = previewCardSchedule('2026-10-10', 10, 15, 3, 100);
+  assert.deepEqual(
+    rows.map((r) => r.amount),
+    [33.34, 33.33, 33.33],
+  );
+  assert.deepEqual(
+    rows.map((r) => r.dueDate.slice(0, 10)),
+    ['2026-11-15', '2026-12-15', '2027-01-15'],
+  );
+});
+test('credit card preview handles leap years and equal or earlier due days', () => {
+  const rows = previewCardSchedule('2028-01-31', 31, 5, 3, 0.05);
+  assert.deepEqual(
+    rows.map((r) => r.closingDate.slice(0, 10)),
+    ['2028-02-29', '2028-03-31', '2028-04-30'],
+  );
+  assert.deepEqual(
+    rows.map((r) => r.dueDate.slice(0, 10)),
+    ['2028-03-05', '2028-04-05', '2028-05-05'],
+  );
+  assert.deepEqual(
+    rows.map((r) => r.amount),
+    [0.02, 0.02, 0.01],
+  );
+});
+test('credit card preview preserves the total across all supported installment counts', () => {
+  for (let count = 1; count <= 36; count++) {
+    const rows = previewCardSchedule('2026-12-31', 31, 31, count, 999999999.99);
+    assert.equal(
+      rows.reduce((sum, r) => sum + Math.round(r.amount * 100), 0),
+      99999999999,
+    );
+  }
+  assert.deepEqual(previewCardSchedule('2026-10-01', 10, 15, 3, 0.02), []);
+  assert.deepEqual(previewCardSchedule('bad', 10, 15, 1, 100), []);
+});

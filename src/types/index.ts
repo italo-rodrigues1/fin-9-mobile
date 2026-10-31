@@ -38,6 +38,12 @@ export interface Account {
 }
 
 export interface Transaction {
+  cardPaymentId?: string | null;
+  cardPayment?: {
+    id: string;
+    invoiceId: string;
+    invoice: { cardId: string };
+  } | null;
   status?: 'CONFIRMED' | 'PLANNED';
   recurrenceId?: string | null;
   occurrenceDate?: string | null;
@@ -99,6 +105,7 @@ export interface FinancialReport extends MonthlySummary {
   currentBalance: number;
   plannedIncome: number;
   plannedExpense: number;
+  plannedCardExpense: number;
   projectedBalance: number;
   history: (MonthlySummary & { month: number; year: number })[];
   previous: {
@@ -202,5 +209,86 @@ export interface SaveGoalContribution {
   amount: number;
   date: string;
   note?: string;
+  requestId?: string;
+}
+
+export interface CreditCard {
+  id: string;
+  name: string;
+  creditLimit: number;
+  closingDay: number;
+  dueDay: number;
+  isArchived: boolean;
+  usedLimit: number;
+  availableLimit: number;
+  hasPurchases?: boolean;
+  unpaidInvoices?: number;
+}
+export interface CardPayment {
+  id: string;
+  invoiceId: string;
+  accountId: string;
+  amount: number;
+  date: string;
+  account: { id: string; name: string; isArchived: boolean };
+}
+export interface CardInvoice {
+  id: string;
+  cardId: string;
+  year: number;
+  month: number;
+  closingDate: string;
+  dueDate: string;
+  total: number;
+  itemCount: number;
+  status: 'OPEN' | 'CLOSED' | 'PAID';
+  overdue: boolean;
+  payment: CardPayment | null;
+}
+export interface CardDetail {
+  card: CreditCard;
+  invoices: CardInvoice[];
+}
+export interface CardPurchase {
+  id: string;
+  cardId: string;
+  title: string;
+  categoryId: string;
+  category?: Category;
+  amount: number;
+  date: string;
+  installmentCount: number;
+  canEdit: boolean;
+}
+export interface CardInvoiceItem {
+  id: string;
+  purchaseId: string;
+  number: number;
+  amount: number;
+  purchase: Omit<CardPurchase, 'canEdit'>;
+  canEdit: boolean;
+}
+export interface CardInvoiceDetail {
+  card: Pick<
+    CreditCard,
+    'id' | 'name' | 'creditLimit' | 'closingDay' | 'dueDay' | 'isArchived'
+  >;
+  invoice: CardInvoice;
+  items: CardInvoiceItem[];
+  hasMore: boolean;
+}
+export interface SaveCreditCard {
+  name: string;
+  creditLimit: number;
+  closingDay: number;
+  dueDay: number;
+  isArchived?: boolean;
+}
+export interface SaveCardPurchase {
+  title: string;
+  categoryId: string;
+  amount: number;
+  date: string;
+  installmentCount: number;
   requestId?: string;
 }

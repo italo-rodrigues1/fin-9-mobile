@@ -29,6 +29,11 @@ export default function MoreScreen() {
         <View className="mx-4 overflow-hidden rounded-lg border border-[#E4E7EC] bg-white">
           {(
             [
+              {
+                title: 'Cartões de crédito',
+                href: '/cards',
+                icon: 'credit-card',
+              },
               { title: 'Metas', href: '/goals', icon: 'target' },
               { title: 'Planejamento', href: '/planning', icon: 'calendar' },
               { title: 'Orçamentos', href: '/budgets', icon: 'pie-chart' },

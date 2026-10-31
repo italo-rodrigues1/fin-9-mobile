@@ -37,7 +37,7 @@ import { transactionService } from '../../../src/services/transactionService';
 import { useAccountStore } from '../../../src/stores/accountStore';
 import { useCategoryStore } from '../../../src/stores/categoryStore';
 import { useTransactionStore } from '../../../src/stores/transactionStore';
-import { TransactionType } from '../../../src/types';
+import { Transaction, TransactionType } from '../../../src/types';
 import { confirmAction } from '../../../src/utils/confirmAction';
 import {
   formatCurrency,
@@ -59,6 +59,8 @@ export default function CreateTransactionScreen() {
   const [status, setStatus] = useState<'CONFIRMED' | 'PLANNED'>(
     params.status === 'PLANNED' ? 'PLANNED' : 'CONFIRMED',
   );
+  const [cardPayment, setCardPayment] =
+    useState<Transaction['cardPayment']>(null);
   const [recurrenceId, setRecurrenceId] = useState<string | null>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -136,6 +138,7 @@ export default function CreateTransactionScreen() {
       .getById(transactionId)
       .then((transaction) => {
         if (!isActive) return;
+        setCardPayment(transaction.cardPayment || null);
         setStatus(transaction.status || 'CONFIRMED');
         setRecurrenceId(transaction.recurrenceId || null);
         setTitle(transaction.title);
@@ -235,6 +238,41 @@ export default function CreateTransactionScreen() {
     );
   }
 
+  if (cardPayment)
+    return (
+      <>
+        <Stack.Screen options={{ title: 'Pagamento de fatura' }} />
+        <SafeAreaView className="flex-1 bg-[#F7F8FA]">
+          <View className="p-4">
+            <Text className="mb-3 text-lg font-semibold text-[#101828]">
+              {title}
+            </Text>
+            <Text className="mb-3 text-2xl font-bold text-[#101828]">
+              {showValues
+                ? formatCurrency(parseCurrencyInput(amount))
+                : 'R$ ••••••'}
+            </Text>
+            <Text className="mb-5 text-sm leading-6 text-[#667085]">
+              Este lançamento faz parte de um pagamento integral de fatura. Para
+              preservar o saldo e as parcelas, gerencie o pagamento pela fatura
+              do cartão.
+            </Text>
+            <Button
+              title="Abrir fatura do cartão"
+              onPress={() =>
+                router.push({
+                  pathname: '/cards/invoice',
+                  params: {
+                    cardId: cardPayment.invoice.cardId,
+                    id: cardPayment.invoiceId,
+                  },
+                })
+              }
+            />
+          </View>
+        </SafeAreaView>
+      </>
+    );
   return (
     <>
       <Stack.Screen
