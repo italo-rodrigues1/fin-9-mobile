@@ -53,7 +53,7 @@ export default function TransactionsListScreen() {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await fetch();
+    await fetch(undefined, true);
     setRefreshing(false);
   }, [fetch]);
 
@@ -263,7 +263,7 @@ export default function TransactionsListScreen() {
           <QueryState
             loading={isLoading}
             error={error}
-            retry={() => void fetch()}
+            retry={() => void fetch(undefined, true)}
           />
         }
         renderItem={renderItem}

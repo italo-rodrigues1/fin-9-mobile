@@ -19,8 +19,8 @@ Implementado em 31/10/2026. O checklist completo está no project.md da pasta qu
 ## Validação
 
 - [x] TypeScript: npm run typecheck.
-- [x] Quatro testes mobile: dinheiro, datas em três fusos, privacidade e erros da API.
-- [x] Backend: 53 testes passaram, incluindo 10 testes financeiros novos; build NestJS passou.
+- [x] Treze testes mobile: dinheiro, datas, privacidade, erros da API, consultas duplicadas, expiração, atualização forçada, invalidação após movimentações e isolamento de sessão.
+- [x] Backend: 56 testes passaram, incluindo 10 testes financeiros novos; build NestJS passou.
 - [x] Exportação web do Expo.
 - [x] Bundle Android gerado pelo Expo (compilação JS/Hermes; não representa teste em aparelho nem APK).
 - [x] Navegador a 390 × 844 com API fictícia local: boas-vindas, validação de cadastro, login, sessão ao recarregar, menu, ocultação, criação de conta a partir de lançamento, retorno com título/valor preservados, seleção da nova conta e salvamento do lançamento e estado de falha de conexão com ação Tentar novamente.
@@ -29,3 +29,14 @@ Implementado em 31/10/2026. O checklist completo está no project.md da pasta qu
 Os testes financeiros usam um cliente Prisma simulado: verificam os saldos, reversões, mudança de conta/tipo/valor, rollback, centavos, datas e tentativas limitadas de conflitos. Não substituem teste concorrente contra PostgreSQL real. O teste de limite de login existente também foi corrigido para exigir 401 nas primeiras tentativas, em vez de aceitar erros 500.
 
 A fase fica aberta apenas para homologação nativa. Nenhuma funcionalidade do P1 foi iniciada.
+
+## Correção após teste Android — 31/10/2026
+
+- [x] Ajustar limite geral para 120 requisições/minuto por rota, mantendo login/cadastro em 5 tentativas/minuto.
+- [x] Corrigir classificação do HTTP 429 para Too Many Requests no filtro de exceções.
+- [x] Compartilhar consultas simultâneas e reutilizar leituras por 10 segundos no aplicativo.
+- [x] Invalidar leituras após gravações e logout; atualização manual força nova consulta.
+- [x] Remover consulta de resumo ainda sem uso e painéis de erro repetidos no Dashboard.
+- [x] Validar limites com controladores reais e repositórios simulados: 120 leituras de contas permitidas, a seguinte retorna 429 com Retry-After; 15 consultas mensais permitidas; sexta tentativa de login bloqueada.
+- [x] Testes: 56 no backend e 13 no mobile; TypeScript, lint dos arquivos de backend alterados e build NestJS.
+- [ ] Revalidar navegação Android após instalar/recarregar a versão corrigida.

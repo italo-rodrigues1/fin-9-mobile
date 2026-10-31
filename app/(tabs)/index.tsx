@@ -22,11 +22,10 @@ import { EmptyState } from '../../src/components/EmptyState';
 import { QuickAddMenu } from '../../src/components/QuickAddMenu';
 import { TransactionItem } from '../../src/components/TransactionItem';
 import { COLORS } from '../../src/constants';
-import { dashboardService } from '../../src/services/dashboardService';
 import { useAccountStore } from '../../src/stores/accountStore';
 import { useAuthStore } from '../../src/stores/authStore';
 import { useTransactionStore } from '../../src/stores/transactionStore';
-import { Account, MonthlySummary, Transaction } from '../../src/types';
+import { Account, Transaction } from '../../src/types';
 import { confirmAction } from '../../src/utils/confirmAction';
 import {
   formatCurrency,
@@ -47,7 +46,6 @@ export default function DashboardScreen() {
     fetch: fetchAccounts,
     remove: removeAccount,
   } = useAccountStore();
-  const [summary, setSummary] = useState<MonthlySummary | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const { showValues, toggle: toggleValues } = usePrivacyStore();
   const [loading, setLoading] = useState(true);
@@ -70,23 +68,24 @@ export default function DashboardScreen() {
     });
   }, []);
 
-  const loadData = useCallback(async () => {
-    setLoading(true);
-    setLoadError(null);
-    try {
-      setTransactionFilters({ month, year });
-      const [summaryData] = await Promise.all([
-        dashboardService.getSummary(month, year),
-        fetchTransactions({ month, year }),
-        fetchAccounts(),
-      ]);
-      setSummary(summaryData);
-    } catch {
-      setLoadError('Não foi possível atualizar suas informações.');
-    } finally {
-      setLoading(false);
-    }
-  }, [fetchAccounts, fetchTransactions, month, setTransactionFilters, year]);
+  const loadData = useCallback(
+    async (force = false) => {
+      setLoading(true);
+      setLoadError(null);
+      try {
+        setTransactionFilters({ month, year });
+        await Promise.all([
+          fetchTransactions({ month, year }, force),
+          fetchAccounts(force),
+        ]);
+      } catch {
+        setLoadError('Não foi possível atualizar suas informações.');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fetchAccounts, fetchTransactions, month, setTransactionFilters, year],
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -96,7 +95,7 @@ export default function DashboardScreen() {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await loadData();
+    await loadData(true);
     setRefreshing(false);
   }, [loadData]);
 
@@ -164,7 +163,7 @@ export default function DashboardScreen() {
             <QueryState
               loading={loading}
               error={loadError || accountError || transactionError}
-              retry={loadData}
+              retry={() => void loadData(true)}
             />
             <View className="mb-4 flex-row items-center justify-between px-1">
               <BrandLogo />
@@ -297,11 +296,6 @@ export default function DashboardScreen() {
             </View>
 
             <View className="mt-5 rounded-lg bg-[#F2F4F7] px-4 py-4">
-              <QueryState
-                loading={loading}
-                error={loadError || accountError || transactionError}
-                retry={loadData}
-              />
               <View className="mb-4 flex-row items-center justify-between">
                 <Text className="text-base font-semibold text-[#344054]">
                   Transações
@@ -314,11 +308,6 @@ export default function DashboardScreen() {
                 </TouchableOpacity>
               </View>
 
-              <QueryState
-                loading={loading}
-                error={loadError || accountError || transactionError}
-                retry={loadData}
-              />
               <View className="mb-4 flex-row items-center justify-between px-3">
                 <TouchableOpacity
                   onPress={() => changeMonth(-1)}

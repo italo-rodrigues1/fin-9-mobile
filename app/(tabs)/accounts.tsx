@@ -37,12 +37,16 @@ export default function AccountsScreen() {
           />
         </View>
       </View>
-      <QueryState loading={isLoading} error={error} retry={fetch} />
+      <QueryState
+        loading={isLoading}
+        error={error}
+        retry={() => void fetch(true)}
+      />
       <FlatList
         data={error || isLoading ? [] : accounts}
         keyExtractor={(item) => item.id}
         refreshing={isLoading}
-        onRefresh={fetch}
+        onRefresh={() => void fetch(true)}
         contentContainerStyle={{ padding: 16 }}
         ListEmptyComponent={
           !isLoading && !error ? (

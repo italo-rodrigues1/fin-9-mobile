@@ -1,13 +1,16 @@
+import { readCaches } from '../services/readCaches';
 import { errorMessage } from '../utils/errorMessage';
 import { create } from 'zustand';
 import { Category } from '../types';
 import { categoryService } from '../services/categoryService';
 
+let requestVersion = 0;
+
 interface CategoryState {
   categories: Category[];
   isLoading: boolean;
   error: string | null;
-  fetch: () => Promise<void>;
+  fetch: (force?: boolean) => Promise<void>;
   create: (payload: {
     name: string;
     color?: string;
@@ -26,12 +29,15 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
   isLoading: false,
   error: null,
 
-  fetch: async () => {
+  fetch: async (force = false) => {
+    const version = ++requestVersion;
     set({ isLoading: true, error: null });
     try {
-      const categories = await categoryService.getAll();
+      const categories = await categoryService.getAll(force);
+      if (version !== requestVersion) return;
       set({ categories, isLoading: false });
     } catch (err: any) {
+      if (version !== requestVersion) return;
       set({
         error: errorMessage(err, 'Erro ao carregar categorias'),
         isLoading: false,
@@ -66,5 +72,9 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
     }
   },
 
-  reset: () => set({ categories: [], isLoading: false, error: null }),
+  reset: () => {
+    requestVersion++;
+    readCaches.categories.clear();
+    set({ categories: [], isLoading: false, error: null });
+  },
 }));

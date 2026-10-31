@@ -49,7 +49,7 @@ export default function CategoriesScreen() {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await fetch();
+    await fetch(true);
     setRefreshing(false);
   }, [fetch]);
 
@@ -198,7 +198,11 @@ export default function CategoriesScreen() {
       <FlatList
         data={isLoading || error ? [] : categories}
         ListHeaderComponent={
-          <QueryState loading={isLoading} error={error} retry={fetch} />
+          <QueryState
+            loading={isLoading}
+            error={error}
+            retry={() => void fetch(true)}
+          />
         }
         renderItem={renderItem}
         keyExtractor={keyExtractor}

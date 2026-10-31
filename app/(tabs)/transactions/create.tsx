@@ -340,7 +340,7 @@ export default function CreateTransactionScreen() {
                     <Text className="text-sm text-[#B42318]">
                       {accountError}
                     </Text>
-                    <TouchableOpacity onPress={() => void fetchAccounts()}>
+                    <TouchableOpacity onPress={() => void fetchAccounts(true)}>
                       <Text className="mt-2 font-semibold text-[#047857]">
                         Tentar novamente
                       </Text>
@@ -386,7 +386,7 @@ export default function CreateTransactionScreen() {
                 <QueryState
                   loading={loadingCategories}
                   error={categoryError}
-                  retry={fetchCategories}
+                  retry={() => void fetchCategories(true)}
                 />
                 {errors.categoryId ? (
                   <Text className="mb-2 text-sm text-[#B42318]">

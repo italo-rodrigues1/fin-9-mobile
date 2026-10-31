@@ -1,14 +1,17 @@
+import { readCaches } from '../services/readCaches';
 import { errorMessage } from '../utils/errorMessage';
 import { notify } from './feedbackStore';
 import { create } from 'zustand';
 import { accountService } from '../services/accountService';
 import { Account, CreateAccountPayload } from '../types';
 
+let requestVersion = 0;
+
 interface AccountState {
   accounts: Account[];
   isLoading: boolean;
   error: string | null;
-  fetch: () => Promise<void>;
+  fetch: (force?: boolean) => Promise<void>;
   create: (payload: CreateAccountPayload) => Promise<Account>;
   remove: (id: string) => Promise<void>;
   reset: () => void;
@@ -19,12 +22,15 @@ export const useAccountStore = create<AccountState>((set) => ({
   isLoading: false,
   error: null,
 
-  fetch: async () => {
+  fetch: async (force = false) => {
+    const version = ++requestVersion;
     set({ isLoading: true, error: null });
     try {
-      const accounts = await accountService.getAll();
+      const accounts = await accountService.getAll(force);
+      if (version !== requestVersion) return;
       set({ accounts, isLoading: false });
     } catch (err: any) {
+      if (version !== requestVersion) return;
       set({
         error: errorMessage(err, 'Não foi possível carregar suas contas'),
         isLoading: false,
@@ -35,12 +41,14 @@ export const useAccountStore = create<AccountState>((set) => ({
   create: async (payload) => {
     try {
       const account = await accountService.create(payload);
+      requestVersion++;
       set((state) => ({
         accounts: [
           ...state.accounts.filter((item) => item.id !== account.id),
           account,
         ],
         error: null,
+        isLoading: false,
       }));
       return account;
     } catch (err: any) {
@@ -52,14 +60,20 @@ export const useAccountStore = create<AccountState>((set) => ({
     try {
       await accountService.delete(id);
       notify('Conta excluída com sucesso.');
+      requestVersion++;
       set((state) => ({
         accounts: state.accounts.filter((account) => account.id !== id),
         error: null,
+        isLoading: false,
       }));
     } catch (err: any) {
       throw new Error(errorMessage(err, 'Não foi possível excluir a conta'));
     }
   },
 
-  reset: () => set({ accounts: [], isLoading: false, error: null }),
+  reset: () => {
+    requestVersion++;
+    readCaches.accounts.clear();
+    set({ accounts: [], isLoading: false, error: null });
+  },
 }));

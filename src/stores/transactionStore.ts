@@ -1,3 +1,4 @@
+import { readCaches } from '../services/readCaches';
 import { errorMessage } from '../utils/errorMessage';
 import { notify } from './feedbackStore';
 import { create } from 'zustand';
@@ -5,12 +6,14 @@ import { Transaction, TransactionFilters } from '../types';
 import { transactionService } from '../services/transactionService';
 import { useAccountStore } from './accountStore';
 
+let requestVersion = 0;
+
 interface TransactionState {
   transactions: Transaction[];
   isLoading: boolean;
   error: string | null;
   filters: TransactionFilters;
-  fetch: (filters?: TransactionFilters) => Promise<void>;
+  fetch: (filters?: TransactionFilters, force?: boolean) => Promise<void>;
   create: (
     payload: Parameters<typeof transactionService.create>[0],
   ) => Promise<void>;
@@ -29,13 +32,19 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
   error: null,
   filters: {},
 
-  fetch: async (filters) => {
+  fetch: async (filters, force = false) => {
+    const version = ++requestVersion;
     set({ isLoading: true, error: null });
     try {
       const appliedFilters = filters || get().filters;
-      const transactions = await transactionService.getAll(appliedFilters);
+      const transactions = await transactionService.getAll(
+        appliedFilters,
+        force,
+      );
+      if (version !== requestVersion) return;
       set({ transactions, isLoading: false });
     } catch (err: any) {
+      if (version !== requestVersion) return;
       set({
         error: errorMessage(err, 'Erro ao carregar transações'),
         isLoading: false,
@@ -75,6 +84,9 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
 
   setFilters: (filters) => set({ filters }),
 
-  reset: () =>
-    set({ transactions: [], isLoading: false, error: null, filters: {} }),
+  reset: () => {
+    requestVersion++;
+    readCaches.transactions.clear();
+    set({ transactions: [], isLoading: false, error: null, filters: {} });
+  },
 }));
