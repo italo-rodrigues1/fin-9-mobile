@@ -1,3 +1,5 @@
+import { confirmAction } from '../../src/utils/confirmAction';
+import { notify } from '../../src/stores/feedbackStore';
 import React, { useState } from 'react';
 import { View, Text, Alert, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -10,82 +12,85 @@ import { INPUT_LIMITS } from '../../src/constants';
 
 export default function ProfileScreen() {
   const { user, logout, updateProfile, deleteAccount } = useAuthStore();
+  const [nameError, setNameError] = useState('');
   const [name, setName] = useState(user?.name || '');
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleSave = async () => {
-    if (!name.trim()) return Alert.alert('Atenção', 'Informe seu nome');
+    if (isSaving) return;
+    if (!name.trim()) return setNameError('Informe seu nome');
+    setNameError('');
     setIsSaving(true);
     try {
       await updateProfile(name.trim());
       setIsEditing(false);
-      Alert.alert('Sucesso', 'Perfil atualizado!');
+      notify('Perfil atualizado com sucesso.');
     } catch (err: any) {
-      Alert.alert('Erro', err.message);
+      notify(err.message);
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleLogout = () => {
-    Alert.alert('Sair', 'Tem certeza que deseja sair?', [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Sair', style: 'destructive', onPress: logout },
-    ]);
+  const handleLogout = async () => {
+    if (await confirmAction('Sair', 'Tem certeza que deseja sair?', 'Sair')) {
+      try {
+        await logout();
+      } catch {
+        notify('Não foi possível sair. Tente novamente.');
+      }
+    }
   };
-
-  const handleDeleteAccount = () => {
-    Alert.alert(
-      'Excluir conta',
-      'Essa acao ira apagar permanentemente seu perfil e todos os dados vinculados, incluindo despesas, receitas, contas e categorias. Deseja continuar?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Excluir conta',
-          style: 'destructive',
-          onPress: () => {
-            Alert.alert(
-              'Confirmacao final',
-              'Essa exclusao nao pode ser desfeita. Confirma a exclusao total da conta?',
-              [
-                { text: 'Voltar', style: 'cancel' },
-                {
-                  text: 'Excluir definitivamente',
-                  style: 'destructive',
-                  onPress: async () => {
-                    setIsDeleting(true);
-                    try {
-                      await deleteAccount();
-                      Alert.alert('Conta excluida', 'Sua conta e todos os dados relacionados foram removidos.');
-                    } catch (err: any) {
-                      Alert.alert('Erro', err.message);
-                    } finally {
-                      setIsDeleting(false);
-                    }
-                  },
-                },
-              ],
-            );
-          },
-        },
-      ],
-    );
+  const handleDeleteAccount = async () => {
+    if (isDeleting) return;
+    if (
+      !(await confirmAction(
+        'Excluir conta',
+        'Seu perfil e todos os seus dados financeiros serão apagados permanentemente.',
+        'Continuar',
+      ))
+    )
+      return;
+    if (
+      !(await confirmAction(
+        'Confirmação final',
+        'Essa exclusão não pode ser desfeita. Deseja continuar?',
+        'Excluir definitivamente',
+      ))
+    )
+      return;
+    setIsDeleting(true);
+    try {
+      await deleteAccount();
+      notify('Conta excluída com sucesso.');
+    } catch (err: any) {
+      notify(err.message);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
     <SafeAreaView className="flex-1 bg-[#F7F8FA]">
       <ScreenHeader title="Perfil" />
-      <ScrollView className="flex-1 px-4" contentContainerStyle={{ paddingBottom: 40 }}>
+      <ScrollView
+        className="flex-1 px-4"
+        contentContainerStyle={{ paddingBottom: 40 }}
+      >
         <View className="items-center pb-8 pt-4">
           <View className="mb-5 h-24 w-24 items-center justify-center rounded-full bg-[#E9FBF3]">
             <Text className="text-3xl font-semibold text-[#169670]">
               {(user?.name || 'EA').slice(0, 2).toUpperCase()}
             </Text>
           </View>
-          <Text className="text-2xl font-bold tracking-tight text-[#344054]">{user?.name}</Text>
-          <Text className="mt-1 text-sm font-medium text-[#98A2B3]">{user?.email}</Text>
+          <Text className="text-2xl font-bold tracking-tight text-[#344054]">
+            {user?.name}
+          </Text>
+          <Text className="mt-1 text-sm font-medium text-[#667085]">
+            {user?.email}
+          </Text>
         </View>
 
         <Card className="mb-6 p-5">
@@ -97,6 +102,7 @@ export default function ProfileScreen() {
             <View className="mt-2">
               <Input
                 label="Nome"
+                error={nameError}
                 value={name}
                 onChangeText={setName}
                 placeholder="Seu nome completo"
@@ -104,52 +110,88 @@ export default function ProfileScreen() {
               />
               <View className="flex-row gap-4 mt-2">
                 <View className="flex-1">
-                  <Button title="Cancelar" onPress={() => { setIsEditing(false); setName(user?.name || ''); }} variant="outline" />
+                  <Button
+                    title="Cancelar"
+                    onPress={() => {
+                      setIsEditing(false);
+                      setName(user?.name || '');
+                    }}
+                    variant="outline"
+                  />
                 </View>
                 <View className="flex-1">
-                  <Button title="Salvar" onPress={handleSave} isLoading={isSaving} />
+                  <Button
+                    title="Salvar"
+                    onPress={handleSave}
+                    isLoading={isSaving}
+                  />
                 </View>
               </View>
             </View>
           ) : (
             <View>
               <View className="flex-row items-center justify-between border-b border-[#EEF2F5] py-4">
-                <Text className="text-sm font-medium text-[#98A2B3]">Nome</Text>
-                <Text className="text-sm font-semibold text-[#344054]">{user?.name}</Text>
+                <Text className="text-sm font-medium text-[#667085]">Nome</Text>
+                <Text className="text-sm font-semibold text-[#344054]">
+                  {user?.name}
+                </Text>
               </View>
               <View className="flex-row justify-between items-center border-b border-[#EEF2F5] py-4">
-                <Text className="text-sm font-medium text-[#98A2B3]">E-mail</Text>
-                <Text className="text-sm font-semibold text-[#344054]">{user?.email}</Text>
+                <Text className="text-sm font-medium text-[#667085]">
+                  E-mail
+                </Text>
+                <Text className="text-sm font-semibold text-[#344054]">
+                  {user?.email}
+                </Text>
               </View>
               <View className="flex-row justify-between items-center py-4">
-                <Text className="text-sm font-medium text-[#98A2B3]">Membro desde</Text>
+                <Text className="text-sm font-medium text-[#667085]">
+                  Membro desde
+                </Text>
                 <Text className="text-sm font-semibold text-[#169670]">
-                  {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('pt-BR') : '-'}
+                  {user?.createdAt
+                    ? new Date(user.createdAt).toLocaleDateString('pt-BR')
+                    : '-'}
                 </Text>
               </View>
               <View className="mt-6">
-                <Button title="Editar Perfil" onPress={() => setIsEditing(true)} variant="secondary" />
+                <Button
+                  title="Editar Perfil"
+                  onPress={() => setIsEditing(true)}
+                  variant="secondary"
+                />
               </View>
             </View>
           )}
         </Card>
 
         <Card className="mb-8 p-5">
-          <Text className="mb-3 text-lg font-bold text-[#344054]">Sobre o App</Text>
-          <Text className="text-sm leading-6 text-[#98A2B3]">
-            <Text className="font-bold text-[#667085]">Fin-9 v1.0.0</Text>{'\n'}
-            Domine suas finanças pessoais de forma simples, eficiente e elegante.
+          <Text className="mb-3 text-lg font-bold text-[#344054]">
+            Sobre o App
+          </Text>
+          <Text className="text-sm leading-6 text-[#667085]">
+            <Text className="font-bold text-[#667085]">Fin-9 v1.0.0</Text>
+            {'\n'}
+            Domine suas finanças pessoais de forma simples, eficiente e
+            elegante.
           </Text>
         </Card>
 
         <View className="pb-8">
-          <Button title="Sair da Conta" onPress={handleLogout} variant="primary" />
+          <Button
+            title="Sair da Conta"
+            onPress={handleLogout}
+            variant="primary"
+          />
         </View>
 
         <Card className="border border-[#FECACA] bg-[#FFF1F2] p-5">
-          <Text className="mb-2 text-lg font-bold text-[#B42318]">Zona de perigo</Text>
+          <Text className="mb-2 text-lg font-bold text-[#B42318]">
+            Zona de perigo
+          </Text>
           <Text className="mb-5 text-sm leading-6 text-[#B42318]">
-            Exclua sua conta para remover permanentemente seu perfil e todas as informacoes financeiras relacionadas.
+            Exclua sua conta para remover permanentemente seu perfil e todas as
+            informacoes financeiras relacionadas.
           </Text>
           <Button
             title="Deletar Conta"

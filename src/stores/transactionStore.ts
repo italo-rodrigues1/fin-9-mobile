@@ -1,3 +1,5 @@
+import { errorMessage } from '../utils/errorMessage';
+import { notify } from './feedbackStore';
 import { create } from 'zustand';
 import { Transaction, TransactionFilters } from '../types';
 import { transactionService } from '../services/transactionService';
@@ -9,8 +11,13 @@ interface TransactionState {
   error: string | null;
   filters: TransactionFilters;
   fetch: (filters?: TransactionFilters) => Promise<void>;
-  create: (payload: Parameters<typeof transactionService.create>[0]) => Promise<void>;
-  update: (id: string, payload: Parameters<typeof transactionService.update>[1]) => Promise<void>;
+  create: (
+    payload: Parameters<typeof transactionService.create>[0],
+  ) => Promise<void>;
+  update: (
+    id: string,
+    payload: Parameters<typeof transactionService.update>[1],
+  ) => Promise<void>;
   remove: (id: string) => Promise<void>;
   setFilters: (filters: TransactionFilters) => void;
   reset: () => void;
@@ -29,38 +36,45 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
       const transactions = await transactionService.getAll(appliedFilters);
       set({ transactions, isLoading: false });
     } catch (err: any) {
-      set({ error: err.response?.data?.message || 'Erro ao carregar transações', isLoading: false });
+      set({
+        error: errorMessage(err, 'Erro ao carregar transações'),
+        isLoading: false,
+      });
     }
   },
 
   create: async (payload) => {
     try {
       await transactionService.create(payload);
+      notify('Transação cadastrada com sucesso.');
       await Promise.all([get().fetch(), useAccountStore.getState().fetch()]);
     } catch (err: any) {
-      throw new Error(err.response?.data?.message || 'Erro ao criar transação');
+      throw new Error(errorMessage(err, 'Erro ao criar transação'));
     }
   },
 
   update: async (id, payload) => {
     try {
       await transactionService.update(id, payload);
+      notify('Transação atualizada com sucesso.');
       await Promise.all([get().fetch(), useAccountStore.getState().fetch()]);
     } catch (err: any) {
-      throw new Error(err.response?.data?.message || 'Erro ao atualizar transação');
+      throw new Error(errorMessage(err, 'Erro ao atualizar transação'));
     }
   },
 
   remove: async (id) => {
     try {
       await transactionService.delete(id);
+      notify('Transação excluída com sucesso.');
       await Promise.all([get().fetch(), useAccountStore.getState().fetch()]);
     } catch (err: any) {
-      throw new Error(err.response?.data?.message || 'Erro ao excluir transação');
+      throw new Error(errorMessage(err, 'Erro ao excluir transação'));
     }
   },
 
   setFilters: (filters) => set({ filters }),
 
-  reset: () => set({ transactions: [], isLoading: false, error: null, filters: {} }),
+  reset: () =>
+    set({ transactions: [], isLoading: false, error: null, filters: {} }),
 }));

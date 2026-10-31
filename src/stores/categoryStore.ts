@@ -1,3 +1,4 @@
+import { errorMessage } from '../utils/errorMessage';
 import { create } from 'zustand';
 import { Category } from '../types';
 import { categoryService } from '../services/categoryService';
@@ -7,8 +8,15 @@ interface CategoryState {
   isLoading: boolean;
   error: string | null;
   fetch: () => Promise<void>;
-  create: (payload: { name: string; color?: string; icon?: string }) => Promise<void>;
-  update: (id: string, payload: Partial<{ name: string; color: string; icon: string }>) => Promise<void>;
+  create: (payload: {
+    name: string;
+    color?: string;
+    icon?: string;
+  }) => Promise<void>;
+  update: (
+    id: string,
+    payload: Partial<{ name: string; color: string; icon: string }>,
+  ) => Promise<void>;
   remove: (id: string) => Promise<void>;
   reset: () => void;
 }
@@ -24,7 +32,10 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
       const categories = await categoryService.getAll();
       set({ categories, isLoading: false });
     } catch (err: any) {
-      set({ error: err.response?.data?.message || 'Erro ao carregar categorias', isLoading: false });
+      set({
+        error: errorMessage(err, 'Erro ao carregar categorias'),
+        isLoading: false,
+      });
     }
   },
 
@@ -33,7 +44,7 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
       await categoryService.create(payload);
       await get().fetch();
     } catch (err: any) {
-      throw new Error(err.response?.data?.message || 'Erro ao criar categoria');
+      throw new Error(errorMessage(err, 'Erro ao criar categoria'));
     }
   },
 
@@ -42,7 +53,7 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
       await categoryService.update(id, payload);
       await get().fetch();
     } catch (err: any) {
-      throw new Error(err.response?.data?.message || 'Erro ao atualizar categoria');
+      throw new Error(errorMessage(err, 'Erro ao atualizar categoria'));
     }
   },
 
@@ -51,7 +62,7 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
       await categoryService.delete(id);
       await get().fetch();
     } catch (err: any) {
-      throw new Error(err.response?.data?.message || 'Erro ao excluir categoria');
+      throw new Error(errorMessage(err, 'Erro ao excluir categoria'));
     }
   },
 

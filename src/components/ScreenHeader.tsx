@@ -9,9 +9,14 @@ interface ScreenHeaderProps {
   dark?: boolean;
 }
 
-export function ScreenHeader({ title, subtitle, right, dark = false }: ScreenHeaderProps) {
+export function ScreenHeader({
+  title,
+  subtitle,
+  right,
+  dark = false,
+}: ScreenHeaderProps) {
   const titleColor = dark ? 'text-white' : 'text-[#344054]';
-  const subtitleColor = dark ? 'text-slate-400' : 'text-[#98A2B3]';
+  const subtitleColor = dark ? 'text-slate-600' : 'text-[#667085]';
 
   return (
     <View className="flex-row items-start px-4 pb-4 pt-3">
@@ -22,7 +27,9 @@ export function ScreenHeader({ title, subtitle, right, dark = false }: ScreenHea
       <View className="ml-3 flex-1 pt-1">
         <Text className={`text-2xl font-bold ${titleColor}`}>{title}</Text>
         {subtitle ? (
-          <Text className={`mt-1 text-sm leading-5 ${subtitleColor}`}>{subtitle}</Text>
+          <Text className={`mt-1 text-sm leading-5 ${subtitleColor}`}>
+            {subtitle}
+          </Text>
         ) : null}
       </View>
       {right ? <View className="ml-3">{right}</View> : null}

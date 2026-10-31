@@ -37,7 +37,9 @@ export function QuickAddMenu() {
     {
       key: 'account',
       label: 'Nova Conta',
-      icon: <MaterialCommunityIcons name="bank-outline" size={18} color="#1D67C1" />,
+      icon: (
+        <MaterialCommunityIcons name="bank-outline" size={18} color="#1D67C1" />
+      ),
       iconBackground: '#EAF2FF',
       onPress: () => {
         setIsOpen(false);
@@ -61,7 +63,7 @@ export function QuickAddMenu() {
 
       {isOpen ? (
         <View
-          className="absolute right-4 w-[176px] rounded-[24px] bg-white px-4 py-3 shadow-sm"
+          className="absolute right-4 w-[176px] rounded-lg bg-white px-4 py-3 shadow-sm"
           style={{ bottom: buttonBottom + 68, elevation: 8, zIndex: 30 }}
         >
           {actions.map((action) => (
@@ -79,7 +81,9 @@ export function QuickAddMenu() {
               >
                 {action.icon}
               </View>
-              <Text className="text-[15px] font-medium text-[#344054]">{action.label}</Text>
+              <Text className="text-[15px] font-medium text-[#344054]">
+                {action.label}
+              </Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -89,8 +93,11 @@ export function QuickAddMenu() {
         onPress={() => setIsOpen((current) => !current)}
         activeOpacity={0.85}
         accessibilityRole="button"
-        accessibilityLabel={isOpen ? 'Fechar menu de cadastro' : 'Abrir menu de cadastro'}
-        className="absolute right-4 h-14 w-14 items-center justify-center rounded-full"
+        accessibilityState={{ expanded: isOpen }}
+        accessibilityLabel={
+          isOpen ? 'Fechar menu de cadastro' : 'Abrir menu de cadastro'
+        }
+        className="absolute right-4 h-12 flex-row items-center justify-center rounded-lg px-4"
         style={{
           backgroundColor: COLORS.primary,
           bottom: buttonBottom,
@@ -98,7 +105,10 @@ export function QuickAddMenu() {
           zIndex: 40,
         }}
       >
-        <Text className="mb-[2px] text-3xl text-white">{isOpen ? '×' : '+'}</Text>
+        <Feather name={isOpen ? 'x' : 'menu'} size={20} color="#FFFFFF" />
+        <Text className="ml-2 font-semibold text-white">
+          {isOpen ? 'Fechar' : 'Novo registro'}
+        </Text>
       </TouchableOpacity>
     </>
   );

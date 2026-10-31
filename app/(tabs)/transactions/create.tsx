@@ -1,11 +1,13 @@
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { QueryState } from '../../../src/components/QueryState';
+import { notify } from '../../../src/stores/feedbackStore';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import {
   Stack,
   useFocusEffect,
   useLocalSearchParams,
   useRouter,
-} from "expo-router";
-import React, { useCallback, useState } from "react";
+} from 'expo-router';
+import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -15,50 +17,57 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Button } from "../../../src/components/ui/Button";
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Button } from '../../../src/components/ui/Button';
 import {
   DateInput,
   getLocalDateValue,
   isValidDateValue,
-} from "../../../src/components/ui/DateInput";
-import { Input } from "../../../src/components/ui/Input";
-import { Select } from "../../../src/components/ui/Select";
-import { CATEGORY_ICONS, INPUT_LIMITS } from "../../../src/constants";
+} from '../../../src/components/ui/DateInput';
+import { Input } from '../../../src/components/ui/Input';
+import { Select } from '../../../src/components/ui/Select';
+import { CATEGORY_ICONS, INPUT_LIMITS } from '../../../src/constants';
 import {
   amountSchema,
   normalizeAmountForValidation,
-} from "../../../src/schemas/transactionSchema";
-import { transactionService } from "../../../src/services/transactionService";
-import { useAccountStore } from "../../../src/stores/accountStore";
-import { useCategoryStore } from "../../../src/stores/categoryStore";
-import { useTransactionStore } from "../../../src/stores/transactionStore";
-import { TransactionType } from "../../../src/types";
-import { confirmAction } from "../../../src/utils/confirmAction";
+} from '../../../src/schemas/transactionSchema';
+import { transactionService } from '../../../src/services/transactionService';
+import { useAccountStore } from '../../../src/stores/accountStore';
+import { useCategoryStore } from '../../../src/stores/categoryStore';
+import { useTransactionStore } from '../../../src/stores/transactionStore';
+import { TransactionType } from '../../../src/types';
+import { confirmAction } from '../../../src/utils/confirmAction';
 import {
   formatCurrency,
   formatCurrencyInput,
   parseCurrencyInput,
   sanitizeCurrencyInput,
-} from "../../../src/utils/format";
+} from '../../../src/utils/format';
 
 export default function CreateTransactionScreen() {
   const params = useLocalSearchParams<{ id?: string; type?: string }>();
   const transactionId = params.id;
   const isEditing = Boolean(transactionId);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState("");
+  const saving = React.useRef(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [amount, setAmount] = useState('');
   const [type, setType] = useState<TransactionType>(TransactionType.EXPENSE);
-  const [categoryId, setCategoryId] = useState("");
-  const [accountId, setAccountId] = useState("");
+  const [categoryId, setCategoryId] = useState('');
+  const [accountId, setAccountId] = useState('');
   const [date, setDate] = useState(getLocalDateValue);
   const [isLoadingTransaction, setIsLoadingTransaction] = useState(isEditing);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { create, update, remove } = useTransactionStore();
-  const { categories, fetch: fetchCategories } = useCategoryStore();
+  const {
+    categories,
+    fetch: fetchCategories,
+    isLoading: loadingCategories,
+    error: categoryError,
+  } = useCategoryStore();
   const {
     accounts,
     fetch: fetchAccounts,
@@ -83,7 +92,7 @@ export default function CreateTransactionScreen() {
     setAccountId((current) =>
       accounts.some((account) => account.id === current)
         ? current
-        : (accounts[0]?.id ?? ""),
+        : (accounts[0]?.id ?? ''),
     );
   }, [accounts]);
 
@@ -110,15 +119,15 @@ export default function CreateTransactionScreen() {
       .then((transaction) => {
         if (!isActive) return;
         setTitle(transaction.title);
-        setDescription(transaction.description ?? "");
+        setDescription(transaction.description ?? '');
         setAmount(formatCurrencyInput(transaction.amount));
         setType(transaction.type);
-        setDate(transaction.date.split("T")[0]);
+        setDate(transaction.date.split('T')[0]);
         setCategoryId(transaction.categoryId);
         setAccountId(transaction.accountId);
       })
       .catch(() => {
-        Alert.alert("Erro", "Transação não encontrada");
+        Alert.alert('Erro', 'Transação não encontrada');
         router.back();
       })
       .finally(() => {
@@ -131,23 +140,23 @@ export default function CreateTransactionScreen() {
   }, [router, transactionId]);
 
   const handleSubmit = async () => {
+    if (saving.current) return;
     const amountResult = amountSchema.safeParse(
       normalizeAmountForValidation(amount),
     );
 
-    if (!title.trim()) return Alert.alert("Atenção", "Informe o título");
-    if (!amountResult.success) {
-      return Alert.alert(
-        "Atenção",
-        amountResult.error.issues[0]?.message ?? "Informe um valor válido",
-      );
-    }
+    const next: Record<string, string> = {};
+    if (!title.trim()) next.title = 'Informe o título';
+    if (!amountResult.success)
+      next.amount =
+        amountResult.error.issues[0]?.message ?? 'Informe um valor válido';
+    if (!accountId) next.accountId = 'Selecione uma conta';
+    if (!categoryId) next.categoryId = 'Selecione uma categoria';
+    if (!isValidDateValue(date)) next.date = 'Informe uma data válida';
+    setErrors(next);
+    if (Object.keys(next).length) return;
     const parsedAmount = Number(amountResult.data);
-    if (!accountId) return Alert.alert("Atenção", "Selecione uma conta");
-    if (!categoryId) return Alert.alert("Atenção", "Selecione uma categoria");
-    if (!isValidDateValue(date))
-      return Alert.alert("Atenção", "Informe uma data válida");
-
+    saving.current = true;
     setIsSubmitting(true);
     try {
       const payload = {
@@ -167,27 +176,33 @@ export default function CreateTransactionScreen() {
       }
       router.back();
     } catch (err: any) {
-      Alert.alert("Erro", err.message);
+      notify(err.message);
     } finally {
+      saving.current = false;
       setIsSubmitting(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!transactionId) return;
+    if (!transactionId || saving.current) return;
 
     const confirmed = await confirmAction(
-      "Excluir transação",
-      "Tem certeza que deseja excluir esta transação?",
-      "Excluir",
+      'Excluir transação',
+      'Tem certeza que deseja excluir esta transação?',
+      'Excluir',
     );
     if (!confirmed) return;
 
+    saving.current = true;
+    setIsSubmitting(true);
     try {
       await remove(transactionId);
       router.back();
     } catch (err: any) {
-      Alert.alert("Erro", err.message);
+      notify(err.message);
+    } finally {
+      saving.current = false;
+      setIsSubmitting(false);
     }
   };
 
@@ -203,30 +218,30 @@ export default function CreateTransactionScreen() {
     <>
       <Stack.Screen
         options={{
-          title: `${isEditing ? "Editar" : "Nova"} ${type === TransactionType.EXPENSE ? "Despesa" : "Receita"}`,
+          title: `${isEditing ? 'Editar' : 'Nova'} ${type === TransactionType.EXPENSE ? 'Despesa' : 'Receita'}`,
         }}
       />
       <SafeAreaView
         className="flex-1 bg-[#F7F8FA]"
-        edges={["left", "right", "bottom"]}
+        edges={['left', 'right', 'bottom']}
       >
         <KeyboardAvoidingView
           className="flex-1"
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
           <ScrollView
             className="flex-1 px-4"
             contentContainerStyle={{ paddingBottom: 60, paddingTop: 20 }}
             keyboardShouldPersistTaps="handled"
           >
-            <View className="mb-6 rounded-[24px] bg-white p-5">
+            <View className="mb-6 rounded-lg bg-white p-5">
               <Text className="mb-3 ml-1 text-sm font-medium text-[#667085]">
                 Tipo de transação
               </Text>
-              <View className="mb-8 flex-row rounded-[18px] bg-[#F2F4F7] p-1">
+              <View className="mb-8 flex-row rounded-lg bg-[#F2F4F7] p-1">
                 <TouchableOpacity
-                  className={`flex-1 flex-row items-center justify-center rounded-[14px] py-3 ${
-                    type === TransactionType.EXPENSE ? "bg-white" : ""
+                  className={`flex-1 flex-row items-center justify-center rounded-lg py-3 ${
+                    type === TransactionType.EXPENSE ? 'bg-white' : ''
                   }`}
                   onPress={() => setType(TransactionType.EXPENSE)}
                   activeOpacity={0.7}
@@ -239,18 +254,18 @@ export default function CreateTransactionScreen() {
                     name="arrow-down-circle-outline"
                     size={20}
                     color={
-                      type === TransactionType.EXPENSE ? "#FF6B6B" : "#98A2B3"
+                      type === TransactionType.EXPENSE ? '#FF6B6B' : '#667085'
                     }
                   />
                   <Text
-                    className={`font-semibold text-base ${type === TransactionType.EXPENSE ? "text-[#FF6B6B]" : "text-[#667085]"}`}
+                    className={`font-semibold text-base ${type === TransactionType.EXPENSE ? 'text-[#FF6B6B]' : 'text-[#667085]'}`}
                   >
-                    {"  "}Despesa
+                    {'  '}Despesa
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  className={`flex-1 flex-row items-center justify-center rounded-[14px] py-3 ${
-                    type === TransactionType.INCOME ? "bg-white" : ""
+                  className={`flex-1 flex-row items-center justify-center rounded-lg py-3 ${
+                    type === TransactionType.INCOME ? 'bg-white' : ''
                   }`}
                   onPress={() => setType(TransactionType.INCOME)}
                   activeOpacity={0.7}
@@ -263,19 +278,20 @@ export default function CreateTransactionScreen() {
                     name="arrow-up-circle-outline"
                     size={20}
                     color={
-                      type === TransactionType.INCOME ? "#169670" : "#98A2B3"
+                      type === TransactionType.INCOME ? '#169670' : '#667085'
                     }
                   />
                   <Text
-                    className={`font-semibold text-base ${type === TransactionType.INCOME ? "text-[#169670]" : "text-[#667085]"}`}
+                    className={`font-semibold text-base ${type === TransactionType.INCOME ? 'text-[#169670]' : 'text-[#667085]'}`}
                   >
-                    {"  "}Receita
+                    {'  '}Receita
                   </Text>
                 </TouchableOpacity>
               </View>
 
               <Input
                 label="Título"
+                error={errors.title}
                 value={title}
                 onChangeText={setTitle}
                 placeholder="Ex: Almoço, Salário..."
@@ -283,6 +299,7 @@ export default function CreateTransactionScreen() {
               />
               <Input
                 label="Valor (R$)"
+                error={errors.amount}
                 value={amount}
                 onChangeText={(value) =>
                   setAmount(sanitizeCurrencyInput(value))
@@ -296,28 +313,43 @@ export default function CreateTransactionScreen() {
                 keyboardType="decimal-pad"
                 maxLength={INPUT_LIMITS.money}
               />
+              {errors.date ? (
+                <Text className="mb-2 text-sm text-[#B42318]">
+                  {errors.date}
+                </Text>
+              ) : null}
               <DateInput label="Data" value={date} onChange={setDate} />
 
               <View className="mb-6">
                 <Text className="mb-3 ml-1 text-sm font-medium text-[#667085]">
                   Conta
                 </Text>
+                {errors.accountId ? (
+                  <Text className="mb-2 text-sm text-[#B42318]">
+                    {errors.accountId}
+                  </Text>
+                ) : null}
                 {isLoadingAccounts ? (
-                  <View className="rounded-[16px] bg-[#F9FAFB] px-4 py-4">
-                    <Text className="text-sm text-[#98A2B3]">
+                  <View className="rounded-lg bg-[#F9FAFB] px-4 py-4">
+                    <Text className="text-sm text-[#667085]">
                       Carregando contas...
                     </Text>
                   </View>
                 ) : accountError ? (
-                  <View className="rounded-[16px] border border-[#FFB4B4] bg-[#FFF1F1] px-4 py-4">
+                  <View className="rounded-lg border border-[#FFB4B4] bg-[#FFF1F1] px-4 py-4">
                     <Text className="text-sm text-[#B42318]">
                       {accountError}
                     </Text>
+                    <TouchableOpacity onPress={() => void fetchAccounts()}>
+                      <Text className="mt-2 font-semibold text-[#047857]">
+                        Tentar novamente
+                      </Text>
+                    </TouchableOpacity>
                   </View>
                 ) : accounts.length === 0 ? (
                   <TouchableOpacity
-                    onPress={() => router.push("/accounts/create")}
-                    className="rounded-[16px] border border-dashed border-[#169670] bg-[#EAFBF0] px-4 py-4"
+                    onPress={() => router.push('/accounts/create')}
+                    className="rounded-lg border border-dashed border-[#169670] bg-[#EAFBF0] px-4 py-4"
                     activeOpacity={0.75}
                   >
                     <Text className="text-center font-semibold text-[#169670]">
@@ -334,24 +366,45 @@ export default function CreateTransactionScreen() {
                     modalTitle="Conta"
                   />
                 )}
+                {accounts.length > 0 ? (
+                  <TouchableOpacity
+                    accessibilityRole="button"
+                    onPress={() => router.push('/accounts/create')}
+                    className="py-3"
+                  >
+                    <Text className="font-semibold text-[#047857]">
+                      Cadastrar nova conta
+                    </Text>
+                  </TouchableOpacity>
+                ) : null}
               </View>
 
               <View className="mb-6">
                 <Text className="mb-3 ml-1 text-sm font-medium text-[#667085]">
                   Categoria de Lançamento
                 </Text>
+                <QueryState
+                  loading={loadingCategories}
+                  error={categoryError}
+                  retry={fetchCategories}
+                />
+                {errors.categoryId ? (
+                  <Text className="mb-2 text-sm text-[#B42318]">
+                    {errors.categoryId}
+                  </Text>
+                ) : null}
                 <View className="flex-row flex-wrap gap-3">
                   {categories.map((cat) => {
-                    const icon = CATEGORY_ICONS[cat.icon] || "🏷️";
+                    const icon = CATEGORY_ICONS[cat.icon] || '🏷️';
                     const isSelected = categoryId === cat.id;
                     return (
                       <TouchableOpacity
                         key={cat.id}
                         onPress={() => setCategoryId(cat.id)}
-                        className={`flex-row items-center rounded-[16px] border px-4 py-3 ${
+                        className={`flex-row items-center rounded-lg border px-4 py-3 ${
                           isSelected
-                            ? "border-2"
-                            : "border-[#EAECF0] bg-[#F9FAFB]"
+                            ? 'border-2'
+                            : 'border-[#EAECF0] bg-[#F9FAFB]'
                         }`}
                         style={
                           isSelected
@@ -365,7 +418,7 @@ export default function CreateTransactionScreen() {
                       >
                         <Text className="mr-2 text-lg">{icon}</Text>
                         <Text
-                          className={`text-sm ${isSelected ? "font-semibold text-[#344054]" : "font-medium text-[#667085]"}`}
+                          className={`text-sm ${isSelected ? 'font-semibold text-[#344054]' : 'font-medium text-[#667085]'}`}
                         >
                           {cat.name}
                         </Text>
@@ -388,10 +441,10 @@ export default function CreateTransactionScreen() {
               <Button
                 title={
                   isEditing
-                    ? "Salvar Alterações"
+                    ? 'Salvar Alterações'
                     : type === TransactionType.EXPENSE
-                      ? "Salvar Despesa"
-                      : "Salvar Receita"
+                      ? 'Salvar Despesa'
+                      : 'Salvar Receita'
                 }
                 onPress={handleSubmit}
                 isLoading={isSubmitting}
@@ -402,6 +455,7 @@ export default function CreateTransactionScreen() {
                   title="Excluir Transação"
                   onPress={handleDelete}
                   variant="danger"
+                  disabled={isSubmitting}
                 />
               ) : null}
             </View>

@@ -1,46 +1,62 @@
 import { Tabs } from 'expo-router';
-import { COLORS } from '../../src/constants';
-
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Feather } from '@expo/vector-icons';
 export default function TabsLayout() {
+  const insets = useSafeAreaInsets();
   return (
     <Tabs
       screenOptions={{
-        headerStyle: { backgroundColor: COLORS.background },
-        headerTintColor: COLORS.text,
-        headerTitleStyle: { fontWeight: 'bold' },
+        headerShown: false,
+        tabBarActiveTintColor: '#047857',
+        tabBarInactiveTintColor: '#667085',
         tabBarStyle: {
-          display: 'none',
+          height: 64 + insets.bottom,
+          paddingTop: 8,
+          paddingBottom: Math.max(8, insets.bottom),
+          backgroundColor: '#FFFFFF',
+          borderTopColor: '#E4E7EC',
         },
+        tabBarLabelStyle: { fontSize: 12, fontWeight: '600' },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Dashboard',
-          headerShown: false,
+          title: 'Início',
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="home" color={color as string} size={size} />
+          ),
         }}
       />
       <Tabs.Screen
         name="transactions"
         options={{
           title: 'Transações',
-          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="list" color={color as string} size={size} />
+          ),
         }}
       />
       <Tabs.Screen
-        name="categories"
+        name="accounts"
         options={{
-          title: 'Categorias',
-          headerShown: false,
+          title: 'Contas',
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="credit-card" color={color as string} size={size} />
+          ),
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="more"
         options={{
-          title: 'Perfil',
-          headerShown: false,
+          title: 'Mais',
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="menu" color={color as string} size={size} />
+          ),
         }}
       />
+      <Tabs.Screen name="categories" options={{ href: null }} />
+      <Tabs.Screen name="profile" options={{ href: null }} />
     </Tabs>
   );
 }

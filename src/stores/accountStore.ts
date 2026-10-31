@@ -1,3 +1,5 @@
+import { errorMessage } from '../utils/errorMessage';
+import { notify } from './feedbackStore';
 import { create } from 'zustand';
 import { accountService } from '../services/accountService';
 import { Account, CreateAccountPayload } from '../types';
@@ -24,7 +26,7 @@ export const useAccountStore = create<AccountState>((set) => ({
       set({ accounts, isLoading: false });
     } catch (err: any) {
       set({
-        error: err.response?.data?.message || 'Não foi possível carregar suas contas',
+        error: errorMessage(err, 'Não foi possível carregar suas contas'),
         isLoading: false,
       });
     }
@@ -34,24 +36,28 @@ export const useAccountStore = create<AccountState>((set) => ({
     try {
       const account = await accountService.create(payload);
       set((state) => ({
-        accounts: [...state.accounts.filter((item) => item.id !== account.id), account],
+        accounts: [
+          ...state.accounts.filter((item) => item.id !== account.id),
+          account,
+        ],
         error: null,
       }));
       return account;
     } catch (err: any) {
-      throw new Error(err.response?.data?.message || 'Não foi possível cadastrar a conta');
+      throw new Error(errorMessage(err, 'Não foi possível cadastrar a conta'));
     }
   },
 
   remove: async (id) => {
     try {
       await accountService.delete(id);
+      notify('Conta excluída com sucesso.');
       set((state) => ({
         accounts: state.accounts.filter((account) => account.id !== id),
         error: null,
       }));
     } catch (err: any) {
-      throw new Error(err.response?.data?.message || 'Não foi possível excluir a conta');
+      throw new Error(errorMessage(err, 'Não foi possível excluir a conta'));
     }
   },
 

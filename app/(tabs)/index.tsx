@@ -1,6 +1,7 @@
-import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useState } from "react";
+import { notify } from '../../src/stores/feedbackStore';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
 import {
   Alert,
   FlatList,
@@ -9,32 +10,30 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from "react-native";
+} from 'react-native';
 import {
   SafeAreaView,
   useSafeAreaInsets,
-} from "react-native-safe-area-context";
-import { BrandLogo } from "../../src/components/BrandLogo";
-import { EmptyState } from "../../src/components/EmptyState";
-import { QuickAddMenu } from "../../src/components/QuickAddMenu";
-import { TransactionItem } from "../../src/components/TransactionItem";
-import { COLORS } from "../../src/constants";
-import { dashboardService } from "../../src/services/dashboardService";
-import { useAccountStore } from "../../src/stores/accountStore";
-import { useAuthStore } from "../../src/stores/authStore";
-import { useTransactionStore } from "../../src/stores/transactionStore";
-import {
-  Account,
-  MonthlySummary,
-  Transaction,
-} from "../../src/types";
-import { confirmAction } from "../../src/utils/confirmAction";
+} from 'react-native-safe-area-context';
+import { QueryState } from '../../src/components/QueryState';
+import { usePrivacyStore } from '../../src/stores/privacyStore';
+import { BrandLogo } from '../../src/components/BrandLogo';
+import { EmptyState } from '../../src/components/EmptyState';
+import { QuickAddMenu } from '../../src/components/QuickAddMenu';
+import { TransactionItem } from '../../src/components/TransactionItem';
+import { COLORS } from '../../src/constants';
+import { dashboardService } from '../../src/services/dashboardService';
+import { useAccountStore } from '../../src/stores/accountStore';
+import { useAuthStore } from '../../src/stores/authStore';
+import { useTransactionStore } from '../../src/stores/transactionStore';
+import { Account, MonthlySummary, Transaction } from '../../src/types';
+import { confirmAction } from '../../src/utils/confirmAction';
 import {
   formatCurrency,
   getCurrentMonth,
   getCurrentYear,
   getMonthName,
-} from "../../src/utils/format";
+} from '../../src/utils/format';
 
 export default function DashboardScreen() {
   const { user } = useAuthStore();
@@ -50,7 +49,11 @@ export default function DashboardScreen() {
   } = useAccountStore();
   const [summary, setSummary] = useState<MonthlySummary | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [showValues, setShowValues] = useState(true);
+  const { showValues, toggle: toggleValues } = usePrivacyStore();
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const accountError = useAccountStore((state) => state.error);
+  const transactionError = useTransactionStore((state) => state.error);
   const [selectedPeriod, setSelectedPeriod] = useState(() => ({
     month: getCurrentMonth(),
     year: getCurrentYear(),
@@ -68,6 +71,8 @@ export default function DashboardScreen() {
   }, []);
 
   const loadData = useCallback(async () => {
+    setLoading(true);
+    setLoadError(null);
     try {
       setTransactionFilters({ month, year });
       const [summaryData] = await Promise.all([
@@ -76,7 +81,11 @@ export default function DashboardScreen() {
         fetchAccounts(),
       ]);
       setSummary(summaryData);
-    } catch {}
+    } catch {
+      setLoadError('Não foi possível atualizar suas informações.');
+    } finally {
+      setLoading(false);
+    }
   }, [fetchAccounts, fetchTransactions, month, setTransactionFilters, year]);
 
   useFocusEffect(
@@ -110,16 +119,16 @@ export default function DashboardScreen() {
   const handleDeleteAccount = useCallback(
     async (account: Account) => {
       const confirmed = await confirmAction(
-        "Excluir conta",
+        'Excluir conta',
         `Tem certeza que deseja excluir a conta ${account.name}?`,
-        "Excluir",
+        'Excluir',
       );
       if (!confirmed) return;
 
       try {
         await removeAccount(account.id);
       } catch (error: any) {
-        Alert.alert("Erro", error.message);
+        notify(error.message);
       }
     },
     [removeAccount],
@@ -131,14 +140,16 @@ export default function DashboardScreen() {
     0,
   );
   const balanceValue = formatCurrency(totalAccountBalance);
-  const displayedBalance = showValues ? balanceValue : "R$ ••••••";
+  const displayedBalance = showValues ? balanceValue : 'R$ ••••••';
   const accountCards = accounts;
   const currentMonthLabel = getMonthName(month).slice(0, 3);
 
   return (
     <SafeAreaView className="flex-1 bg-[#F7F8FA]">
       <FlatList
-        data={recentTransactions}
+        data={
+          loading || loadError || transactionError ? [] : recentTransactions
+        }
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         refreshControl={
@@ -150,20 +161,25 @@ export default function DashboardScreen() {
         }
         ListHeaderComponent={
           <View className="px-4 pb-6 pt-4">
+            <QueryState
+              loading={loading}
+              error={loadError || accountError || transactionError}
+              retry={loadData}
+            />
             <View className="mb-4 flex-row items-center justify-between px-1">
               <BrandLogo />
               <TouchableOpacity
-                onPress={() => router.push("/(tabs)/profile")}
+                onPress={() => router.push('/(tabs)/profile')}
                 activeOpacity={0.8}
-                className="h-11 w-11 items-center justify-center rounded-full bg-[#E9FBF3]"
+                className="h-11 w-11 items-center justify-center rounded-lg bg-[#E9FBF3]"
               >
                 <Text className="font-semibold text-[#169670]">
-                  {(user?.name || "EA").slice(0, 2).toUpperCase()}
+                  {(user?.name || 'EA').slice(0, 2).toUpperCase()}
                 </Text>
               </TouchableOpacity>
             </View>
 
-            <View className="rounded-[24px] bg-[#169670] px-4 pb-5 pt-5">
+            <View className="rounded-lg bg-[#064E3B] px-5 pb-5 pt-5">
               <View className="flex-row items-start justify-between">
                 <View>
                   <Text className="text-sm text-white/90">Saldo total</Text>
@@ -172,12 +188,16 @@ export default function DashboardScreen() {
                   </Text>
                 </View>
                 <TouchableOpacity
-                  onPress={() => setShowValues((current) => !current)}
-                  className="h-10 w-10 items-center justify-center rounded-full bg-white/15"
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    showValues ? 'Ocultar valores' : 'Mostrar valores'
+                  }
+                  onPress={() => toggleValues()}
+                  className="h-10 w-10 items-center justify-center rounded-lg bg-white/15"
                   activeOpacity={0.7}
                 >
                   <Feather
-                    name={showValues ? "eye" : "eye-off"}
+                    name={showValues ? 'eye' : 'eye-off'}
                     size={18}
                     color="#FFFFFF"
                   />
@@ -199,10 +219,10 @@ export default function DashboardScreen() {
                   {accountCards.map((account) => (
                     <View
                       key={account.id}
-                      className="mr-3 w-[276px] overflow-hidden rounded-[22px] bg-white px-4 pb-5 pt-4"
+                      className="mr-3 w-[276px] overflow-hidden rounded-lg bg-white px-4 pb-5 pt-4"
                     >
-                      <View className="mb-6 flex-row items-center justify-between">
-                        <View className="h-10 w-10 items-center justify-center rounded-full bg-[#F2F4F7]">
+                      <View className="mb-4 flex-row items-center justify-between">
+                        <View className="h-10 w-10 items-center justify-center rounded-lg bg-[#F2F4F7]">
                           <MaterialCommunityIcons
                             name={account.icon as never}
                             size={22}
@@ -211,7 +231,7 @@ export default function DashboardScreen() {
                         </View>
                         <TouchableOpacity
                           onPress={() => handleDeleteAccount(account)}
-                          className="h-10 w-10 items-center justify-center rounded-full bg-[#FFF1F1]"
+                          className="h-10 w-10 items-center justify-center rounded-lg bg-[#FFF1F1]"
                           accessibilityLabel={`Excluir conta ${account.name}`}
                         >
                           <MaterialCommunityIcons
@@ -224,7 +244,7 @@ export default function DashboardScreen() {
                       <Text
                         numberOfLines={1}
                         ellipsizeMode="tail"
-                        className="text-[28px] font-bold tracking-tight text-[#344054]"
+                        className="text-[20px] font-bold tracking-tight text-[#344054]"
                       >
                         {account.institution}
                       </Text>
@@ -238,61 +258,77 @@ export default function DashboardScreen() {
                       <Text
                         numberOfLines={1}
                         ellipsizeMode="tail"
-                        className="mt-8 text-[30px] font-bold text-[#344054]"
-                        accessibilityLabel={`Saldo ${formatCurrency(account.balance)}`}
+                        className="mt-4 text-[24px] font-bold text-[#344054]"
+                        accessibilityLabel={
+                          showValues
+                            ? `Saldo ${showValues ? formatCurrency(account.balance) : 'R$ ••••••'}`
+                            : 'Saldo oculto'
+                        }
                       >
-                        {formatCurrency(account.balance)}
+                        {showValues
+                          ? formatCurrency(account.balance)
+                          : 'R$ ••••••'}
                       </Text>
-                      <Text className="text-base text-[#98A2B3]">
+                      <Text className="text-base text-[#667085]">
                         Saldo atual
                       </Text>
                       <View
-                        className="absolute bottom-0 left-0 right-0 h-[6px] rounded-b-[22px]"
+                        className="absolute bottom-0 left-0 right-0 h-[6px] rounded-b-lg"
                         style={{ backgroundColor: account.color }}
                       />
                     </View>
                   ))}
                 </ScrollView>
-              ) : (
+              ) : loading || accountError ? null : (
                 <TouchableOpacity
                   activeOpacity={0.85}
-                  onPress={() => router.push("/accounts/create")}
-                  className="items-center rounded-[26px] border-2 border-dashed border-[#2DCAA0] px-5 py-10"
-                  style={{ minHeight: 260 }}
+                  onPress={() => router.push('/accounts/create')}
+                  className="items-center rounded-lg border-2 border-dashed border-[#2DCAA0] px-5 py-10"
+                  style={{ minHeight: 140 }}
                 >
-                  <View className="mt-2 h-16 w-16 items-center justify-center rounded-full border-2 border-dashed border-white">
-                    <Feather name="plus" size={28} color="#FFFFFF" />
+                  <View className="mt-2 h-16 w-16 items-center justify-center rounded-lg border-2 border-dashed border-white">
+                    <Feather name="credit-card" size={28} color="#FFFFFF" />
                   </View>
                   <Text className="mt-8 text-center text-[17px] font-semibold leading-8 text-white">
-                    Cadastre uma{"\n"}nova conta
+                    Cadastre uma{'\n'}nova conta
                   </Text>
                 </TouchableOpacity>
               )}
             </View>
 
-            <View className="mt-5 rounded-[24px] bg-[#F2F4F7] px-4 py-4">
+            <View className="mt-5 rounded-lg bg-[#F2F4F7] px-4 py-4">
+              <QueryState
+                loading={loading}
+                error={loadError || accountError || transactionError}
+                retry={loadData}
+              />
               <View className="mb-4 flex-row items-center justify-between">
                 <Text className="text-base font-semibold text-[#344054]">
                   Transações
                 </Text>
 
                 <TouchableOpacity
-                  onPress={() => router.push("/(tabs)/transactions")}
+                  onPress={() => router.push('/(tabs)/transactions')}
                 >
                   <Text className="font-medium text-[#169670]">Ver todas</Text>
                 </TouchableOpacity>
               </View>
 
+              <QueryState
+                loading={loading}
+                error={loadError || accountError || transactionError}
+                retry={loadData}
+              />
               <View className="mb-4 flex-row items-center justify-between px-3">
                 <TouchableOpacity
                   onPress={() => changeMonth(-1)}
                   accessibilityRole="button"
                   accessibilityLabel="Mês anterior"
-                  className="h-11 w-11 items-center justify-center rounded-full bg-white"
+                  className="h-11 w-11 items-center justify-center rounded-lg bg-white"
                 >
                   <Feather name="chevron-left" size={22} color="#667085" />
                 </TouchableOpacity>
-                <View className="rounded-full bg-white px-6 py-3">
+                <View className="rounded-lg bg-white px-6 py-3">
                   <Text className="font-semibold capitalize text-[#344054]">
                     {currentMonthLabel} {year}
                   </Text>
@@ -301,7 +337,7 @@ export default function DashboardScreen() {
                   onPress={() => changeMonth(1)}
                   accessibilityRole="button"
                   accessibilityLabel="Próximo mês"
-                  className="h-11 w-11 items-center justify-center rounded-full bg-white"
+                  className="h-11 w-11 items-center justify-center rounded-lg bg-white"
                 >
                   <Feather name="chevron-right" size={22} color="#667085" />
                 </TouchableOpacity>
@@ -310,15 +346,17 @@ export default function DashboardScreen() {
           </View>
         }
         ListEmptyComponent={
-          <View className="px-4">
-            <View className="rounded-[24px] bg-[#F2F4F7] p-6">
-              <EmptyState
-                icon="🔎"
-                title="Nenhuma transação"
-                description="Você ainda não cadastrou nada, você pode começar por suas contas, depois receitas e despesas :)"
-              />
+          loading || loadError || transactionError ? undefined : (
+            <View className="px-4">
+              <View className="rounded-lg bg-[#F2F4F7] p-6">
+                <EmptyState
+                  icon="🔎"
+                  title="Nenhuma transação"
+                  description="Você ainda não cadastrou nada, você pode começar por suas contas, depois receitas e despesas :)"
+                />
+              </View>
             </View>
-          </View>
+          )
         }
         ListFooterComponent={<View className="h-3" />}
         contentContainerStyle={{ paddingBottom: 140 + insets.bottom }}

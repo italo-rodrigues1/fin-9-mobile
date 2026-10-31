@@ -1,7 +1,8 @@
-export const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3333';
+export const API_URL =
+  process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3333';
 
 export const COLORS = {
-  primary: '#169670',
+  primary: '#047857',
   primaryDark: '#12785A',
   primaryLight: '#E7F8F1',
   background: '#F7F8FA',
@@ -9,9 +10,9 @@ export const COLORS = {
   surfaceLight: '#EEF2F5',
   text: '#1F2937',
   textSecondary: '#6B7280',
-  textMuted: '#98A2B3',
+  textMuted: '#667085',
   success: '#6CCF7F',
-  danger: '#FF6B6B',
+  danger: '#B42318',
   warning: '#F5B546',
   border: '#D6DEE6',
   white: '#ffffff',
@@ -36,7 +37,14 @@ export const CATEGORY_ICONS: Record<string, string> = {
   coffee: '☕',
 };
 
-export const ACCOUNT_COLORS = ['#7C3AED', '#169670', '#1D67C1', '#F97316', '#E11D48', '#0F766E'];
+export const ACCOUNT_COLORS = [
+  '#7C3AED',
+  '#169670',
+  '#1D67C1',
+  '#F97316',
+  '#E11D48',
+  '#0F766E',
+];
 
 export const ACCOUNT_ICON_OPTIONS = [
   'bank-outline',

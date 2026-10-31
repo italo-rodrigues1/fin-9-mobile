@@ -14,7 +14,9 @@ export function EmptyState({ icon, title, description }: EmptyStateProps) {
         <Text className="text-4xl">{icon}</Text>
       </View>
       <Text className="mb-2 text-lg font-semibold text-[#344054]">{title}</Text>
-      <Text className="text-center text-sm leading-6 text-[#98A2B3]">{description}</Text>
+      <Text className="text-center text-sm leading-6 text-[#667085]">
+        {description}
+      </Text>
     </View>
   );
 }

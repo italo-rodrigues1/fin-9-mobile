@@ -1,3 +1,4 @@
+import { errorMessage } from '../utils/errorMessage';
 import { create } from 'zustand';
 import { User } from '../types';
 import { authService } from '../services/authService';
@@ -11,6 +12,7 @@ interface AuthState {
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  isHydrated: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
@@ -32,6 +34,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   token: null,
   isLoading: true,
   isAuthenticated: false,
+  isHydrated: false,
   error: null,
 
   login: async (email, password) => {
@@ -41,7 +44,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       await tokenStorage.setItem(AUTH_TOKEN_KEY, token);
       set({ user, token, isAuthenticated: true, isLoading: false });
     } catch (err: any) {
-      const message = err.response?.data?.message || 'Erro ao fazer login';
+      const message = errorMessage(err, 'Erro ao fazer login');
       set({ error: message, isLoading: false });
       throw new Error(message);
     }
@@ -54,7 +57,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       await tokenStorage.setItem(AUTH_TOKEN_KEY, token);
       set({ user, token, isAuthenticated: true, isLoading: false });
     } catch (err: any) {
-      const message = err.response?.data?.message || 'Erro ao criar conta';
+      const message = errorMessage(err, 'Erro ao criar conta');
       set({ error: message, isLoading: false });
       throw new Error(message);
     }
@@ -71,9 +74,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       await authService.deleteAccount();
       await tokenStorage.removeItem(AUTH_TOKEN_KEY);
       resetAppStores();
-      set({ user: null, token: null, isAuthenticated: false, error: null, isLoading: false });
+      set({
+        user: null,
+        token: null,
+        isAuthenticated: false,
+        error: null,
+        isLoading: false,
+      });
     } catch (err: any) {
-      const message = err.response?.data?.message || 'Erro ao excluir conta';
+      const message = errorMessage(err, 'Erro ao excluir conta');
       set({ error: message });
       throw new Error(message);
     }
@@ -92,6 +101,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       await tokenStorage.removeItem(AUTH_TOKEN_KEY);
       resetAppStores();
       set({ isLoading: false });
+    } finally {
+      set({ isHydrated: true });
     }
   },
 
@@ -100,7 +111,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const user = await authService.updateProfile(name);
       set({ user });
     } catch (err: any) {
-      const message = err.response?.data?.message || 'Erro ao atualizar perfil';
+      const message = errorMessage(err, 'Erro ao atualizar perfil');
       set({ error: message });
       throw new Error(message);
     }

@@ -1,5 +1,10 @@
 import React from 'react';
-import { TouchableOpacity, Text, ActivityIndicator, ViewStyle } from 'react-native';
+import {
+  TouchableOpacity,
+  Text,
+  ActivityIndicator,
+  ViewStyle,
+} from 'react-native';
 import { COLORS } from '../../constants';
 
 interface ButtonProps {
@@ -11,8 +16,16 @@ interface ButtonProps {
   style?: ViewStyle;
 }
 
-export function Button({ title, onPress, variant = 'primary', isLoading, disabled, style }: ButtonProps) {
-  const baseClass = 'min-h-[56px] flex-row items-center justify-center rounded-[16px] px-5 py-4';
+export function Button({
+  title,
+  onPress,
+  variant = 'primary',
+  isLoading,
+  disabled,
+  style,
+}: ButtonProps) {
+  const baseClass =
+    'min-h-[56px] flex-row items-center justify-center rounded-lg px-5 py-4';
 
   const variantClass = {
     primary: '',
@@ -35,11 +48,18 @@ export function Button({ title, onPress, variant = 'primary', isLoading, disable
     outline: 'transparent',
   }[variant];
 
-  const spinnerColor = variant === 'primary' || variant === 'danger' ? '#FFFFFF' : COLORS.text;
+  const spinnerColor =
+    variant === 'primary' || variant === 'danger' ? '#FFFFFF' : COLORS.text;
 
   return (
     <TouchableOpacity
       className={`${baseClass} ${variantClass} ${disabled || isLoading ? 'opacity-60' : ''}`}
+      accessibilityRole="button"
+      accessibilityLabel={title}
+      accessibilityState={{
+        disabled: Boolean(disabled || isLoading),
+        busy: Boolean(isLoading),
+      }}
       onPress={onPress}
       disabled={disabled || isLoading}
       activeOpacity={0.8}

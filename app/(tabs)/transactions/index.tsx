@@ -1,5 +1,13 @@
+import { QueryState } from '../../../src/components/QueryState';
 import React, { useEffect, useCallback, useState } from 'react';
-import { Alert, View, Text, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
+import {
+  Alert,
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  RefreshControl,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -7,13 +15,21 @@ import { useTransactionStore } from '../../../src/stores/transactionStore';
 import { TransactionItem } from '../../../src/components/TransactionItem';
 import { EmptyState } from '../../../src/components/EmptyState';
 import { QuickAddMenu } from '../../../src/components/QuickAddMenu';
-import { DateInput, isValidDateValue } from '../../../src/components/ui/DateInput';
+import {
+  DateInput,
+  isValidDateValue,
+} from '../../../src/components/ui/DateInput';
 import { Transaction, TransactionType } from '../../../src/types';
-import { getCurrentMonth, getCurrentYear, getMonthName } from '../../../src/utils/format';
+import {
+  getCurrentMonth,
+  getCurrentYear,
+  getMonthName,
+} from '../../../src/utils/format';
 import { COLORS } from '../../../src/constants';
 
 export default function TransactionsListScreen() {
-  const { transactions, fetch, filters, setFilters } = useTransactionStore();
+  const { transactions, fetch, filters, setFilters, isLoading, error } =
+    useTransactionStore();
   const [refreshing, setRefreshing] = useState(false);
   const [showDateFilters, setShowDateFilters] = useState(
     Boolean(filters.startDate || filters.endDate),
@@ -77,11 +93,17 @@ export default function TransactionsListScreen() {
 
   const applyDateRange = () => {
     if (!isValidDateValue(startDate) || !isValidDateValue(endDate)) {
-      Alert.alert('Atenção', 'Informe uma data inicial e uma data final válidas');
+      Alert.alert(
+        'Atenção',
+        'Informe uma data inicial e uma data final válidas',
+      );
       return;
     }
     if (startDate > endDate) {
-      Alert.alert('Atenção', 'A data inicial não pode ser posterior à data final');
+      Alert.alert(
+        'Atenção',
+        'A data inicial não pode ser posterior à data final',
+      );
       return;
     }
 
@@ -113,7 +135,9 @@ export default function TransactionsListScreen() {
   };
 
   const renderItem = useCallback(
-    ({ item }: { item: Transaction }) => <TransactionItem item={item} onPress={handlePress} />,
+    ({ item }: { item: Transaction }) => (
+      <TransactionItem item={item} onPress={handlePress} />
+    ),
     [handlePress],
   );
 
@@ -125,7 +149,7 @@ export default function TransactionsListScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-[#F7F8FA]">
-      <View className="mx-4 mt-4 rounded-[20px] border border-[#E4E7EC] bg-white p-3">
+      <View className="mx-4 mt-4 rounded-lg border border-[#E4E7EC] bg-white p-3">
         <View className="flex-row items-center">
           <TouchableOpacity
             onPress={() => changeMonth(-1)}
@@ -133,10 +157,14 @@ export default function TransactionsListScreen() {
             accessibilityLabel="Mês anterior"
             className="h-11 w-11 items-center justify-center rounded-full bg-[#F2F4F7]"
           >
-            <MaterialCommunityIcons name="chevron-left" size={24} color="#667085" />
+            <MaterialCommunityIcons
+              name="chevron-left"
+              size={24}
+              color="#667085"
+            />
           </TouchableOpacity>
           <View className="flex-1 items-center px-2">
-            <Text className="text-xs font-medium text-[#98A2B3]">Período</Text>
+            <Text className="text-xs font-medium text-[#667085]">Período</Text>
             <Text className="mt-1 text-center text-sm font-semibold capitalize text-[#344054]">
               {periodLabel}
             </Text>
@@ -147,36 +175,54 @@ export default function TransactionsListScreen() {
             accessibilityLabel="Próximo mês"
             className="h-11 w-11 items-center justify-center rounded-full bg-[#F2F4F7]"
           >
-            <MaterialCommunityIcons name="chevron-right" size={24} color="#667085" />
+            <MaterialCommunityIcons
+              name="chevron-right"
+              size={24}
+              color="#667085"
+            />
           </TouchableOpacity>
         </View>
 
         <TouchableOpacity
           onPress={() => setShowDateFilters((current) => !current)}
-          className="mt-3 flex-row items-center justify-center rounded-[14px] bg-[#EAFBF0] px-4 py-3"
+          className="mt-3 flex-row items-center justify-center rounded-lg bg-[#EAFBF0] px-4 py-3"
           accessibilityRole="button"
           accessibilityState={{ expanded: showDateFilters }}
         >
-          <MaterialCommunityIcons name="calendar-filter" size={19} color="#169670" />
+          <MaterialCommunityIcons
+            name="calendar-filter"
+            size={19}
+            color="#169670"
+          />
           <Text className="ml-2 font-semibold text-[#169670]">
-            {showDateFilters ? 'Fechar filtro por data' : 'Filtrar por intervalo de datas'}
+            {showDateFilters
+              ? 'Fechar filtro por data'
+              : 'Filtrar por intervalo de datas'}
           </Text>
         </TouchableOpacity>
 
         {showDateFilters ? (
           <View className="mt-4 border-t border-[#EAECF0] pt-4">
-            <DateInput label="Data inicial" value={startDate} onChange={setStartDate} />
-            <DateInput label="Data final" value={endDate} onChange={setEndDate} />
+            <DateInput
+              label="Data inicial"
+              value={startDate}
+              onChange={setStartDate}
+            />
+            <DateInput
+              label="Data final"
+              value={endDate}
+              onChange={setEndDate}
+            />
             <View className="flex-row gap-3">
               <TouchableOpacity
                 onPress={resetDateRange}
-                className="flex-1 items-center rounded-[14px] border border-[#D0D5DD] bg-white px-3 py-3"
+                className="flex-1 items-center rounded-lg border border-[#D0D5DD] bg-white px-3 py-3"
               >
                 <Text className="font-semibold text-[#667085]">Limpar</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={applyDateRange}
-                className="flex-1 items-center rounded-[14px] bg-[#169670] px-3 py-3"
+                className="flex-1 items-center rounded-lg bg-[#169670] px-3 py-3"
               >
                 <Text className="font-semibold text-white">Aplicar</Text>
               </TouchableOpacity>
@@ -195,7 +241,9 @@ export default function TransactionsListScreen() {
             key={filter.label}
             onPress={() => handleFilter(filter.value)}
             className={`flex-1 items-center rounded-full px-3 py-3 ${
-              filters.type === filter.value ? 'bg-[#169670]' : 'border border-[#D6DEE6] bg-white'
+              filters.type === filter.value
+                ? 'bg-[#169670]'
+                : 'border border-[#D6DEE6] bg-white'
             }`}
           >
             <Text
@@ -210,20 +258,33 @@ export default function TransactionsListScreen() {
       </View>
 
       <FlatList
-        data={transactions}
+        data={isLoading || error ? [] : transactions}
+        ListHeaderComponent={
+          <QueryState
+            loading={isLoading}
+            error={error}
+            retry={() => void fetch()}
+          />
+        }
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.primary} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={COLORS.primary}
+          />
         }
         ListEmptyComponent={
-          <View className="mt-10">
-            <EmptyState
-              icon="📋"
-              title="Nenhuma transação"
-              description="Toque no botão + para adicionar sua primeira transação"
-            />
-          </View>
+          isLoading || error ? undefined : (
+            <View className="mt-10">
+              <EmptyState
+                icon="📋"
+                title="Nenhuma transação"
+                description="Toque no botão + para adicionar sua primeira transação"
+              />
+            </View>
+          )
         }
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}

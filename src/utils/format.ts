@@ -12,16 +12,29 @@ export function sanitizeCurrencyInput(value: string): string {
   if (!sanitized) return '';
 
   const commaIndex = sanitized.indexOf(',');
-  const dotIndexes = [...sanitized.matchAll(/\./g)].map((match) => match.index ?? -1);
+  const dotIndexes = [...sanitized.matchAll(/\./g)].map(
+    (match) => match.index ?? -1,
+  );
   const lastDotIndex = dotIndexes.at(-1) ?? -1;
-  const dotLooksDecimal = commaIndex === -1 && dotIndexes.length === 1 && sanitized.length - lastDotIndex - 1 <= 2;
-  const separatorIndex = commaIndex >= 0 ? commaIndex : (dotLooksDecimal ? lastDotIndex : -1);
-  const integerDigits = (separatorIndex >= 0 ? sanitized.slice(0, separatorIndex) : sanitized).replace(/\D/g, '');
-  const normalizedInteger = (integerDigits.replace(/^0+(?=\d)/, '') || '0').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  const dotLooksDecimal =
+    commaIndex === -1 &&
+    dotIndexes.length === 1 &&
+    sanitized.length - lastDotIndex - 1 <= 2;
+  const separatorIndex =
+    commaIndex >= 0 ? commaIndex : dotLooksDecimal ? lastDotIndex : -1;
+  const integerDigits = (
+    separatorIndex >= 0 ? sanitized.slice(0, separatorIndex) : sanitized
+  ).replace(/\D/g, '');
+  const normalizedInteger = (
+    integerDigits.replace(/^0+(?=\d)/, '') || '0'
+  ).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
   if (separatorIndex === -1) return normalizedInteger;
 
-  const decimalDigits = sanitized.slice(separatorIndex + 1).replace(/\D/g, '').slice(0, 2);
+  const decimalDigits = sanitized
+    .slice(separatorIndex + 1)
+    .replace(/\D/g, '')
+    .slice(0, 2);
   return `${normalizedInteger},${decimalDigits}`;
 }
 
@@ -39,6 +52,7 @@ export function formatCurrencyInput(value: number): string {
 export function formatDate(dateString: string): string {
   const date = new Date(dateString);
   return new Intl.DateTimeFormat('pt-BR', {
+    timeZone: 'UTC',
     day: '2-digit',
     month: 'short',
     year: 'numeric',
@@ -48,6 +62,7 @@ export function formatDate(dateString: string): string {
 export function formatDateShort(dateString: string): string {
   const date = new Date(dateString);
   return new Intl.DateTimeFormat('pt-BR', {
+    timeZone: 'UTC',
     day: '2-digit',
     month: 'short',
   }).format(date);

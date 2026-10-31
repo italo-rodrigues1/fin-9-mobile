@@ -1,6 +1,13 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { useMemo, useState } from 'react';
-import { Modal, Pressable, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  Modal,
+  Pressable,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { COLORS } from '../../constants';
 
 interface DateInputProps {
@@ -27,7 +34,11 @@ function parseDateValue(value: string) {
   const month = Number(match[2]) - 1;
   const day = Number(match[3]);
   const date = new Date(year, month, day);
-  return date.getFullYear() === year && date.getMonth() === month && date.getDate() === day ? date : null;
+  return date.getFullYear() === year &&
+    date.getMonth() === month &&
+    date.getDate() === day
+    ? date
+    : null;
 }
 
 export function isValidDateValue(value: string) {
@@ -53,7 +64,10 @@ export function DateInput({ label, value, onChange }: DateInputProps) {
     const month = visibleMonth.getMonth();
     const firstWeekDay = new Date(year, month, 1).getDay();
     const totalDays = new Date(year, month + 1, 0).getDate();
-    return [...Array(firstWeekDay).fill(null), ...Array.from({ length: totalDays }, (_, index) => index + 1)];
+    return [
+      ...Array(firstWeekDay).fill(null),
+      ...Array.from({ length: totalDays }, (_, index) => index + 1),
+    ];
   }, [visibleMonth]);
 
   const openCalendar = () => {
@@ -63,18 +77,25 @@ export function DateInput({ label, value, onChange }: DateInputProps) {
   };
 
   const changeMonth = (offset: number) => {
-    setVisibleMonth((current) => new Date(current.getFullYear(), current.getMonth() + offset, 1));
+    setVisibleMonth(
+      (current) =>
+        new Date(current.getFullYear(), current.getMonth() + offset, 1),
+    );
   };
 
   const chooseDay = (day: number) => {
-    onChange(toDateValue(visibleMonth.getFullYear(), visibleMonth.getMonth(), day));
+    onChange(
+      toDateValue(visibleMonth.getFullYear(), visibleMonth.getMonth(), day),
+    );
     setIsOpen(false);
   };
 
   return (
     <View className="mb-4">
-      <Text className="mb-2 ml-1 text-sm font-medium text-[#667085]">{label}</Text>
-      <View className="flex-row items-center rounded-[14px] border border-[#D0D5DD] bg-white">
+      <Text className="mb-2 ml-1 text-sm font-medium text-[#667085]">
+        {label}
+      </Text>
+      <View className="flex-row items-center rounded-lg border border-[#D0D5DD] bg-white">
         <TextInput
           className="flex-1 px-4 py-4 text-base text-[#344054]"
           value={value}
@@ -89,35 +110,83 @@ export function DateInput({ label, value, onChange }: DateInputProps) {
           className="h-14 w-14 items-center justify-center"
           accessibilityLabel="Abrir calendário"
         >
-          <MaterialCommunityIcons name="calendar-month-outline" size={23} color="#169670" />
+          <MaterialCommunityIcons
+            name="calendar-month-outline"
+            size={23}
+            color="#169670"
+          />
         </TouchableOpacity>
       </View>
 
-      <Modal visible={isOpen} transparent animationType="fade" onRequestClose={() => setIsOpen(false)}>
-        <Pressable className="flex-1 items-center justify-center bg-black/40 p-4" onPress={() => setIsOpen(false)}>
-          <Pressable className="w-full max-w-[380px] rounded-[24px] bg-white p-5" onPress={(event) => event.stopPropagation()}>
+      <Modal
+        visible={isOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setIsOpen(false)}
+      >
+        <Pressable
+          className="flex-1 items-center justify-center bg-black/40 p-4"
+          onPress={() => setIsOpen(false)}
+        >
+          <Pressable
+            className="w-full max-w-[380px] rounded-lg bg-white p-5"
+            onPress={(event) => event.stopPropagation()}
+          >
             <View className="mb-5 flex-row items-center justify-between">
-              <TouchableOpacity onPress={() => changeMonth(-1)} className="h-10 w-10 items-center justify-center">
-                <MaterialCommunityIcons name="chevron-left" size={26} color="#344054" />
+              <TouchableOpacity
+                onPress={() => changeMonth(-1)}
+                className="h-10 w-10 items-center justify-center"
+              >
+                <MaterialCommunityIcons
+                  name="chevron-left"
+                  size={26}
+                  color="#344054"
+                />
               </TouchableOpacity>
               <Text className="text-base font-bold capitalize text-[#344054]">
-                {new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(visibleMonth)}
+                {new Intl.DateTimeFormat('pt-BR', {
+                  month: 'long',
+                  year: 'numeric',
+                }).format(visibleMonth)}
               </Text>
-              <TouchableOpacity onPress={() => changeMonth(1)} className="h-10 w-10 items-center justify-center">
-                <MaterialCommunityIcons name="chevron-right" size={26} color="#344054" />
+              <TouchableOpacity
+                onPress={() => changeMonth(1)}
+                className="h-10 w-10 items-center justify-center"
+              >
+                <MaterialCommunityIcons
+                  name="chevron-right"
+                  size={26}
+                  color="#344054"
+                />
               </TouchableOpacity>
             </View>
 
             <View className="flex-row flex-wrap">
               {WEEK_DAYS.map((day, index) => (
-                <View key={`${day}-${index}`} className="items-center py-2" style={{ width: '14.2857%' }}>
-                  <Text className="text-xs font-semibold text-[#98A2B3]">{day}</Text>
+                <View
+                  key={`${day}-${index}`}
+                  className="items-center py-2"
+                  style={{ width: '14.2857%' }}
+                >
+                  <Text className="text-xs font-semibold text-[#667085]">
+                    {day}
+                  </Text>
                 </View>
               ))}
               {days.map((day, index) => {
-                if (day === null) return <View key={`empty-${index}`} style={{ width: '14.2857%' }} />;
+                if (day === null)
+                  return (
+                    <View
+                      key={`empty-${index}`}
+                      style={{ width: '14.2857%' }}
+                    />
+                  );
 
-                const dayValue = toDateValue(visibleMonth.getFullYear(), visibleMonth.getMonth(), day);
+                const dayValue = toDateValue(
+                  visibleMonth.getFullYear(),
+                  visibleMonth.getMonth(),
+                  day,
+                );
                 const isSelected = dayValue === value;
                 return (
                   <TouchableOpacity
@@ -126,8 +195,18 @@ export function DateInput({ label, value, onChange }: DateInputProps) {
                     className="items-center py-1"
                     style={{ width: '14.2857%' }}
                   >
-                    <View className={`h-10 w-10 items-center justify-center rounded-full ${isSelected ? 'bg-[#169670]' : ''}`}>
-                      <Text className={isSelected ? 'font-semibold text-white' : 'text-[#344054]'}>{day}</Text>
+                    <View
+                      className={`h-10 w-10 items-center justify-center rounded-full ${isSelected ? 'bg-[#169670]' : ''}`}
+                    >
+                      <Text
+                        className={
+                          isSelected
+                            ? 'font-semibold text-white'
+                            : 'text-[#344054]'
+                        }
+                      >
+                        {day}
+                      </Text>
                     </View>
                   </TouchableOpacity>
                 );

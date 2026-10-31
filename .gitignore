@@ -42,3 +42,5 @@ yarn-error.*
 
 .env
 .env.local
+# Local P0 validation export
+dist-p0/
