@@ -1,8 +1,9 @@
 import { create } from 'zustand';
-import * as SecureStore from 'expo-secure-store';
 import { User } from '../types';
 import { authService } from '../services/authService';
+import { AUTH_TOKEN_KEY, tokenStorage } from '../services/tokenStorage';
 import { useCategoryStore } from './categoryStore';
+import { useAccountStore } from './accountStore';
 import { useTransactionStore } from './transactionStore';
 
 interface AuthState {
@@ -21,6 +22,7 @@ interface AuthState {
 }
 
 const resetAppStores = () => {
+  useAccountStore.getState().reset();
   useCategoryStore.getState().reset();
   useTransactionStore.getState().reset();
 };
@@ -36,7 +38,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const { user, token } = await authService.login(email, password);
-      await SecureStore.setItemAsync('auth_token', token);
+      await tokenStorage.setItem(AUTH_TOKEN_KEY, token);
       set({ user, token, isAuthenticated: true, isLoading: false });
     } catch (err: any) {
       const message = err.response?.data?.message || 'Erro ao fazer login';
@@ -49,7 +51,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const { user, token } = await authService.register(name, email, password);
-      await SecureStore.setItemAsync('auth_token', token);
+      await tokenStorage.setItem(AUTH_TOKEN_KEY, token);
       set({ user, token, isAuthenticated: true, isLoading: false });
     } catch (err: any) {
       const message = err.response?.data?.message || 'Erro ao criar conta';
@@ -59,7 +61,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   logout: async () => {
-    await SecureStore.deleteItemAsync('auth_token');
+    await tokenStorage.removeItem(AUTH_TOKEN_KEY);
     resetAppStores();
     set({ user: null, token: null, isAuthenticated: false, error: null });
   },
@@ -67,7 +69,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   deleteAccount: async () => {
     try {
       await authService.deleteAccount();
-      await SecureStore.deleteItemAsync('auth_token');
+      await tokenStorage.removeItem(AUTH_TOKEN_KEY);
       resetAppStores();
       set({ user: null, token: null, isAuthenticated: false, error: null, isLoading: false });
     } catch (err: any) {
@@ -79,7 +81,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   loadToken: async () => {
     try {
-      const token = await SecureStore.getItemAsync('auth_token');
+      const token = await tokenStorage.getItem(AUTH_TOKEN_KEY);
       if (token) {
         const user = await authService.getProfile();
         set({ token, user, isAuthenticated: true, isLoading: false });
@@ -87,7 +89,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ isLoading: false });
       }
     } catch {
-      await SecureStore.deleteItemAsync('auth_token');
+      await tokenStorage.removeItem(AUTH_TOKEN_KEY);
       resetAppStores();
       set({ isLoading: false });
     }

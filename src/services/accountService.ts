@@ -11,4 +11,8 @@ export const accountService = {
     const { data } = await api.post<Account>('/accounts', payload);
     return data;
   },
+
+  delete: async (id: string): Promise<void> => {
+    await api.delete(`/accounts/${id}`);
+  },
 };

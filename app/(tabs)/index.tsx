@@ -1,7 +1,8 @@
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import {
+  Alert,
   FlatList,
   RefreshControl,
   ScrollView,
@@ -15,12 +16,19 @@ import {
 } from "react-native-safe-area-context";
 import { BrandLogo } from "../../src/components/BrandLogo";
 import { EmptyState } from "../../src/components/EmptyState";
+import { QuickAddMenu } from "../../src/components/QuickAddMenu";
 import { TransactionItem } from "../../src/components/TransactionItem";
 import { COLORS } from "../../src/constants";
 import { dashboardService } from "../../src/services/dashboardService";
+import { useAccountStore } from "../../src/stores/accountStore";
 import { useAuthStore } from "../../src/stores/authStore";
 import { useTransactionStore } from "../../src/stores/transactionStore";
-import { MonthlySummary, Transaction, TransactionType } from "../../src/types";
+import {
+  Account,
+  MonthlySummary,
+  Transaction,
+} from "../../src/types";
+import { confirmAction } from "../../src/utils/confirmAction";
 import {
   formatCurrency,
   getCurrentMonth,
@@ -30,26 +38,46 @@ import {
 
 export default function DashboardScreen() {
   const { user } = useAuthStore();
-  const { transactions, fetch: fetchTransactions } = useTransactionStore();
+  const {
+    transactions,
+    fetch: fetchTransactions,
+    setFilters: setTransactionFilters,
+  } = useTransactionStore();
+  const {
+    accounts,
+    fetch: fetchAccounts,
+    remove: removeAccount,
+  } = useAccountStore();
   const [summary, setSummary] = useState<MonthlySummary | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [showValues, setShowValues] = useState(true);
-  const [isQuickMenuOpen, setIsQuickMenuOpen] = useState(false);
+  const [selectedPeriod, setSelectedPeriod] = useState(() => ({
+    month: getCurrentMonth(),
+    year: getCurrentYear(),
+  }));
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  const month = getCurrentMonth();
-  const year = getCurrentYear();
+  const { month, year } = selectedPeriod;
+
+  const changeMonth = useCallback((offset: number) => {
+    setSelectedPeriod((current) => {
+      const next = new Date(current.year, current.month - 1 + offset, 1);
+      return { month: next.getMonth() + 1, year: next.getFullYear() };
+    });
+  }, []);
 
   const loadData = useCallback(async () => {
     try {
+      setTransactionFilters({ month, year });
       const [summaryData] = await Promise.all([
         dashboardService.getSummary(month, year),
         fetchTransactions({ month, year }),
+        fetchAccounts(),
       ]);
       setSummary(summaryData);
     } catch {}
-  }, [fetchTransactions, month, year]);
+  }, [fetchAccounts, fetchTransactions, month, setTransactionFilters, year]);
 
   useFocusEffect(
     useCallback(() => {
@@ -79,50 +107,33 @@ export default function DashboardScreen() {
 
   const keyExtractor = useCallback((item: Transaction) => item.id, []);
 
+  const handleDeleteAccount = useCallback(
+    async (account: Account) => {
+      const confirmed = await confirmAction(
+        "Excluir conta",
+        `Tem certeza que deseja excluir a conta ${account.name}?`,
+        "Excluir",
+      );
+      if (!confirmed) return;
+
+      try {
+        await removeAccount(account.id);
+      } catch (error: any) {
+        Alert.alert("Erro", error.message);
+      }
+    },
+    [removeAccount],
+  );
+
   const recentTransactions = transactions.slice(0, 5);
-  const balanceValue = summary ? formatCurrency(summary.balance) : "R$ 0,00";
+  const totalAccountBalance = accounts.reduce(
+    (total, account) => total + account.balance,
+    0,
+  );
+  const balanceValue = formatCurrency(totalAccountBalance);
   const displayedBalance = showValues ? balanceValue : "R$ ••••••";
-  const quickActions = [
-    {
-      key: "expense",
-      label: "Nova Despesa",
-      icon: <Feather name="credit-card" size={18} color="#FF5A52" />,
-      iconBackground: "#FFF1F1",
-      onPress: () => {
-        setIsQuickMenuOpen(false);
-        router.push({
-          pathname: "/(tabs)/transactions/create",
-          params: { type: TransactionType.EXPENSE },
-        });
-      },
-    },
-    {
-      key: "income",
-      label: "Nova Receita",
-      icon: <Feather name="credit-card" size={18} color="#169670" />,
-      iconBackground: "#EAFBF0",
-      onPress: () => {
-        setIsQuickMenuOpen(false);
-        router.push({
-          pathname: "/(tabs)/transactions/create",
-          params: { type: TransactionType.INCOME },
-        });
-      },
-    },
-    {
-      key: "account",
-      label: "Nova Conta",
-      icon: (
-        <MaterialCommunityIcons name="bank-outline" size={18} color="#1D67C1" />
-      ),
-      iconBackground: "#EAF2FF",
-      onPress: () => {
-        setIsQuickMenuOpen(false);
-        router.push("/(tabs)/accounts/create");
-      },
-    },
-  ];
-  const accountCards = summary?.accounts || [];
+  const accountCards = accounts;
+  const currentMonthLabel = getMonthName(month).slice(0, 3);
 
   return (
     <SafeAreaView className="flex-1 bg-[#F7F8FA]">
@@ -142,7 +153,7 @@ export default function DashboardScreen() {
             <View className="mb-4 flex-row items-center justify-between px-1">
               <BrandLogo />
               <TouchableOpacity
-                onPress={() => router.push('/(tabs)/profile')}
+                onPress={() => router.push("/(tabs)/profile")}
                 activeOpacity={0.8}
                 className="h-11 w-11 items-center justify-center rounded-full bg-[#E9FBF3]"
               >
@@ -190,20 +201,46 @@ export default function DashboardScreen() {
                       key={account.id}
                       className="mr-3 w-[276px] overflow-hidden rounded-[22px] bg-white px-4 pb-5 pt-4"
                     >
-                      <View className="mb-6 h-10 w-10 items-center justify-center rounded-full bg-[#F2F4F7]">
-                        <MaterialCommunityIcons
-                          name={account.icon as never}
-                          size={22}
-                          color="#4B5563"
-                        />
+                      <View className="mb-6 flex-row items-center justify-between">
+                        <View className="h-10 w-10 items-center justify-center rounded-full bg-[#F2F4F7]">
+                          <MaterialCommunityIcons
+                            name={account.icon as never}
+                            size={22}
+                            color="#4B5563"
+                          />
+                        </View>
+                        <TouchableOpacity
+                          onPress={() => handleDeleteAccount(account)}
+                          className="h-10 w-10 items-center justify-center rounded-full bg-[#FFF1F1]"
+                          accessibilityLabel={`Excluir conta ${account.name}`}
+                        >
+                          <MaterialCommunityIcons
+                            name="trash-can-outline"
+                            size={20}
+                            color="#D92D20"
+                          />
+                        </TouchableOpacity>
                       </View>
-                      <Text className="text-[28px] font-bold tracking-tight text-[#344054]">
+                      <Text
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                        className="text-[28px] font-bold tracking-tight text-[#344054]"
+                      >
                         {account.institution}
                       </Text>
-                      <Text className="mt-1 text-base text-[#667085]">
+                      <Text
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                        className="mt-1 text-base text-[#667085]"
+                      >
                         {account.name}
                       </Text>
-                      <Text className="mt-8 text-[30px] font-bold text-[#344054]">
+                      <Text
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                        className="mt-8 text-[30px] font-bold text-[#344054]"
+                        accessibilityLabel={`Saldo ${formatCurrency(account.balance)}`}
+                      >
                         {formatCurrency(account.balance)}
                       </Text>
                       <Text className="text-base text-[#98A2B3]">
@@ -219,7 +256,7 @@ export default function DashboardScreen() {
               ) : (
                 <TouchableOpacity
                   activeOpacity={0.85}
-                  onPress={() => router.push("/(tabs)/accounts/create")}
+                  onPress={() => router.push("/accounts/create")}
                   className="items-center rounded-[26px] border-2 border-dashed border-[#2DCAA0] px-5 py-10"
                   style={{ minHeight: 260 }}
                 >
@@ -235,44 +272,38 @@ export default function DashboardScreen() {
 
             <View className="mt-5 rounded-[24px] bg-[#F2F4F7] px-4 py-4">
               <View className="mb-4 flex-row items-center justify-between">
-                <TouchableOpacity
-                  onPress={() => router.push("/(tabs)/transactions")}
-                  className="flex-row items-center"
-                >
-                  <Text className="text-base font-semibold text-[#344054]">
-                    Transações
-                  </Text>
-                  <Text className="ml-2 text-[#667085]">⌄</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => router.push("/(tabs)/transactions")}
-                >
-                  <Text className="text-lg text-[#667085]">⌂</Text>
-                </TouchableOpacity>
-              </View>
-
-              <View className="mb-4 flex-row items-center justify-between px-3">
-                <Text className="text-xl text-[#667085]">‹</Text>
-                <View className="flex-row items-center">
-                  <Text className="mx-4 text-sm text-[#667085]">Abr</Text>
-                  <View className="rounded-full bg-white px-5 py-2">
-                    <Text className="font-semibold text-[#667085]">
-                      {getMonthName(month).slice(0, 3)}
-                    </Text>
-                  </View>
-                  <Text className="mx-4 text-sm text-[#667085]">Jun</Text>
-                </View>
-                <Text className="text-xl text-[#667085]">›</Text>
-              </View>
-
-              <View className="mb-2 flex-row items-center justify-between">
-                <Text className="text-sm text-[#98A2B3]">
-                  Saldo de {getMonthName(month)}
+                <Text className="text-base font-semibold text-[#344054]">
+                  Transações
                 </Text>
+
                 <TouchableOpacity
                   onPress={() => router.push("/(tabs)/transactions")}
                 >
                   <Text className="font-medium text-[#169670]">Ver todas</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View className="mb-4 flex-row items-center justify-between px-3">
+                <TouchableOpacity
+                  onPress={() => changeMonth(-1)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Mês anterior"
+                  className="h-11 w-11 items-center justify-center rounded-full bg-white"
+                >
+                  <Feather name="chevron-left" size={22} color="#667085" />
+                </TouchableOpacity>
+                <View className="rounded-full bg-white px-6 py-3">
+                  <Text className="font-semibold capitalize text-[#344054]">
+                    {currentMonthLabel} {year}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => changeMonth(1)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Próximo mês"
+                  className="h-11 w-11 items-center justify-center rounded-full bg-white"
+                >
+                  <Feather name="chevron-right" size={22} color="#667085" />
                 </TouchableOpacity>
               </View>
             </View>
@@ -294,55 +325,7 @@ export default function DashboardScreen() {
         showsVerticalScrollIndicator={false}
       />
 
-      {isQuickMenuOpen ? (
-        <TouchableOpacity
-          activeOpacity={1}
-          onPress={() => setIsQuickMenuOpen(false)}
-          className="absolute inset-0 bg-black/10"
-        >
-          <View className="flex-1" />
-        </TouchableOpacity>
-      ) : null}
-
-      {isQuickMenuOpen ? (
-        <View
-          className="absolute right-4 w-[168px] rounded-[24px] bg-white px-4 py-3 shadow-sm"
-          style={{ bottom: 88 + insets.bottom }}
-        >
-          {quickActions.map((action) => (
-            <TouchableOpacity
-              key={action.key}
-              onPress={action.onPress}
-              activeOpacity={0.75}
-              className="flex-row items-center py-3"
-            >
-              <View
-                className="mr-3 h-8 w-8 items-center justify-center rounded-full"
-                style={{ backgroundColor: action.iconBackground }}
-              >
-                {action.icon}
-              </View>
-              <Text className="text-[15px] font-medium text-[#344054]">
-                {action.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      ) : null}
-
-      <TouchableOpacity
-        onPress={() => setIsQuickMenuOpen((current) => !current)}
-        activeOpacity={0.85}
-        className="absolute right-4 h-14 w-14 items-center justify-center rounded-full"
-        style={{
-          backgroundColor: COLORS.primary,
-          bottom: Math.max(20, insets.bottom + 20),
-        }}
-      >
-        <Text className="mb-[2px] text-3xl text-white">
-          {isQuickMenuOpen ? "×" : "+"}
-        </Text>
-      </TouchableOpacity>
+      <QuickAddMenu />
     </SafeAreaView>
   );
 }

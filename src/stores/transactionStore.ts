@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Transaction, TransactionFilters } from '../types';
 import { transactionService } from '../services/transactionService';
+import { useAccountStore } from './accountStore';
 
 interface TransactionState {
   transactions: Transaction[];
@@ -35,7 +36,7 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
   create: async (payload) => {
     try {
       await transactionService.create(payload);
-      await get().fetch();
+      await Promise.all([get().fetch(), useAccountStore.getState().fetch()]);
     } catch (err: any) {
       throw new Error(err.response?.data?.message || 'Erro ao criar transação');
     }
@@ -44,7 +45,7 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
   update: async (id, payload) => {
     try {
       await transactionService.update(id, payload);
-      await get().fetch();
+      await Promise.all([get().fetch(), useAccountStore.getState().fetch()]);
     } catch (err: any) {
       throw new Error(err.response?.data?.message || 'Erro ao atualizar transação');
     }
@@ -53,7 +54,7 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
   remove: async (id) => {
     try {
       await transactionService.delete(id);
-      await get().fetch();
+      await Promise.all([get().fetch(), useAccountStore.getState().fetch()]);
     } catch (err: any) {
       throw new Error(err.response?.data?.message || 'Erro ao excluir transação');
     }

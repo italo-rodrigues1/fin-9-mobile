@@ -6,6 +6,8 @@ export const transactionService = {
     const params = new URLSearchParams();
     if (filters?.month) params.set('month', String(filters.month));
     if (filters?.year) params.set('year', String(filters.year));
+    if (filters?.startDate) params.set('startDate', filters.startDate);
+    if (filters?.endDate) params.set('endDate', filters.endDate);
     if (filters?.type) params.set('type', filters.type);
     if (filters?.categoryId) params.set('categoryId', filters.categoryId);
     if (filters?.orderBy) params.set('orderBy', filters.orderBy);
@@ -27,6 +29,7 @@ export const transactionService = {
     type: string;
     date: string;
     categoryId: string;
+    accountId: string;
   }): Promise<Transaction> => {
     const { data } = await api.post<Transaction>('/transactions', payload);
     return data;
@@ -39,6 +42,7 @@ export const transactionService = {
     type: string;
     date: string;
     categoryId: string;
+    accountId: string;
   }>): Promise<Transaction> => {
     const { data } = await api.patch<Transaction>(`/transactions/${id}`, payload);
     return data;

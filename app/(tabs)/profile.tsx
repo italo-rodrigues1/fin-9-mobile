@@ -5,6 +5,8 @@ import { useAuthStore } from '../../src/stores/authStore';
 import { Button } from '../../src/components/ui/Button';
 import { Input } from '../../src/components/ui/Input';
 import { Card } from '../../src/components/ui/Card';
+import { ScreenHeader } from '../../src/components/ScreenHeader';
+import { INPUT_LIMITS } from '../../src/constants';
 
 export default function ProfileScreen() {
   const { user, logout, updateProfile, deleteAccount } = useAuthStore();
@@ -74,8 +76,9 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-[#F7F8FA]">
+      <ScreenHeader title="Perfil" />
       <ScrollView className="flex-1 px-4" contentContainerStyle={{ paddingBottom: 40 }}>
-        <View className="items-center pt-10 pb-8">
+        <View className="items-center pb-8 pt-4">
           <View className="mb-5 h-24 w-24 items-center justify-center rounded-full bg-[#E9FBF3]">
             <Text className="text-3xl font-semibold text-[#169670]">
               {(user?.name || 'EA').slice(0, 2).toUpperCase()}
@@ -97,6 +100,7 @@ export default function ProfileScreen() {
                 value={name}
                 onChangeText={setName}
                 placeholder="Seu nome completo"
+                maxLength={INPUT_LIMITS.name}
               />
               <View className="flex-row gap-4 mt-2">
                 <View className="flex-1">
@@ -139,7 +143,7 @@ export default function ProfileScreen() {
         </Card>
 
         <View className="pb-8">
-          <Button title="Sair da Conta" onPress={handleLogout} variant="danger" />
+          <Button title="Sair da Conta" onPress={handleLogout} variant="primary" />
         </View>
 
         <Card className="border border-[#FECACA] bg-[#FFF1F2] p-5">

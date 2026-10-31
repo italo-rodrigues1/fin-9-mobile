@@ -44,6 +44,7 @@ export interface Transaction {
   type: TransactionType;
   date: string;
   categoryId: string;
+  accountId: string;
   userId: string;
   category?: Category;
   createdAt: string;
@@ -69,6 +70,8 @@ export interface CategorySummary {
 export interface TransactionFilters {
   month?: number;
   year?: number;
+  startDate?: string;
+  endDate?: string;
   type?: TransactionType;
   categoryId?: string;
   orderBy?: 'date' | 'amount';

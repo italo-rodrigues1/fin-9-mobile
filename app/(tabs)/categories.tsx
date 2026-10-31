@@ -3,10 +3,11 @@ import { View, Text, FlatList, TouchableOpacity, Alert, RefreshControl } from 'r
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCategoryStore } from '../../src/stores/categoryStore';
 import { Category } from '../../src/types';
-import { CATEGORY_ICONS } from '../../src/constants';
+import { CATEGORY_ICONS, INPUT_LIMITS } from '../../src/constants';
 import { EmptyState } from '../../src/components/EmptyState';
 import { Input } from '../../src/components/ui/Input';
 import { Button } from '../../src/components/ui/Button';
+import { ScreenHeader } from '../../src/components/ScreenHeader';
 
 const COLORS = ['#ef4444', '#3b82f6', '#14b8a6', '#10b981', '#f59e0b', '#ec4899', '#06b6d4', '#22c55e', '#6b7280', '#f97316'];
 
@@ -110,15 +111,20 @@ export default function CategoriesScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-slate-950">
-      <View className="px-6 pt-6 pb-4 flex-row items-center justify-between">
-        <Text className="text-white text-3xl font-extrabold tracking-tight">Categorias</Text>
-        <TouchableOpacity
-          onPress={() => { resetForm(); setShowForm(!showForm); }}
-          className="bg-primary-500 px-5 py-3 rounded-2xl active:bg-primary-600 shadow-sm"
-        >
-          <Text className="text-emerald-950 font-bold text-sm tracking-wide">{showForm ? 'FECHAR' : '+ NOVA'}</Text>
-        </TouchableOpacity>
-      </View>
+      <ScreenHeader
+        title="Categorias"
+        dark
+        right={
+          <TouchableOpacity
+            onPress={() => { resetForm(); setShowForm(!showForm); }}
+            className="rounded-2xl bg-primary-500 px-4 py-3 shadow-sm active:bg-primary-600"
+          >
+            <Text className="text-sm font-bold tracking-wide text-emerald-950">
+              {showForm ? 'FECHAR' : '+ NOVA'}
+            </Text>
+          </TouchableOpacity>
+        }
+      />
 
       {showForm && (
         <View className="mx-6 mb-6 p-6 bg-slate-900 rounded-[32px] border border-slate-800 shadow-xl">
@@ -127,6 +133,7 @@ export default function CategoriesScreen() {
             value={name}
             onChangeText={setName}
             placeholder="Nome da categoria"
+            maxLength={INPUT_LIMITS.categoryName}
           />
           <Text className="text-slate-400 text-sm font-medium mb-3 ml-1">Cor de Identificação</Text>
           <View className="flex-row flex-wrap gap-3 mb-6">

@@ -46,3 +46,15 @@ export const ACCOUNT_ICON_OPTIONS = [
   'cash-multiple',
   'shield-lock-outline',
 ];
+
+export const INPUT_LIMITS = {
+  defaultText: 100,
+  name: 100,
+  categoryName: 50,
+  email: 254,
+  password: 128,
+  transactionTitle: 100,
+  transactionDescription: 500,
+  institution: 100,
+  money: 16,
+} as const;

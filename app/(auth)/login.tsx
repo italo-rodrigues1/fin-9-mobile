@@ -5,6 +5,7 @@ import { useAuthStore } from '../../src/stores/authStore';
 import { Button } from '../../src/components/ui/Button';
 import { Input } from '../../src/components/ui/Input';
 import { BrandLogo } from '../../src/components/BrandLogo';
+import { INPUT_LIMITS } from '../../src/constants';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -91,6 +92,7 @@ export default function LoginScreen() {
               keyboardType="email-address"
               autoCapitalize="none"
               onFocus={() => { lowerFieldFocused.current = false; }}
+              maxLength={INPUT_LIMITS.email}
             />
 
             <Input
@@ -100,6 +102,7 @@ export default function LoginScreen() {
               placeholder="Senha"
               secureTextEntry
               onFocus={scrollToLowerFields}
+              maxLength={INPUT_LIMITS.password}
             />
 
             {error && (

@@ -5,6 +5,9 @@ import { useAuthStore } from '../../src/stores/authStore';
 import { Button } from '../../src/components/ui/Button';
 import { Input } from '../../src/components/ui/Input';
 import { BrandLogo } from '../../src/components/BrandLogo';
+import { BackButton } from '../../src/components/BackButton';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { INPUT_LIMITS } from '../../src/constants';
 
 export default function RegisterScreen() {
   const [name, setName] = useState('');
@@ -60,7 +63,10 @@ export default function RegisterScreen() {
   };
 
   return (
-    <View className="flex-1 bg-[#F7F8FA]">
+    <SafeAreaView className="flex-1 bg-[#F7F8FA]">
+      <View className="absolute left-4 top-3 z-10">
+        <BackButton fallbackHref="/(auth)/login" />
+      </View>
       <ScrollView
         ref={scrollViewRef}
         contentContainerStyle={{
@@ -99,6 +105,7 @@ export default function RegisterScreen() {
               onChangeText={(text) => { clearError(); setName(text); }}
               placeholder="Nome"
               onFocus={() => { lowerFieldFocused.current = false; }}
+              maxLength={INPUT_LIMITS.name}
             />
 
             <Input
@@ -109,6 +116,7 @@ export default function RegisterScreen() {
               keyboardType="email-address"
               autoCapitalize="none"
               onFocus={() => { lowerFieldFocused.current = false; }}
+              maxLength={INPUT_LIMITS.email}
             />
 
             <Input
@@ -118,6 +126,7 @@ export default function RegisterScreen() {
               placeholder="Senha"
               secureTextEntry
               onFocus={scrollToLowerFields}
+              maxLength={INPUT_LIMITS.password}
             />
 
             <Input
@@ -127,6 +136,7 @@ export default function RegisterScreen() {
               placeholder="Confirmar senha"
               secureTextEntry
               onFocus={scrollToLowerFields}
+              maxLength={INPUT_LIMITS.password}
             />
 
             {error && (
@@ -141,6 +151,6 @@ export default function RegisterScreen() {
           </View>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }

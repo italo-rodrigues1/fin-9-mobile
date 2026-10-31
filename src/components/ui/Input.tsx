@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, TextInput, Text } from 'react-native';
-import { COLORS } from '../../constants';
+import { COLORS, INPUT_LIMITS } from '../../constants';
 
 interface InputProps {
   label: string;
@@ -13,6 +13,8 @@ interface InputProps {
   multiline?: boolean;
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
   onFocus?: () => void;
+  onBlur?: () => void;
+  maxLength?: number;
 }
 
 export function Input({
@@ -26,6 +28,8 @@ export function Input({
   multiline,
   autoCapitalize = 'sentences',
   onFocus,
+  onBlur,
+  maxLength = INPUT_LIMITS.defaultText,
 }: InputProps) {
   return (
     <View className="mb-4">
@@ -43,6 +47,8 @@ export function Input({
         multiline={multiline}
         autoCapitalize={autoCapitalize}
         onFocus={onFocus}
+        onBlur={onBlur}
+        maxLength={maxLength}
         textAlignVertical={multiline ? 'top' : 'center'}
       />
       {error && <Text className="mt-2 ml-1 text-xs text-[#FF6B6B]">{error}</Text>}

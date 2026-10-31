@@ -41,13 +41,6 @@ export default function TabsLayout() {
           headerShown: false,
         }}
       />
-      <Tabs.Screen
-        name="accounts"
-        options={{
-          href: null,
-          headerShown: false,
-        }}
-      />
     </Tabs>
   );
 }
