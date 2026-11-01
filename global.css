@@ -29,18 +29,18 @@
   --app-onInverse: 255 255 255;
 }
 .dark {
-  --app-background: 11 18 32;
-  --app-surface: 21 32 51;
-  --app-surfaceLight: 32 46 67;
-  --app-text: 242 244 247;
-  --app-textSecondary: 208 213 221;
-  --app-textMuted: 152 162 179;
-  --app-border: 52 64 84;
-  --app-primary: 4 120 87;
-  --app-primaryDark: 6 78 59;
-  --app-primaryLight: 16 60 51;
-  --app-primaryText: 110 231 183;
-  --app-success: 110 231 183;
+  --app-background: 10 10 10;
+  --app-surface: 23 23 23;
+  --app-surfaceLight: 36 36 36;
+  --app-text: 245 245 245;
+  --app-textSecondary: 212 212 212;
+  --app-textMuted: 163 163 163;
+  --app-border: 58 58 58;
+  --app-primary: 21 128 61;
+  --app-primaryDark: 28 28 28;
+  --app-primaryLight: 38 38 38;
+  --app-primaryText: 74 222 128;
+  --app-success: 74 222 128;
   --app-danger: 253 162 155;
   --app-dangerBackground: 59 30 39;
   --app-dangerBorder: 128 51 59;
@@ -49,8 +49,8 @@
   --app-warningBorder: 120 92 38;
   --app-white: 255 255 255;
   --app-onPrimary: 255 255 255;
-  --app-avatar: 16 60 51;
-  --app-skeleton: 52 64 84;
-  --app-inverse: 228 231 236;
-  --app-onInverse: 16 24 40;
+  --app-avatar: 38 38 38;
+  --app-skeleton: 51 51 51;
+  --app-inverse: 229 229 229;
+  --app-onInverse: 23 23 23;
 }

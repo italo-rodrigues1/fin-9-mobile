@@ -50,7 +50,7 @@ test('appearance respects manual choice and falls back to the current system pre
 });
 test('light and dark palettes expose matching native and web semantic variables', () => {
   assert.deepEqual(Object.keys(palettes.light), Object.keys(palettes.dark));
-  assert.equal(themeVariables(palettes.dark)['--app-background'], '11 18 32');
+  assert.equal(themeVariables(palettes.dark)['--app-background'], '10 10 10');
   assert.ok(
     Object.values(themeVariables(palettes.light)).every((v) =>
       /^\d+ \d+ \d+$/.test(v),

@@ -50,3 +50,10 @@ As alterações simultâneas de redesenho da tela de boas-vindas e dos cartões 
 - [ ] Revalidar no aparelho os modos Claro, Escuro e Seguir o sistema, inclusive após reiniciar o app e alterar a aparência do Android. Sem dispositivo/emulador disponível nesta revisão.
 
 Contrato confirmado no código instalado e na [documentação do React Native 0.88](https://reactnative.dev/docs/appearance#setcolorscheme). A correção é JavaScript; recarregar o bundle atualizado é suficiente se a build nativa anterior já contém as dependências da revisão P3.
+
+## Paleta escura — preto, cinza e verde
+
+- [x] Fundo preto `#0A0A0A`, superfícies `#171717` e `#242424`, bordas e textos em cinza neutro.
+- [x] Resumo de saldo, seleção e avatar usam superfícies cinza; verde fica nos textos de destaque, indicadores e ações. Branco sobre o verde das ações mantém contraste mínimo de 4,5:1.
+- [x] Variáveis web sincronizadas com a paleta usada pelo mobile; TypeScript e 30 testes passaram, incluindo contraste e integração da aparência nativa.
+- [ ] Revisão visual da nova paleta em aparelho Android/iOS.
