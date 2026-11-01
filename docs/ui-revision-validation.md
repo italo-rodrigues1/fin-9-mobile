@@ -40,3 +40,13 @@ No Android com development build, gerar nova build (npx expo run:android ou o fl
 Comandos: npm test -- --runInBand e npm run test:finance no backend; npm run typecheck e npm test no mobile. As suítes PostgreSQL compartilham o banco local e rodam sequencialmente entre arquivos; os cenários de concorrência permanecem dentro de cada suíte.
 
 As alterações simultâneas de redesenho da tela de boas-vindas e dos cartões foram preservadas fora destes commits. A revisão inclui apenas a adaptação dos componentes anteriores ao tema, mantendo o trabalho em andamento no diretório compartilhado.
+
+## Correção de aparência no Android — 31/10/2026
+
+- [x] Identificada incompatibilidade entre NativeWind 4.2.2 e React Native 0.88.1: o setter do NativeWind converte `system` em `Appearance.setColorScheme(null)`, mas a API nativa agora exige uma string. A chamada acontecia também na inicialização, pois a preferência padrão é `system`.
+- [x] Android/iOS usam diretamente `Appearance.setColorScheme('auto')` para seguir o sistema e `light`/`dark` para escolha manual. O NativeWind acompanha os eventos de Appearance. A web mantém seu setter do NativeWind com o tema resolvido.
+- [x] Testes de regressão cobrem a inicialização e o retorno ao sistema após escolhas manuais, impedindo envio de `null` ao bridge nativo, além da separação do fluxo web.
+- [x] `npm run typecheck`, 30 testes mobile e exportação Android com bytecode Hermes concluídos. A exportação foi executada fora do sandbox após falha do compilador no ambiente restrito.
+- [ ] Revalidar no aparelho os modos Claro, Escuro e Seguir o sistema, inclusive após reiniciar o app e alterar a aparência do Android. Sem dispositivo/emulador disponível nesta revisão.
+
+Contrato confirmado no código instalado e na [documentação do React Native 0.88](https://reactnative.dev/docs/appearance#setcolorscheme). A correção é JavaScript; recarregar o bundle atualizado é suficiente se a build nativa anterior já contém as dependências da revisão P3.

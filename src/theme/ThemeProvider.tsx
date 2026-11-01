@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect } from 'react';
-import { View, Platform, useColorScheme } from 'react-native';
+import { View, useColorScheme } from 'react-native';
 import { vars, useColorScheme as useNativeWindScheme } from 'nativewind';
 import {
   ThemeProvider as NavigationThemeProvider,
@@ -8,6 +8,7 @@ import {
 } from 'expo-router';
 import { palettes, resolveTheme, ThemeColors, themeVariables } from './palette';
 import { useThemeStore } from '../stores/themeStore';
+import { syncColorScheme } from './appearance';
 const ThemeContext = createContext<{ isDark: boolean; colors: ThemeColors }>({
   isDark: false,
   colors: palettes.light,
@@ -24,7 +25,7 @@ export function AppThemeProvider({ children }: { children: React.ReactNode }) {
     void hydrate().catch(() => {});
   }, [hydrate]);
   useEffect(() => {
-    setColorScheme(Platform.OS === 'web' ? scheme : preference);
+    syncColorScheme(preference, scheme, setColorScheme);
   }, [preference, scheme, setColorScheme]);
   return (
     <ThemeContext.Provider value={{ isDark: scheme === 'dark', colors }}>

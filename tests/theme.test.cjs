@@ -4,7 +4,7 @@ const { test } = require('node:test'),
   path = require('path'),
   Module = require('module'),
   ts = require('typescript');
-function harness(storage) {
+function harness(storage, reactNative) {
   const modules = new Map();
   function load(relative) {
     const file = path.resolve(__dirname, '../src', relative);
@@ -14,6 +14,7 @@ function harness(storage) {
     mod.paths = Module._nodeModulePaths(path.dirname(file));
     modules.set(file, mod);
     mod.require = function (id) {
+      if (id === 'react-native' && reactNative) return reactNative;
       if (id === '@react-native-async-storage/async-storage')
         return { default: storage };
       if (id.startsWith('.'))
@@ -107,4 +108,44 @@ test('rapid appearance changes are saved in the requested order', async () => {
   ]);
   assert.deepEqual(writes, ['dark', 'light', 'system']);
   assert.equal(store.getState().preference, 'system');
+});
+
+for (const platform of ['android', 'ios']) {
+  test(`${platform} restores system appearance without passing null to the native bridge`, () => {
+    const calls = [];
+    const { syncColorScheme } = harness({}, {
+      Platform: { OS: platform },
+      Appearance: {
+        setColorScheme(value) {
+          assert.ok(['light', 'dark', 'auto'].includes(value));
+          calls.push(value);
+        },
+      },
+    })('theme/appearance.ts');
+    const setWebScheme = () => assert.fail('NativeWind setter is web-only');
+    syncColorScheme('system', 'light', setWebScheme);
+    syncColorScheme('dark', 'dark', setWebScheme);
+    syncColorScheme('light', 'light', setWebScheme);
+    // The resolved value may still reflect the previous override until RN emits
+    // the system appearance. Reset using auto, never the stale resolved value.
+    syncColorScheme('system', 'light', setWebScheme);
+    syncColorScheme('system', 'dark', setWebScheme);
+    assert.deepEqual(calls, ['auto', 'dark', 'light', 'auto', 'auto']);
+  });
+}
+
+test('web applies the resolved theme through NativeWind without calling native Appearance', () => {
+  const calls = [];
+  const { syncColorScheme } = harness({}, {
+    Platform: { OS: 'web' },
+    Appearance: {
+      setColorScheme: () => assert.fail('Native appearance is not a browser theme selector'),
+    },
+  })('theme/appearance.ts');
+  const setWebScheme = (value) => calls.push(value);
+  syncColorScheme('system', 'dark', setWebScheme);
+  syncColorScheme('light', 'light', setWebScheme);
+  syncColorScheme('dark', 'dark', setWebScheme);
+  syncColorScheme('system', 'light', setWebScheme);
+  assert.deepEqual(calls, ['dark', 'light', 'dark', 'light']);
 });
