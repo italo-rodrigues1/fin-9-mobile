@@ -6,7 +6,6 @@ import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { QueryState } from '../../src/components/QueryState';
 import { CreditCardSummary } from '../../src/components/CreditCardSummary';
 import { CardInvoiceSummary } from '../../src/components/CardInvoiceSummary';
-import { Button } from '../../src/components/ui/Button';
 import { Select } from '../../src/components/ui/Select';
 import { useResource } from '../../src/hooks/useResource';
 import { cardService } from '../../src/services/cardService';
@@ -39,26 +38,18 @@ export default function CardDetailScreen() {
             <QueryState loading={r.loading} error={r.error} retry={r.reload} />
             {!r.loading && !r.error && r.data ? (
               <>
-                <CreditCardSummary card={r.data.card} />
-                <Button
-                  title="Nova compra no cartão"
-                  disabled={r.data.card.isArchived}
-                  onPress={() =>
+                <CreditCardSummary
+                  card={r.data.card}
+                  onPurchase={() =>
                     router.push({
                       pathname: '/cards/purchase',
                       params: { cardId: id },
                     })
                   }
+                  onEdit={() =>
+                    router.push({ pathname: '/cards/edit', params: { id } })
+                  }
                 />
-                <View className="my-3">
-                  <Button
-                    title="Editar cartão"
-                    variant="outline"
-                    onPress={() =>
-                      router.push({ pathname: '/cards/edit', params: { id } })
-                    }
-                  />
-                </View>
                 <Text className="mb-5 text-sm leading-6 text-app-textMuted">
                   Compras no dia do fechamento vão para a próxima fatura. Em
                   meses curtos, fechamento e vencimento usam o último dia

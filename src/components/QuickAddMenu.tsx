@@ -1,12 +1,12 @@
 import { useTheme } from '../theme/ThemeProvider';
-import { Feather } from '@expo/vector-icons';
+import { AntDesign,Feather  } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Modal, Pressable, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TransactionType } from '../types';
 export function QuickAddMenu() {
-  const theme = useTheme();
+ const theme=useTheme();
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -60,7 +60,7 @@ export function QuickAddMenu() {
           className="mb-1 items-center justify-center rounded-lg bg-app-primary"
           style={{ width: 38, height: 30 }}
         >
-          <Feather name="edit-3" size={20} color={theme.colors.onPrimary} />
+          <AntDesign name="plus" size={20} color={theme.colors.onPrimary} />
         </View>
         <Text className="text-center text-[10px] font-semibold text-app-primaryText">
           Novo registro
@@ -112,11 +112,7 @@ export function QuickAddMenu() {
                 <Text className="ml-4 flex-1 text-base font-semibold text-app-text">
                   {action.label}
                 </Text>
-                <Feather
-                  name="chevron-right"
-                  size={20}
-                  color={theme.colors.textMuted}
-                />
+                <Feather name="chevron-right" size={20} color={theme.colors.textMuted} />
               </TouchableOpacity>
             ))}
           </View>

@@ -1,0 +1,170 @@
+[
+  {
+    "file": "nubank.png",
+    "institution": "Nubank",
+    "ispb": "18236120",
+    "source": {
+      "type": "openfinance",
+      "org": "NU PAGAMENTOS S.A. - INSTITUICAO DE PAGAMENTO",
+      "cnpj": "18236120000158",
+      "uri": "https://nuapp.nubank.com.br/open-banking/logo.svg",
+      "sha256": "a4a63bd7d76bd7f3377335ae2a4c9d1f80d602f6a69fd5dba375f46d269272a6",
+      "updatedAt": "2026-07-17"
+    },
+    "catalog": "https://github.com/rzmt/logos-bancos-br/blob/main/logos/png/18236120.png"
+  },
+  {
+    "file": "itau.png",
+    "institution": "Itaú",
+    "ispb": "60701190",
+    "source": {
+      "type": "openfinance",
+      "org": "ITAU UNIBANCO S.A.",
+      "cnpj": "60701190000104",
+      "uri": "https://www.itau.com.br/media/dam/m/4ee2c952e1fa91a2/original/Novo_itau.svg",
+      "sha256": "9b2cadfb4ec44d8a3f9b24e9b3e7439e128164ab05ab1044ad37742255795af2",
+      "updatedAt": "2026-07-17"
+    },
+    "catalog": "https://github.com/rzmt/logos-bancos-br/blob/main/logos/png/60701190.png"
+  },
+  {
+    "file": "bradesco.png",
+    "institution": "Bradesco",
+    "ispb": "60746948",
+    "source": {
+      "type": "openfinance",
+      "org": "BANCO BRADESCO SA",
+      "cnpj": "60746948000112",
+      "uri": "https://banco.bradesco/open-finance/logo/icones_vetorial-pf.svg",
+      "sha256": "eab31731175c5229512016c2cdf98f38affecb891c217bbe6ea6b83e4c5bdb38",
+      "updatedAt": "2026-07-17"
+    },
+    "catalog": "https://github.com/rzmt/logos-bancos-br/blob/main/logos/png/60746948.png"
+  },
+  {
+    "file": "santander.png",
+    "institution": "Santander",
+    "ispb": "90400888",
+    "source": {
+      "type": "openfinance",
+      "org": "BCO SANTANDER (BRASIL) S.A.",
+      "cnpj": "90400888000142",
+      "uri": "https://cms.santander.com.br/sites/WPS/imagem/santander_chama/23-10-31_194829_P_santander_chama.svg",
+      "sha256": "3db65acca8651f09096f81c004513586b3b22075041afe7e29df16f658b7d766",
+      "updatedAt": "2026-07-17"
+    },
+    "catalog": "https://github.com/rzmt/logos-bancos-br/blob/main/logos/png/90400888.png"
+  },
+  {
+    "file": "banco-do-brasil.png",
+    "institution": "Banco do Brasil",
+    "ispb": "00000000",
+    "source": {
+      "type": "openfinance",
+      "org": "BANCO DO BRASIL S.A.",
+      "cnpj": "00000000000191",
+      "uri": "https://www.bb.com.br/docs/pub/inst/img/LogoBB.svg",
+      "sha256": "8bd7640e0e08e49cc00d3b4b901a44add88a1a3e9539b8cd71c8f04692d88caa",
+      "updatedAt": "2026-07-17"
+    },
+    "catalog": "https://github.com/rzmt/logos-bancos-br/blob/main/logos/png/00000000.png"
+  },
+  {
+    "file": "caixa.png",
+    "institution": "Caixa",
+    "ispb": "00360305",
+    "source": {
+      "type": "openfinance",
+      "org": "CAIXA ECONOMICA FEDERAL",
+      "cnpj": "00360305000104",
+      "uri": "https://consentimento.openbanking.caixa.gov.br/assets/images/logomarca_caixa.svg",
+      "sha256": "3073827b49f87a32f69c93d8008583a1af2f2498b873eabd9f9d64d130c70dfd",
+      "updatedAt": "2026-07-17"
+    },
+    "catalog": "https://github.com/rzmt/logos-bancos-br/blob/main/logos/png/00360305.png"
+  },
+  {
+    "file": "inter.png",
+    "institution": "Inter",
+    "ispb": "00416968",
+    "source": {
+      "type": "openfinance",
+      "org": "BANCO INTER",
+      "cnpj": "00416968000101",
+      "uri": "https://marketing.bancointer.com.br/arquivos/images/app-icon.svg",
+      "sha256": "09b8e88439fd0106deef4eb448fea00d127e1a7dd592b5baa76fea07b226c128",
+      "updatedAt": "2026-07-17"
+    },
+    "catalog": "https://github.com/rzmt/logos-bancos-br/blob/main/logos/png/00416968.png"
+  },
+  {
+    "file": "c6-bank.png",
+    "institution": "C6 Bank",
+    "ispb": "31872495",
+    "source": {
+      "type": "openfinance",
+      "org": "BCO C6 S.A.",
+      "cnpj": "31872495000172",
+      "uri": "https://cdn.c6bank.com.br/open-banking/c6bank-logo.svg",
+      "sha256": "deb2fd2d220ad11000f97f2ee553308c1e98311c979a0a003530aca76f83b011",
+      "updatedAt": "2026-07-17"
+    },
+    "catalog": "https://github.com/rzmt/logos-bancos-br/blob/main/logos/png/31872495.png"
+  },
+  {
+    "file": "btg-pactual.png",
+    "institution": "BTG Pactual",
+    "ispb": "30306294",
+    "source": {
+      "type": "openfinance",
+      "org": "BANCO BTG PACTUAL S.A.",
+      "cnpj": "30306294000145",
+      "uri": "https://banking-public-prd.s3.sa-east-1.amazonaws.com/open-finance/logo/btginvestimentos/btginvestimentos.svg",
+      "sha256": "ac521163417436f99df1bd1cb2512fe75ff55041bb9345f0394deb2d5634da6d",
+      "updatedAt": "2026-07-17"
+    },
+    "catalog": "https://github.com/rzmt/logos-bancos-br/blob/main/logos/png/30306294.png"
+  },
+  {
+    "file": "xp.png",
+    "institution": "XP Investimentos",
+    "ispb": "02332886",
+    "source": {
+      "type": "openfinance",
+      "org": "BANCO XP S.A.",
+      "cnpj": "33264668000103",
+      "uri": "https://openbanking-redirect.xpi.com.br/assets/xpi.svg",
+      "sha256": "7f75762e82f828eb401dbc27d38b2d57eda0b14d5662a89315bb756ade7b5566",
+      "updatedAt": "2026-07-17"
+    },
+    "catalog": "https://github.com/rzmt/logos-bancos-br/blob/main/logos/png/02332886.png"
+  },
+  {
+    "file": "picpay.png",
+    "institution": "PicPay",
+    "ispb": "22896431",
+    "source": {
+      "type": "openfinance",
+      "org": "PICPAY",
+      "cnpj": "22896431000110",
+      "uri": "https://picpay.s3.sa-east-1.amazonaws.com/openbanking/picpay-logo-icon-pf.svg",
+      "sha256": "5dda49002fc6d9b323a30d88afd7e9ba5b54982dc5ffcf630364aa94bfcf43b8",
+      "updatedAt": "2026-07-17"
+    },
+    "catalog": "https://github.com/rzmt/logos-bancos-br/blob/main/logos/png/22896431.png"
+  },
+  {
+    "file": "mercado-pago.png",
+    "institution": "Mercado Pago",
+    "ispb": "10573521",
+    "source": {
+      "type": "openfinance",
+      "org": "MERCADO PAGO INSTITUICAO DE PAGAMENTO LTDA",
+      "cnpj": "10573521000191",
+      "uri": "https://http2.mlstatic.com/open-banking/assets/logo.svg",
+      "sha256": "a1dbab9a3efb581b2e2e12bd09a3e4fe16d71b4d7c29be902f78c2958ee103f2",
+      "updatedAt": "2026-07-17"
+    },
+    "catalog": "https://github.com/rzmt/logos-bancos-br/blob/main/logos/png/10573521.png"
+  }
+]

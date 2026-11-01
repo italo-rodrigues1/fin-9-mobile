@@ -156,7 +156,12 @@ export default function AccountDetail() {
                 <AccountCard
                   account={account}
                   onEdit={!editing ? beginEdit : undefined}
-                  onTransfer={() => router.push({ pathname: '/transfer', params: { fromAccountId: account.id } })}
+                  onTransfer={() =>
+                    router.push({
+                      pathname: '/transfer',
+                      params: { fromAccountId: account.id },
+                    })
+                  }
                 />
                 <Text className="mb-4 text-xs text-app-textMuted">
                   Lançamentos previstos não alteram o saldo atual.

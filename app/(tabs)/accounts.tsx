@@ -1,17 +1,17 @@
 import { useCallback } from 'react';
+import { Feather } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { FlatList, View } from 'react-native';
+import { FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAccountStore } from '../../src/stores/accountStore';
-import { usePrivacyStore } from '../../src/stores/privacyStore';
+import { useTheme } from '../../src/theme/ThemeProvider';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { QueryState } from '../../src/components/QueryState';
 import { EmptyState } from '../../src/components/EmptyState';
-import { Button } from '../../src/components/ui/Button';
 import { AccountCard } from '../../src/components/AccountCard';
 export default function AccountsScreen() {
   const { accounts, fetch, isLoading, error } = useAccountStore();
-  const { showValues, toggle } = usePrivacyStore();
+  const theme = useTheme();
   const router = useRouter();
   useFocusEffect(
     useCallback(() => {
@@ -23,20 +23,17 @@ export default function AccountsScreen() {
       <ScreenHeader
         title="Contas"
         subtitle="Seus saldos, organizados por instituição."
+        right={
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel="Nova conta"
+            onPress={() => router.push('/accounts/create')}
+            className="h-11 w-11 items-center justify-center rounded-full bg-app-primary"
+          >
+            <Feather name="plus" size={22} color={theme.colors.onPrimary} />
+          </TouchableOpacity>
+        }
       />
-      <View className="mx-4 mb-4">
-        <Button
-          title="Nova conta"
-          onPress={() => router.push('/accounts/create')}
-        />
-        <View className="mt-2">
-          <Button
-            variant="secondary"
-            title={showValues ? 'Ocultar valores' : 'Mostrar valores'}
-            onPress={toggle}
-          />
-        </View>
-      </View>
       <QueryState
         loading={isLoading}
         error={error}
@@ -64,7 +61,12 @@ export default function AccountsScreen() {
                 params: { id: item.id },
               })
             }
-            onTransfer={() => router.push({ pathname: '/transfer', params: { fromAccountId: item.id } })}
+            onTransfer={() =>
+              router.push({
+                pathname: '/transfer',
+                params: { fromAccountId: item.id },
+              })
+            }
           />
         )}
       />

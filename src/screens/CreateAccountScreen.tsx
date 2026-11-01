@@ -19,27 +19,13 @@ import {
   INPUT_LIMITS,
 } from '../constants';
 import { useAccountStore } from '../stores/accountStore';
+import { INSTITUTION_OPTIONS } from '../constants/institutions';
 import {
   formatCurrencyInput,
   MAX_MONEY_VALUE,
   parseCurrencyInput,
   sanitizeCurrencyInput,
 } from '../utils/format';
-
-const INSTITUTION_OPTIONS = [
-  'Nubank',
-  'Itaú',
-  'Bradesco',
-  'Santander',
-  'Banco do Brasil',
-  'Caixa Econômica Federal',
-  'Banco Inter',
-  'C6 Bank',
-  'BTG Pactual',
-  'XP Investimentos',
-  'PicPay',
-  'Mercado Pago',
-].map((institution) => ({ value: institution, label: institution }));
 
 export default function CreateAccountScreen() {
   const theme = useTheme();

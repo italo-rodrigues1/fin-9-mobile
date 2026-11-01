@@ -215,9 +215,17 @@ export interface SaveGoalContribution {
   requestId?: string;
 }
 
+export type CardBrand =
+  | 'VISA'
+  | 'MASTERCARD'
+  | 'ELO'
+  | 'AMERICAN_EXPRESS'
+  | 'HIPERCARD';
+
 export interface CreditCard {
   id: string;
   name: string;
+  brand?: CardBrand | null;
   creditLimit: number;
   closingDay: number;
   dueDay: number;
@@ -279,7 +287,13 @@ export interface CardInvoiceItem {
 export interface CardInvoiceDetail {
   card: Pick<
     CreditCard,
-    'id' | 'name' | 'creditLimit' | 'closingDay' | 'dueDay' | 'isArchived'
+    | 'id'
+    | 'name'
+    | 'brand'
+    | 'creditLimit'
+    | 'closingDay'
+    | 'dueDay'
+    | 'isArchived'
   >;
   invoice: CardInvoice;
   items: CardInvoiceItem[];
@@ -287,6 +301,7 @@ export interface CardInvoiceDetail {
 }
 export interface SaveCreditCard {
   name: string;
+  brand?: CardBrand | null;
   creditLimit: number;
   closingDay: number;
   dueDay: number;

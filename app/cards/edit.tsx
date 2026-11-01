@@ -12,6 +12,7 @@ import { Select } from '../../src/components/ui/Select';
 import { Button } from '../../src/components/ui/Button';
 import { useResource } from '../../src/hooks/useResource';
 import { cardService } from '../../src/services/cardService';
+import { CARD_BRAND_OPTIONS } from '../../src/constants/cardBrands';
 import { notify } from '../../src/stores/feedbackStore';
 import { errorMessage } from '../../src/utils/errorMessage';
 import {
@@ -26,6 +27,7 @@ export default function EditCard() {
     busy = useRef(false),
     seeded = useRef(false);
   const [name, setName] = useState(''),
+    [brand, setBrand] = useState(''),
     [limit, setLimit] = useState(''),
     [closing, setClosing] = useState(''),
     [due, setDue] = useState(''),
@@ -43,6 +45,7 @@ export default function EditCard() {
       seeded.current = true;
       const c = r.data.card;
       setName(c.name);
+      setBrand(c.brand || '');
       setLimit(formatCurrencyInput(c.creditLimit));
       setClosing(String(c.closingDay));
       setDue(String(c.dueDay));
@@ -77,6 +80,9 @@ export default function EditCard() {
       const c = await cardService.save(
         {
           name: name.trim(),
+          brand:
+            CARD_BRAND_OPTIONS.find((option) => option.value === brand)
+              ?.value ?? null,
           creditLimit: value,
           closingDay: Number(closing),
           dueDay: Number(due),
@@ -111,6 +117,15 @@ export default function EditCard() {
               onChangeText={setName}
               maxLength={100}
               error={errors.name}
+            />
+            <Select
+              label="Bandeira do cartão"
+              value={brand}
+              onChange={setBrand}
+              options={[
+                { value: '', label: 'Não informada' },
+                ...CARD_BRAND_OPTIONS,
+              ]}
             />
             <Input
               label="Limite total (R$)"

@@ -16,7 +16,8 @@ import { Button } from '../../src/components/ui/Button';
 import { PeriodPicker } from '../../src/components/PeriodPicker';
 import { QueryState } from '../../src/components/QueryState';
 import { TransactionItem } from '../../src/components/TransactionItem';
-import { CreditCardSummary } from '../../src/components/CreditCardSummary';
+import { CreditCardCarousel } from '../../src/components/CreditCardCarousel';
+import { AccountCard } from '../../src/components/AccountCard';
 import { cardService } from '../../src/services/cardService';
 import { GoalCard } from '../../src/components/GoalCard';
 import { goalService } from '../../src/services/goalService';
@@ -193,24 +194,15 @@ export default function DashboardScreen() {
                     </TouchableOpacity>
                   </View>
                   {data.cards.filter((c) => !c.isArchived).length ? (
-                    data.cards
-                      .filter((c) => !c.isArchived)
-                      .slice(0, 2)
-                      .map((c) => (
-                        <TouchableOpacity
-                          key={c.id}
-                          accessibilityRole="button"
-                          accessibilityLabel={'Abrir cartão ' + c.name}
-                          onPress={() =>
-                            router.push({
-                              pathname: '/cards/detail',
-                              params: { id: c.id },
-                            })
-                          }
-                        >
-                          <CreditCardSummary card={c} />
-                        </TouchableOpacity>
-                      ))
+                    <CreditCardCarousel
+                      cards={data.cards.filter((c) => !c.isArchived)}
+                      onOpen={(c) =>
+                        router.push({
+                          pathname: '/cards/detail',
+                          params: { id: c.id },
+                        })
+                      }
+                    />
                   ) : (
                     <Button
                       title="Cadastrar cartão"
@@ -269,34 +261,17 @@ export default function DashboardScreen() {
                     {data.report.accounts
                       .filter((a) => !a.isArchived)
                       .map((account) => (
-                        <TouchableOpacity
+                        <AccountCard
                           key={account.id}
-                          accessibilityRole="button"
-                          accessibilityLabel={
-                            'Detalhes da conta ' + account.name
-                          }
+                          account={account}
+                          compact
                           onPress={() =>
                             router.push({
                               pathname: '/accounts/detail',
                               params: { id: account.id },
                             })
                           }
-                          className="mr-3 w-52 rounded-lg border border-app-border bg-app-surface p-4"
-                          style={{
-                            borderTopColor: account.color,
-                            borderTopWidth: 3,
-                          }}
-                        >
-                          <Text className="text-xs text-app-textMuted">
-                            {account.institution}
-                          </Text>
-                          <Text className="mt-1 text-base font-semibold text-app-text">
-                            {account.name}
-                          </Text>
-                          <Text className="mt-4 text-xl font-bold text-app-text">
-                            {money(account.balance)}
-                          </Text>
-                        </TouchableOpacity>
+                        />
                       ))}
                   </ScrollView>
                   {!data.report.accounts.some((a) => !a.isArchived) ? (

@@ -31,7 +31,10 @@ import {
 } from '../src/utils/format';
 export default function TransferForm() {
   const showValues = usePrivacyStore((s) => s.showValues);
-  const { id, fromAccountId } = useLocalSearchParams<{ id?: string; fromAccountId?: string }>(),
+  const { id, fromAccountId } = useLocalSearchParams<{
+      id?: string;
+      fromAccountId?: string;
+    }>(),
     router = useRouter();
   const resource = useResource(
     useCallback(
@@ -63,9 +66,15 @@ export default function TransferForm() {
       seeded.current = true;
     } else if (!row) {
       const active = resource.data.accounts.filter((a) => !a.isArchived);
-      const source = active.find((account) => account.id === fromAccountId)?.id || active[0]?.id || '';
+      const source =
+        active.find((account) => account.id === fromAccountId)?.id ||
+        active[0]?.id ||
+        '';
       setFrom((old) => old || source);
-      setTo((old) => old || active.find((account) => account.id !== source)?.id || '');
+      setTo(
+        (old) =>
+          old || active.find((account) => account.id !== source)?.id || '',
+      );
     }
   }, [resource.data, fromAccountId]);
   const save = async () => {

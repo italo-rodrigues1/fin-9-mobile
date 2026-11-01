@@ -1,43 +1,58 @@
-import {
-  KeyboardScreen as SafeAreaView,
-  KeyboardScrollView as ScrollView,
-} from '../../src/components/KeyboardForm';
-import { notify } from '../../src/stores/feedbackStore';
-import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, Keyboard, Platform, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useAuthStore } from '../../src/stores/authStore';
-import { Button } from '../../src/components/ui/Button';
-import { Input } from '../../src/components/ui/Input';
-import { BrandLogo } from '../../src/components/BrandLogo';
-import { BackButton } from '../../src/components/BackButton';
-import { INPUT_LIMITS } from '../../src/constants';
+import { Link, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
+import { View } from "react-native";
+import { AuthError, AuthScreen } from "../../src/components/auth/AuthScreen";
+import { PasswordRequirements } from "../../src/components/auth/PasswordRequirements";
+import { Button } from "../../src/components/ui/Button";
+import { Input } from "../../src/components/ui/Input";
+import { INPUT_LIMITS } from "../../src/constants";
+import { useAuthStore } from "../../src/stores/authStore";
+import { notify } from "../../src/stores/feedbackStore";
 
 export default function RegisterScreen() {
-  const [name, setName] = useState('');
+  const [name, setName] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const { register, isLoading, error, clearError } = useAuthStore();
-  const router = useRouter();
+
+  useFocusEffect(
+    useCallback(() => {
+      clearError();
+    }, [clearError]),
+  );
+
+  const updateField = (
+    field: string,
+    value: string,
+    setValue: (value: string) => void,
+  ) => {
+    clearError();
+    setErrors((current) => ({
+      ...current,
+      [field]: "",
+      ...(field === "password" ? { confirmPassword: "" } : {}),
+    }));
+    setValue(value);
+  };
 
   const handleRegister = async () => {
     if (isLoading) return;
     const next: Record<string, string> = {};
+    if (!name.trim()) next.name = "Informe seu nome";
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
-      next.email = 'Informe um e-mail válido';
-    if (!password) next.password = 'Informe sua senha';
-    if (!name.trim()) next.name = 'Informe seu nome';
+      next.email = "Informe um e-mail válido";
     if (
       password.length < 8 ||
       !/[A-Z]/.test(password) ||
       !/[0-9]/.test(password)
     )
       next.password =
-        'Use no mínimo 8 caracteres, uma letra maiúscula e um número';
-    if (password !== confirmPassword)
-      next.confirmPassword = 'As senhas não coincidem';
+        "Use no mínimo 8 caracteres, uma letra maiúscula e um número";
+    if (!confirmPassword) next.confirmPassword = "Confirme sua senha";
+    else if (password !== confirmPassword)
+      next.confirmPassword = "As senhas não coincidem";
     setErrors(next);
     if (Object.keys(next).length) return;
     try {
@@ -48,113 +63,84 @@ export default function RegisterScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-app-background">
-      <View className="absolute left-4 top-3 z-10">
-        <BackButton fallbackHref="/(auth)/login" />
+    <AuthScreen
+      registration
+      title="Crie sua conta"
+      subtitle={
+        <>
+          Já possui uma conta?{" "}
+          <Link
+            href="/(auth)/login"
+            replace
+            style={{ fontWeight: "bold", color: "#E7F8F1" }}
+          >
+            Fazer login
+          </Link>
+        </>
+      }
+    >
+      <Input
+        label="Nome"
+        icon="user"
+        embeddedLabel
+        error={errors.name}
+        value={name}
+        onChangeText={(text) => updateField("name", text, setName)}
+        placeholder="Nome"
+        autoCapitalize="words"
+        autoComplete="name"
+        maxLength={INPUT_LIMITS.name}
+      />
+      <Input
+        label="E-mail"
+        icon="mail"
+        embeddedLabel
+        error={errors.email}
+        value={email}
+        onChangeText={(text) => updateField("email", text, setEmail)}
+        placeholder="E-mail"
+        keyboardType="email-address"
+        autoCapitalize="none"
+        autoComplete="email"
+        maxLength={INPUT_LIMITS.email}
+      />
+      <Input
+        label="Senha"
+        icon="lock"
+        embeddedLabel
+        error={errors.password}
+        value={password}
+        onChangeText={(text) => updateField("password", text, setPassword)}
+        placeholder="Senha"
+        secureTextEntry
+        autoComplete="new-password"
+        maxLength={INPUT_LIMITS.password}
+      />
+      <PasswordRequirements password={password} />
+      <Input
+        label="Confirmar senha"
+        icon="shield"
+        embeddedLabel
+        error={errors.confirmPassword}
+        value={confirmPassword}
+        onChangeText={(text) =>
+          updateField("confirmPassword", text, setConfirmPassword)
+        }
+        placeholder="Confirmar senha"
+        secureTextEntry
+        autoComplete="new-password"
+        returnKeyType="go"
+        onSubmitEditing={handleRegister}
+        maxLength={INPUT_LIMITS.password}
+      />
+      <AuthError message={error} />
+      <View className="mt-2">
+        <Button
+          title="Criar conta"
+          onPress={handleRegister}
+          isLoading={isLoading}
+        />
       </View>
-      <ScrollView
-        contentContainerStyle={{
-          flexGrow: 1,
-          justifyContent: 'center',
-          paddingHorizontal: 32,
-          paddingVertical: 48,
-          paddingBottom: 48,
-        }}
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
-        showsVerticalScrollIndicator={false}
-      >
-        <View className="w-full">
-          <View className="mb-14 items-center">
-            <BrandLogo muted />
-          </View>
-
-          <View>
-            <Text className="text-center text-[18px] font-bold text-app-text">
-              Crie sua conta
-            </Text>
-            <Text className="mt-4 text-center text-base text-app-textMuted">
-              Já possui uma conta?{' '}
-              <Text
-                className="font-semibold text-app-primaryText"
-                onPress={() => router.replace('/(auth)/login')}
-              >
-                Fazer Login
-              </Text>
-            </Text>
-          </View>
-
-          <View className="mt-10">
-            <Input
-              label=""
-              error={errors.name}
-              value={name}
-              onChangeText={(text) => {
-                clearError();
-                setName(text);
-              }}
-              placeholder="Nome"
-              maxLength={INPUT_LIMITS.name}
-            />
-
-            <Input
-              label=""
-              error={errors.email}
-              value={email}
-              onChangeText={(text) => {
-                clearError();
-                setEmail(text);
-              }}
-              placeholder="E-mail"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              maxLength={INPUT_LIMITS.email}
-            />
-
-            <Input
-              label=""
-              error={errors.password}
-              value={password}
-              onChangeText={(text) => {
-                clearError();
-                setPassword(text);
-              }}
-              placeholder="Senha"
-              secureTextEntry
-              maxLength={INPUT_LIMITS.password}
-            />
-
-            <Text className="mb-4 text-sm text-app-textSecondary">
-              Mínimo de 8 caracteres, uma letra maiúscula e um número.
-            </Text>
-            <Input
-              label=""
-              error={errors.confirmPassword}
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              placeholder="Confirmar senha"
-              secureTextEntry
-              maxLength={INPUT_LIMITS.password}
-            />
-
-            {error && (
-              <View className="mb-4 rounded-lg border border-app-dangerBorder bg-app-dangerBackground p-4">
-                <Text className="text-center text-sm text-app-danger">
-                  {error}
-                </Text>
-              </View>
-            )}
-
-            <View className="mt-3">
-              <Button
-                title="Criar conta"
-                onPress={handleRegister}
-                isLoading={isLoading}
-              />
-            </View>
-          </View>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    </AuthScreen>
   );
 }
