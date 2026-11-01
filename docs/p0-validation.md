@@ -1,5 +1,7 @@
 # P0 — Interface e confiabilidade
 
+Este é um registro histórico da etapa. Consulte as [regras de negócio atuais](regras-de-negocio.md), que substituem a regra antiga de arquivamento de contas.
+
 Implementado em 31/10/2026. O checklist completo está no project.md da pasta que reúne os serviços.
 
 ## Entregas

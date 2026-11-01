@@ -14,7 +14,7 @@ export default function Transfers() {
     show = usePrivacyStore((s) => s.showValues),
     resource = useResource(useCallback(() => planningService.transfers(), []));
   return (
-    <SafeAreaView className="flex-1 bg-[#F7F8FA]">
+    <SafeAreaView className="flex-1 bg-app-background">
       <ScreenHeader
         title="Transferências"
         subtitle="As últimas 100 operações entre suas contas."
@@ -34,7 +34,7 @@ export default function Transfers() {
         contentContainerStyle={{ padding: 16 }}
         ListEmptyComponent={
           !resource.loading && !resource.error ? (
-            <Text className="p-5 text-[#667085]">
+            <Text className="p-5 text-app-textMuted">
               Nenhuma transferência registrada.
             </Text>
           ) : undefined
@@ -45,15 +45,15 @@ export default function Transfers() {
             onPress={() =>
               router.push({ pathname: '/transfer', params: { id: item.id } })
             }
-            className="mb-3 rounded-lg border border-[#E4E7EC] bg-white p-4"
+            className="mb-3 rounded-lg border border-app-border bg-app-surface p-4"
           >
-            <Text className="font-semibold text-[#344054]">
+            <Text className="font-semibold text-app-text">
               {item.fromAccount?.name} → {item.toAccount?.name}
             </Text>
-            <Text className="mt-2 text-sm text-[#667085]">
+            <Text className="mt-2 text-sm text-app-textMuted">
               {formatDate(item.date)}
             </Text>
-            <Text className="mt-3 text-lg font-bold text-[#101828]">
+            <Text className="mt-3 text-lg font-bold text-app-text">
               {show ? formatCurrency(item.amount) : 'R$ ••••••'}
             </Text>
           </TouchableOpacity>

@@ -97,7 +97,7 @@ export default function GoalDetailScreen() {
     }
   };
   return (
-    <SafeAreaView className="flex-1 bg-[#F7F8FA]">
+    <SafeAreaView className="flex-1 bg-app-background">
       <ScreenHeader title="Detalhes da meta" />
       <FlatList
         contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
@@ -113,7 +113,7 @@ export default function GoalDetailScreen() {
             {!resource.loading && !resource.error && resource.data ? (
               <>
                 <GoalCard goal={resource.data.goal} />
-                <Text className="mb-4 text-sm leading-6 text-[#667085]">
+                <Text className="mb-4 text-sm leading-6 text-app-textMuted">
                   As contribuições destinam dinheiro que já está nas contas. Se
                   o saldo diminuir, a cobertura é dividida proporcionalmente
                   entre as metas da mesma conta.
@@ -144,7 +144,7 @@ export default function GoalDetailScreen() {
                   onPress={() => remove()}
                   isLoading={saving}
                 />
-                <Text className="mb-4 mt-7 text-lg font-semibold text-[#101828]">
+                <Text className="mb-4 mt-7 text-lg font-semibold text-app-text">
                   Contribuições
                 </Text>
               </>
@@ -153,24 +153,30 @@ export default function GoalDetailScreen() {
         }
         ListEmptyComponent={
           !resource.loading && !resource.error ? (
-            <Text className="py-4 text-[#667085]">
+            <Text className="py-4 text-app-textMuted">
               Nenhuma contribuição. Destine parte do saldo de uma conta para
               começar.
             </Text>
           ) : undefined
         }
         renderItem={({ item }) => (
-          <View className="mb-3 rounded-lg border border-[#E4E7EC] bg-white p-4">
-            <Text className="text-lg font-semibold text-[#101828]">
+          <View className="mb-3 rounded-lg border border-app-border bg-app-surface p-4">
+            <Text className="text-lg font-semibold text-app-text">
               {show ? formatCurrency(item.amount) : 'R$ ••••••'}
             </Text>
-            <Text className="mt-2 text-sm text-[#667085]">
+            <Text className="mt-2 text-sm text-app-textMuted">
               {item.account?.name}
-              {item.account?.isArchived ? ' · Arquivada' : ''} ·{' '}
-              {formatDate(item.date)}
+              {item.account?.deletedAt
+                ? ' · Conta excluída'
+                : item.account?.isArchived
+                  ? ' · Inativa'
+                  : ''}{' '}
+              · {formatDate(item.date)}
             </Text>
             {item.note ? (
-              <Text className="mt-2 text-sm text-[#475467]">{item.note}</Text>
+              <Text className="mt-2 text-sm text-app-textSecondary">
+                {item.note}
+              </Text>
             ) : null}
             <View className="mt-4">
               <Button

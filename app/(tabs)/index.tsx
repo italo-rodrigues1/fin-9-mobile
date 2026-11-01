@@ -1,3 +1,4 @@
+import { useTheme } from '../../src/theme/ThemeProvider';
 import { useTransactionStore } from '../../src/stores/transactionStore';
 import { Feather } from '@expo/vector-icons';
 import { useCallback, useState } from 'react';
@@ -33,6 +34,7 @@ import {
   getMonthName,
 } from '../../src/utils/format';
 export default function DashboardScreen() {
+  const theme = useTheme();
   const router = useRouter(),
     user = useAuthStore((state) => state.user),
     { showValues, toggle } = usePrivacyStore();
@@ -57,7 +59,7 @@ export default function DashboardScreen() {
   const money = (value: number) =>
     showValues ? formatCurrency(value) : 'R$ ••••••';
   return (
-    <SafeAreaView className="flex-1 bg-[#F7F8FA]">
+    <SafeAreaView className="flex-1 bg-app-background">
       <FlatList
         data={!loading && !error ? data?.recent || [] : []}
         keyExtractor={(item) => item.id}
@@ -76,9 +78,9 @@ export default function DashboardScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Abrir perfil"
                 onPress={() => router.push('/profile')}
-                className="h-11 w-11 items-center justify-center rounded-lg bg-[#E7F8F1]"
+                className="h-11 w-11 items-center justify-center rounded-lg bg-app-primaryLight"
               >
-                <Text className="font-bold text-[#047857]">
+                <Text className="font-bold text-app-primaryText">
                   {(user?.name || 'F9').slice(0, 2).toUpperCase()}
                 </Text>
               </TouchableOpacity>
@@ -87,7 +89,7 @@ export default function DashboardScreen() {
             <QueryState loading={loading} error={error} retry={reload} />
             {!loading && !error && data ? (
               <>
-                <View className="mb-4 rounded-lg bg-[#064E3B] p-5">
+                <View className="mb-4 rounded-lg bg-app-primaryDark p-5">
                   <View className="flex-row items-center justify-between">
                     <Text className="text-sm text-white">
                       Saldo atual das contas
@@ -103,7 +105,7 @@ export default function DashboardScreen() {
                       <Feather
                         name={showValues ? 'eye' : 'eye-off'}
                         size={20}
-                        color="#FFFFFF"
+                        color={theme.colors.onPrimary}
                       />
                     </TouchableOpacity>
                   </View>
@@ -111,7 +113,8 @@ export default function DashboardScreen() {
                     {money(data.report.currentBalance)}
                   </Text>
                   <Text className="mt-2 text-xs leading-5 text-white/80">
-                    Inclui contas arquivadas. O resultado do mês aparece abaixo.
+                    Soma das contas cadastradas. Contas excluídas não entram
+                    neste saldo.
                   </Text>
                 </View>
                 <View className="mb-4 flex-row flex-wrap justify-between">
@@ -119,30 +122,30 @@ export default function DashboardScreen() {
                     {
                       label: 'Receitas do mês',
                       value: data.report.totalIncome,
-                      color: '#047857',
+                      color: theme.colors.primaryText,
                     },
                     {
                       label: 'Despesas do mês',
                       value: data.report.totalExpense,
-                      color: '#B42318',
+                      color: theme.colors.danger,
                     },
                     {
                       label: 'Resultado mensal',
                       value: data.report.balance,
-                      color: '#101828',
+                      color: theme.colors.text,
                     },
                     {
                       label: 'Saldo previsto',
                       value: data.report.projectedBalance,
-                      color: '#344054',
+                      color: theme.colors.text,
                     },
                   ].map((item) => (
                     <View
                       key={item.label}
                       style={{ width: '48%' }}
-                      className="mb-3 rounded-lg border border-[#E4E7EC] bg-white p-3"
+                      className="mb-3 rounded-lg border border-app-border bg-app-surface p-3"
                     >
-                      <Text className="text-xs text-[#667085]">
+                      <Text className="text-xs text-app-textMuted">
                         {item.label}
                       </Text>
                       <Text
@@ -153,23 +156,23 @@ export default function DashboardScreen() {
                       </Text>
                     </View>
                   ))}
-                  <Text className="text-xs leading-5 text-[#667085]">
+                  <Text className="text-xs leading-5 text-app-textMuted">
                     Saldo previsto = saldo atual + receitas previstas − despesas
                     previstas do mês selecionado, incluindo faturas não pagas
                     com vencimento no mês.
                   </Text>
                 </View>
-                <View className="mb-4 rounded-lg border border-[#E4E7EC] bg-white p-4">
-                  <Text className="mb-2 font-semibold text-[#344054]">
+                <View className="mb-4 rounded-lg border border-app-border bg-app-surface p-4">
+                  <Text className="mb-2 font-semibold text-app-text">
                     Comparação com {getMonthName(data.report.previous.month)}{' '}
                     {data.report.previous.year}
                   </Text>
-                  <Text className="text-sm leading-6 text-[#667085]">
+                  <Text className="text-sm leading-6 text-app-textMuted">
                     Receitas: {money(data.report.previous.totalIncome)} ·
                     despesas: {money(data.report.previous.totalExpense)} ·
                     resultado: {money(data.report.previous.balance)}.
                   </Text>
-                  <Text className="mt-2 text-sm text-[#344054]">
+                  <Text className="mt-2 text-sm text-app-text">
                     Variação do resultado:{' '}
                     {money(data.report.balance - data.report.previous.balance)}.
                   </Text>
@@ -177,14 +180,14 @@ export default function DashboardScreen() {
                 <FinancialCharts report={data.report} />
                 <View className="mb-4">
                   <View className="mb-3 flex-row items-center justify-between">
-                    <Text className="text-base font-semibold text-[#101828]">
+                    <Text className="text-base font-semibold text-app-text">
                       Cartões de crédito
                     </Text>
                     <TouchableOpacity
                       accessibilityRole="button"
                       onPress={() => router.push('/cards')}
                     >
-                      <Text className="p-2 font-semibold text-[#047857]">
+                      <Text className="p-2 font-semibold text-app-primaryText">
                         Ver cartões
                       </Text>
                     </TouchableOpacity>
@@ -218,19 +221,19 @@ export default function DashboardScreen() {
                 </View>
                 <View className="mb-4">
                   <View className="mb-3 flex-row items-center justify-between">
-                    <Text className="text-base font-semibold text-[#101828]">
+                    <Text className="text-base font-semibold text-app-text">
                       Metas financeiras
                     </Text>
                     <TouchableOpacity
                       accessibilityRole="button"
                       onPress={() => router.push('/goals')}
                     >
-                      <Text className="p-2 font-semibold text-[#047857]">
+                      <Text className="p-2 font-semibold text-app-primaryText">
                         Ver metas
                       </Text>
                     </TouchableOpacity>
                   </View>
-                  <Text className="mb-3 text-sm leading-6 text-[#667085]">
+                  <Text className="mb-3 text-sm leading-6 text-app-textMuted">
                     Dinheiro já incluído no saldo das contas. O progresso
                     considera o saldo atual.
                   </Text>
@@ -259,7 +262,7 @@ export default function DashboardScreen() {
                   )}
                 </View>
                 <View className="mb-4">
-                  <Text className="mb-3 text-base font-semibold text-[#101828]">
+                  <Text className="mb-3 text-base font-semibold text-app-text">
                     Minhas contas
                   </Text>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -278,19 +281,19 @@ export default function DashboardScreen() {
                               params: { id: account.id },
                             })
                           }
-                          className="mr-3 w-52 rounded-lg border border-[#E4E7EC] bg-white p-4"
+                          className="mr-3 w-52 rounded-lg border border-app-border bg-app-surface p-4"
                           style={{
                             borderTopColor: account.color,
                             borderTopWidth: 3,
                           }}
                         >
-                          <Text className="text-xs text-[#667085]">
+                          <Text className="text-xs text-app-textMuted">
                             {account.institution}
                           </Text>
-                          <Text className="mt-1 text-base font-semibold text-[#344054]">
+                          <Text className="mt-1 text-base font-semibold text-app-text">
                             {account.name}
                           </Text>
-                          <Text className="mt-4 text-xl font-bold text-[#101828]">
+                          <Text className="mt-4 text-xl font-bold text-app-text">
                             {money(account.balance)}
                           </Text>
                         </TouchableOpacity>
@@ -304,8 +307,8 @@ export default function DashboardScreen() {
                   ) : null}
                 </View>
                 {data.upcoming.length ? (
-                  <View className="mb-4 rounded-lg border border-[#FEDF89] bg-[#FFFAEB] p-4">
-                    <Text className="font-semibold text-[#93370D]">
+                  <View className="mb-4 rounded-lg border border-app-warningBorder bg-app-warningBackground p-4">
+                    <Text className="font-semibold text-app-warning">
                       Próximos compromissos
                     </Text>
                     {data.upcoming.slice(0, 3).map((item) => (
@@ -317,7 +320,7 @@ export default function DashboardScreen() {
                         }
                         className="mt-3"
                       >
-                        <Text className="text-sm text-[#475467]">
+                        <Text className="text-sm text-app-textSecondary">
                           {item.date
                             .slice(0, 10)
                             .split('-')
@@ -331,7 +334,7 @@ export default function DashboardScreen() {
                       accessibilityRole="button"
                       onPress={() => router.push('/planning')}
                     >
-                      <Text className="mt-3 font-semibold text-[#047857]">
+                      <Text className="mt-3 font-semibold text-app-primaryText">
                         Ver planejamento
                       </Text>
                     </TouchableOpacity>
@@ -343,9 +346,9 @@ export default function DashboardScreen() {
                     <TouchableOpacity
                       key={b.id}
                       onPress={() => router.push('/budgets')}
-                      className="mb-3 rounded-lg border border-[#FECDCA] bg-[#FEF3F2] p-4"
+                      className="mb-3 rounded-lg border border-app-dangerBorder bg-app-dangerBackground p-4"
                     >
-                      <Text className="font-semibold text-[#B42318]">
+                      <Text className="font-semibold text-app-danger">
                         {b.category.name}:{' '}
                         {showValues
                           ? b.percentage + '% do orçamento utilizado'
@@ -354,7 +357,7 @@ export default function DashboardScreen() {
                     </TouchableOpacity>
                   ))}
                 <View className="mb-4 mt-2 flex-row justify-between">
-                  <Text className="text-base font-semibold text-[#101828]">
+                  <Text className="text-base font-semibold text-app-text">
                     Movimentações do mês
                   </Text>
                   <TouchableOpacity
@@ -365,13 +368,13 @@ export default function DashboardScreen() {
                       router.push('/(tabs)/transactions');
                     }}
                   >
-                    <Text className="font-semibold text-[#047857]">
+                    <Text className="font-semibold text-app-primaryText">
                       Ver todas
                     </Text>
                   </TouchableOpacity>
                 </View>
                 {!data.recent.length ? (
-                  <Text className="mb-5 text-[#667085]">
+                  <Text className="mb-5 text-app-textMuted">
                     Nenhum lançamento nesse mês.
                   </Text>
                 ) : null}

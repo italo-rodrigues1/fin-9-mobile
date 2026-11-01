@@ -1,5 +1,8 @@
+import type { TextInputInstance } from 'react-native';
+import { useFormInputFocus } from '../KeyboardForm';
+import { useTheme } from '../../theme/ThemeProvider';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef } from 'react';
 import {
   Modal,
   Pressable,
@@ -53,6 +56,9 @@ function sanitizeDateInput(value: string) {
 }
 
 export function DateInput({ label, value, onChange }: DateInputProps) {
+  const focusInput = useFormInputFocus(),
+    inputRef = useRef<TextInputInstance>(null);
+  const theme = useTheme();
   const selectedDate = parseDateValue(value) ?? new Date();
   const [isOpen, setIsOpen] = useState(false);
   const [visibleMonth, setVisibleMonth] = useState(
@@ -92,16 +98,19 @@ export function DateInput({ label, value, onChange }: DateInputProps) {
 
   return (
     <View className="mb-4">
-      <Text className="mb-2 ml-1 text-sm font-medium text-[#667085]">
+      <Text className="mb-2 ml-1 text-sm font-medium text-app-textMuted">
         {label}
       </Text>
-      <View className="flex-row items-center rounded-lg border border-[#D0D5DD] bg-white">
+      <View className="flex-row items-center rounded-lg border border-app-border bg-app-surface">
         <TextInput
-          className="flex-1 px-4 py-4 text-base text-[#344054]"
+          ref={inputRef}
+          onFocus={() => focusInput(inputRef.current)}
+          accessibilityLabel={label}
+          className="flex-1 px-4 py-4 text-base text-app-text"
           value={value}
           onChangeText={(text) => onChange(sanitizeDateInput(text))}
           placeholder="AAAA-MM-DD"
-          placeholderTextColor={COLORS.textMuted}
+          placeholderTextColor={theme.colors.textMuted}
           keyboardType="numeric"
           maxLength={10}
         />
@@ -113,7 +122,7 @@ export function DateInput({ label, value, onChange }: DateInputProps) {
           <MaterialCommunityIcons
             name="calendar-month-outline"
             size={23}
-            color="#169670"
+            color={theme.colors.primary}
           />
         </TouchableOpacity>
       </View>
@@ -129,7 +138,7 @@ export function DateInput({ label, value, onChange }: DateInputProps) {
           onPress={() => setIsOpen(false)}
         >
           <Pressable
-            className="w-full max-w-[380px] rounded-lg bg-white p-5"
+            className="w-full max-w-[380px] rounded-lg bg-app-surface p-5"
             onPress={(event) => event.stopPropagation()}
           >
             <View className="mb-5 flex-row items-center justify-between">
@@ -140,10 +149,10 @@ export function DateInput({ label, value, onChange }: DateInputProps) {
                 <MaterialCommunityIcons
                   name="chevron-left"
                   size={26}
-                  color="#344054"
+                  color={theme.colors.text}
                 />
               </TouchableOpacity>
-              <Text className="text-base font-bold capitalize text-[#344054]">
+              <Text className="text-base font-bold capitalize text-app-text">
                 {new Intl.DateTimeFormat('pt-BR', {
                   month: 'long',
                   year: 'numeric',
@@ -156,7 +165,7 @@ export function DateInput({ label, value, onChange }: DateInputProps) {
                 <MaterialCommunityIcons
                   name="chevron-right"
                   size={26}
-                  color="#344054"
+                  color={theme.colors.text}
                 />
               </TouchableOpacity>
             </View>
@@ -168,7 +177,7 @@ export function DateInput({ label, value, onChange }: DateInputProps) {
                   className="items-center py-2"
                   style={{ width: '14.2857%' }}
                 >
-                  <Text className="text-xs font-semibold text-[#667085]">
+                  <Text className="text-xs font-semibold text-app-textMuted">
                     {day}
                   </Text>
                 </View>
@@ -196,13 +205,13 @@ export function DateInput({ label, value, onChange }: DateInputProps) {
                     style={{ width: '14.2857%' }}
                   >
                     <View
-                      className={`h-10 w-10 items-center justify-center rounded-full ${isSelected ? 'bg-[#169670]' : ''}`}
+                      className={`h-10 w-10 items-center justify-center rounded-full ${isSelected ? 'bg-app-primary' : ''}`}
                     >
                       <Text
                         className={
                           isSelected
                             ? 'font-semibold text-white'
-                            : 'text-[#344054]'
+                            : 'text-app-text'
                         }
                       >
                         {day}

@@ -1,7 +1,10 @@
+import {
+  KeyboardScreen as SafeAreaView,
+  KeyboardScrollView as ScrollView,
+} from '../../src/components/KeyboardForm';
 import { useCallback, useRef, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { QueryState } from '../../src/components/QueryState';
 import { CardInvoiceSummary } from '../../src/components/CardInvoiceSummary';
@@ -70,7 +73,7 @@ export default function Payment() {
   };
   const accounts = (r.data?.accounts || []).filter((a) => !a.isArchived);
   return (
-    <SafeAreaView className="flex-1 bg-[#F7F8FA]">
+    <SafeAreaView className="flex-1 bg-app-background">
       <ScreenHeader title="Registrar pagamento" />
       <ScrollView
         contentContainerStyle={{ padding: 16, paddingBottom: 48 }}
@@ -79,12 +82,12 @@ export default function Payment() {
         <QueryState loading={r.loading} error={r.error} retry={r.reload} />
         {!r.loading && !r.error && r.data ? (
           <>
-            <Text className="mb-3 text-lg font-semibold text-[#101828]">
+            <Text className="mb-3 text-lg font-semibold text-app-text">
               {r.data.detail.card.name}
             </Text>
             <CardInvoiceSummary invoice={r.data.detail.invoice} />
-            <View className="rounded-lg bg-white p-4">
-              <Text className="mb-5 text-sm leading-6 text-[#667085]">
+            <View className="rounded-lg bg-app-surface p-4">
+              <Text className="mb-5 text-sm leading-6 text-app-textMuted">
                 Este registro não faz um pagamento no banco. Informe um
                 pagamento integral que você já realizou: o valor será descontado
                 da conta e lançado nas categorias das compras.
@@ -102,7 +105,7 @@ export default function Payment() {
                     onChange={setAccount}
                   />
                   {errors.account ? (
-                    <Text className="mb-3 text-[#B42318]">
+                    <Text className="mb-3 text-app-danger">
                       {errors.account}
                     </Text>
                   ) : null}
@@ -112,7 +115,7 @@ export default function Payment() {
                     onChange={setDate}
                   />
                   {errors.date ? (
-                    <Text className="mb-3 text-[#B42318]">{errors.date}</Text>
+                    <Text className="mb-3 text-app-danger">{errors.date}</Text>
                   ) : null}
                   <Button
                     title="Confirmar registro do pagamento"
@@ -131,7 +134,7 @@ export default function Payment() {
                   ) : null}
                 </>
               ) : (
-                <Text className="text-sm text-[#667085]">
+                <Text className="text-sm text-app-textMuted">
                   O registro está disponível apenas para faturas fechadas e
                   ainda não pagas.
                 </Text>

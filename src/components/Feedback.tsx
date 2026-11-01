@@ -13,10 +13,10 @@ export function Feedback() {
       onPress={clear}
       accessibilityRole="alert"
       accessibilityLiveRegion="polite"
-      className="absolute left-4 right-4 top-14 rounded-lg bg-[#101828] p-4"
+      className="absolute left-4 right-4 top-14 rounded-lg bg-app-inverse p-4"
       style={{ zIndex: 1000, elevation: 30 }}
     >
-      <Text className="text-white">{message}</Text>
+      <Text className="text-app-onInverse">{message}</Text>
     </TouchableOpacity>
   ) : null;
 }

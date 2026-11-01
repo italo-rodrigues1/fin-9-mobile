@@ -1,3 +1,4 @@
+import { useTheme } from '../theme/ThemeProvider';
 import { ReactNode } from 'react';
 import { Text, View } from 'react-native';
 import { BackButton } from './BackButton';
@@ -15,14 +16,15 @@ export function ScreenHeader({
   right,
   dark = false,
 }: ScreenHeaderProps) {
-  const titleColor = dark ? 'text-white' : 'text-[#344054]';
-  const subtitleColor = dark ? 'text-slate-600' : 'text-[#667085]';
+  const theme = useTheme();
+  const titleColor = dark ? 'text-white' : 'text-app-text';
+  const subtitleColor = dark ? 'text-app-textMuted' : 'text-app-textMuted';
 
   return (
     <View className="flex-row items-start px-4 pb-4 pt-3">
       <BackButton
-        color={dark ? '#F8FAFC' : '#344054'}
-        backgroundColor={dark ? '#1E293B' : '#FFFFFF'}
+        color={dark ? '#F8FAFC' : theme.colors.text}
+        backgroundColor={dark ? '#1E293B' : theme.colors.surface}
       />
       <View className="ml-3 flex-1 pt-1">
         <Text className={`text-2xl font-bold ${titleColor}`}>{title}</Text>

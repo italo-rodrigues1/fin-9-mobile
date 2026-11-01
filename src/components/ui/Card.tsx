@@ -10,7 +10,7 @@ export function Card({ children, className, ...props }: CardProps) {
   /* aria-label: Generic structural Card */
   return (
     <View
-      className={`rounded-lg border border-[#EEF2F5] bg-white p-4 ${className}`}
+      className={`rounded-lg border border-app-border bg-app-surface p-4 ${className}`}
     >
       {children}
     </View>
@@ -31,23 +31,23 @@ export function SummaryCard({
   color = 'neutral',
 }: SummaryCardProps) {
   const colorClass = {
-    success: 'text-[#047857]',
-    danger: 'text-[#FF6B6B]',
-    primary: 'text-[#169670]',
-    neutral: 'text-[#344054]',
+    success: 'text-app-primaryText',
+    danger: 'text-app-danger',
+    primary: 'text-app-primaryText',
+    neutral: 'text-app-text',
   }[color];
 
   const bgClass = {
-    success: 'bg-white border-[#EEF2F5]',
-    danger: 'bg-white border-[#EEF2F5]',
-    primary: 'bg-white border-[#EEF2F5]',
-    neutral: 'bg-white border-[#EEF2F5]',
+    success: 'bg-app-surface border-app-border',
+    danger: 'bg-app-surface border-app-border',
+    primary: 'bg-app-surface border-app-border',
+    neutral: 'bg-app-surface border-app-border',
   }[color];
 
   return (
     <View className={`${bgClass} flex-1 rounded-lg border p-5`}>
       <Text className="mb-3 text-2xl">{icon}</Text>
-      <Text className="text-xs font-medium uppercase tracking-wide text-[#667085]">
+      <Text className="text-xs font-medium uppercase tracking-wide text-app-textMuted">
         {title}
       </Text>
       <Text

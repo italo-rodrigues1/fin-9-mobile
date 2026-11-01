@@ -28,7 +28,7 @@ export default function CardDetailScreen() {
             : 0),
     );
   return (
-    <SafeAreaView className="flex-1 bg-[#F7F8FA]">
+    <SafeAreaView className="flex-1 bg-app-background">
       <ScreenHeader title="Detalhes do cartão" />
       <FlatList
         contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
@@ -59,12 +59,12 @@ export default function CardDetailScreen() {
                     }
                   />
                 </View>
-                <Text className="mb-5 text-sm leading-6 text-[#667085]">
+                <Text className="mb-5 text-sm leading-6 text-app-textMuted">
                   Compras no dia do fechamento vão para a próxima fatura. Em
                   meses curtos, fechamento e vencimento usam o último dia
                   disponível. O pagamento é integral, após o fechamento.
                 </Text>
-                <Text className="mb-3 text-lg font-semibold text-[#101828]">
+                <Text className="mb-3 text-lg font-semibold text-app-text">
                   Faturas
                 </Text>
                 <Select
@@ -84,7 +84,7 @@ export default function CardDetailScreen() {
         }
         ListEmptyComponent={
           !r.loading && !r.error ? (
-            <Text className="py-4 text-[#667085]">
+            <Text className="py-4 text-app-textMuted">
               Nenhuma fatura nesta situação. As faturas são criadas ao registrar
               compras.
             </Text>

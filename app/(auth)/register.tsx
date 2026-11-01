@@ -1,21 +1,16 @@
+import {
+  KeyboardScreen as SafeAreaView,
+  KeyboardScrollView as ScrollView,
+} from '../../src/components/KeyboardForm';
 import { notify } from '../../src/stores/feedbackStore';
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  Keyboard,
-  Platform,
-  Alert,
-  type ScrollViewInstance,
-} from 'react-native';
+import { View, Text, Keyboard, Platform, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '../../src/stores/authStore';
 import { Button } from '../../src/components/ui/Button';
 import { Input } from '../../src/components/ui/Input';
 import { BrandLogo } from '../../src/components/BrandLogo';
 import { BackButton } from '../../src/components/BackButton';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { INPUT_LIMITS } from '../../src/constants';
 
 export default function RegisterScreen() {
@@ -24,43 +19,8 @@ export default function RegisterScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const scrollViewRef = useRef<ScrollViewInstance>(null);
-  const lowerFieldFocused = useRef(false);
   const { register, isLoading, error, clearError } = useAuthStore();
   const router = useRouter();
-
-  const scrollToLowerFields = () => {
-    lowerFieldFocused.current = true;
-    setTimeout(
-      () => scrollViewRef.current?.scrollToEnd({ animated: true }),
-      100,
-    );
-  };
-
-  useEffect(() => {
-    const showEvent =
-      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
-    const hideEvent =
-      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
-    const showSubscription = Keyboard.addListener(showEvent, (event) => {
-      setKeyboardHeight(event.endCoordinates.height);
-      if (lowerFieldFocused.current) {
-        setTimeout(
-          () => scrollViewRef.current?.scrollToEnd({ animated: true }),
-          50,
-        );
-      }
-    });
-    const hideSubscription = Keyboard.addListener(hideEvent, () =>
-      setKeyboardHeight(0),
-    );
-
-    return () => {
-      showSubscription.remove();
-      hideSubscription.remove();
-    };
-  }, []);
 
   const handleRegister = async () => {
     if (isLoading) return;
@@ -88,18 +48,17 @@ export default function RegisterScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F7F8FA]">
+    <SafeAreaView className="flex-1 bg-app-background">
       <View className="absolute left-4 top-3 z-10">
         <BackButton fallbackHref="/(auth)/login" />
       </View>
       <ScrollView
-        ref={scrollViewRef}
         contentContainerStyle={{
           flexGrow: 1,
           justifyContent: 'center',
           paddingHorizontal: 32,
           paddingVertical: 48,
-          paddingBottom: 48 + keyboardHeight,
+          paddingBottom: 48,
         }}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
@@ -111,13 +70,13 @@ export default function RegisterScreen() {
           </View>
 
           <View>
-            <Text className="text-center text-[18px] font-bold text-[#1F2937]">
+            <Text className="text-center text-[18px] font-bold text-app-text">
               Crie sua conta
             </Text>
-            <Text className="mt-4 text-center text-base text-[#667085]">
+            <Text className="mt-4 text-center text-base text-app-textMuted">
               Já possui uma conta?{' '}
               <Text
-                className="font-semibold text-[#169670]"
+                className="font-semibold text-app-primaryText"
                 onPress={() => router.replace('/(auth)/login')}
               >
                 Fazer Login
@@ -135,9 +94,6 @@ export default function RegisterScreen() {
                 setName(text);
               }}
               placeholder="Nome"
-              onFocus={() => {
-                lowerFieldFocused.current = false;
-              }}
               maxLength={INPUT_LIMITS.name}
             />
 
@@ -152,9 +108,6 @@ export default function RegisterScreen() {
               placeholder="E-mail"
               keyboardType="email-address"
               autoCapitalize="none"
-              onFocus={() => {
-                lowerFieldFocused.current = false;
-              }}
               maxLength={INPUT_LIMITS.email}
             />
 
@@ -168,11 +121,10 @@ export default function RegisterScreen() {
               }}
               placeholder="Senha"
               secureTextEntry
-              onFocus={scrollToLowerFields}
               maxLength={INPUT_LIMITS.password}
             />
 
-            <Text className="mb-4 text-sm text-[#475467]">
+            <Text className="mb-4 text-sm text-app-textSecondary">
               Mínimo de 8 caracteres, uma letra maiúscula e um número.
             </Text>
             <Input
@@ -182,13 +134,12 @@ export default function RegisterScreen() {
               onChangeText={setConfirmPassword}
               placeholder="Confirmar senha"
               secureTextEntry
-              onFocus={scrollToLowerFields}
               maxLength={INPUT_LIMITS.password}
             />
 
             {error && (
-              <View className="mb-4 rounded-lg border border-[#FFD2D2] bg-[#FFF1F1] p-4">
-                <Text className="text-center text-sm text-[#FF6B6B]">
+              <View className="mb-4 rounded-lg border border-app-dangerBorder bg-app-dangerBackground p-4">
+                <Text className="text-center text-sm text-app-danger">
                   {error}
                 </Text>
               </View>

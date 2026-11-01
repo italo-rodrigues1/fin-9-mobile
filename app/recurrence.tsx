@@ -1,7 +1,10 @@
+import {
+  KeyboardScreen as SafeAreaView,
+  KeyboardScrollView as ScrollView,
+} from '../src/components/KeyboardForm';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Text, View } from 'react-native';
 import { ScreenHeader } from '../src/components/ScreenHeader';
 import { QueryState } from '../src/components/QueryState';
 import { Input } from '../src/components/ui/Input';
@@ -163,7 +166,7 @@ export default function RecurrenceForm() {
     }
   };
   return (
-    <SafeAreaView className="flex-1 bg-[#F7F8FA]">
+    <SafeAreaView className="flex-1 bg-app-background">
       <ScreenHeader title={id ? 'Editar próximas' : 'Nova recorrência'} />
       <ScrollView
         contentContainerStyle={{ padding: 16, paddingBottom: 48 }}
@@ -175,8 +178,8 @@ export default function RecurrenceForm() {
           retry={resource.reload}
         />
         {!resource.loading && !resource.error ? (
-          <View className="rounded-lg bg-white p-4">
-            <Text className="mb-4 text-sm leading-6 text-[#667085]">
+          <View className="rounded-lg bg-app-surface p-4">
+            <Text className="mb-4 text-sm leading-6 text-app-textMuted">
               Cada ocorrência nasce como prevista. Confirmar recebimento ou
               pagamento atualiza o saldo; editar aqui preserva as ocorrências já
               confirmadas.
@@ -213,7 +216,7 @@ export default function RecurrenceForm() {
               onChange={setAccount}
             />
             {errors.account ? (
-              <Text className="mb-3 text-[#B42318]">{errors.account}</Text>
+              <Text className="mb-3 text-app-danger">{errors.account}</Text>
             ) : null}
             <Select
               label="Categoria"
@@ -225,7 +228,7 @@ export default function RecurrenceForm() {
               onChange={setCategory}
             />
             {errors.category ? (
-              <Text className="mb-3 text-[#B42318]">{errors.category}</Text>
+              <Text className="mb-3 text-app-danger">{errors.category}</Text>
             ) : null}
             {!id ? (
               <>
@@ -253,11 +256,11 @@ export default function RecurrenceForm() {
                   onChange={setEffective}
                 />
                 {errors.effective ? (
-                  <Text className="mb-3 text-[#B42318]">
+                  <Text className="mb-3 text-app-danger">
                     {errors.effective}
                   </Text>
                 ) : null}
-                <Text className="mb-3 text-sm text-[#667085]">
+                <Text className="mb-3 text-sm text-app-textMuted">
                   Para alterar o dia ou a frequência, encerre esta recorrência e
                   crie outra.
                 </Text>
@@ -269,7 +272,7 @@ export default function RecurrenceForm() {
               onChange={setEnd}
             />
             {errors.date ? (
-              <Text className="mb-3 text-[#B42318]">{errors.date}</Text>
+              <Text className="mb-3 text-app-danger">{errors.date}</Text>
             ) : null}
             <Button
               title="Salvar recorrência"

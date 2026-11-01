@@ -1,9 +1,12 @@
+import {
+  KeyboardScreen as SafeAreaView,
+  KeyboardFlatList as FlatList,
+} from '../src/components/KeyboardForm';
 import { confirmAction } from '../src/utils/confirmAction';
 import { QueryState } from '../src/components/QueryState';
 import { notify } from '../src/stores/feedbackStore';
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { useCategoryStore } from '../src/stores/categoryStore';
 import { Category } from '../src/types';
 import { CATEGORY_ICONS, INPUT_LIMITS } from '../src/constants';
@@ -93,7 +96,7 @@ export default function CategoriesScreen() {
   const renderItem = useCallback(({ item }: { item: Category }) => {
     const icon = CATEGORY_ICONS[item.icon] || '🏷️';
     return (
-      <View className="flex-row items-center py-4 px-5 bg-white rounded-lg mb-3 border border-slate-200/80 shadow-sm">
+      <View className="flex-row items-center py-4 px-5 bg-app-surface rounded-lg mb-3 border border-app-border/80 shadow-sm">
         <View
           className="w-12 h-12 rounded-full items-center justify-center mr-4"
           style={{ backgroundColor: `${item.color}25` }}
@@ -101,26 +104,26 @@ export default function CategoriesScreen() {
           <Text className="text-xl">{icon}</Text>
         </View>
         <View className="flex-1">
-          <Text className="text-slate-900 font-bold text-base mb-1">
+          <Text className="text-app-text font-bold text-base mb-1">
             {item.name}
           </Text>
-          <Text className="text-slate-600 text-xs font-medium">
+          <Text className="text-app-textMuted text-xs font-medium">
             {item.isDefault ? 'Padrão' : 'Personalizada'}
           </Text>
         </View>
         <View className="flex-row gap-2">
           <TouchableOpacity
             onPress={() => handleEdit(item)}
-            className="px-3 py-2 bg-slate-100 rounded-lg active:bg-slate-700"
+            className="px-3 py-2 bg-app-surfaceLight rounded-lg active:bg-slate-700"
           >
-            <Text className="text-primary-700 text-sm font-bold">Editar</Text>
+            <Text className="text-app-primaryText text-sm font-bold">Editar</Text>
           </TouchableOpacity>
           {!item.isDefault && (
             <TouchableOpacity
               onPress={() => handleDelete(item)}
-              className="px-3 py-2 bg-red-500/10 rounded-lg active:bg-red-500/20"
+              className="px-3 py-2 bg-app-danger/10 rounded-lg active:bg-app-danger/20"
             >
-              <Text className="text-red-700 text-sm font-bold">Excluir</Text>
+              <Text className="text-app-danger text-sm font-bold">Excluir</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -131,7 +134,7 @@ export default function CategoriesScreen() {
   const keyExtractor = useCallback((item: Category) => item.id, []);
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F7F8FA]">
+    <SafeAreaView className="flex-1 bg-app-background">
       <ScreenHeader
         title="Categorias"
         right={
@@ -151,45 +154,46 @@ export default function CategoriesScreen() {
         }
       />
 
-      {showForm && (
-        <View className="mx-6 mb-6 p-6 bg-white rounded-lg border border-slate-200 shadow-xl">
-          <Input
-            label={editingId ? 'Editar Categoria' : 'Nova Categoria'}
-            error={fieldError}
-            value={name}
-            onChangeText={setName}
-            placeholder="Nome da categoria"
-            maxLength={INPUT_LIMITS.categoryName}
-          />
-          <Text className="text-slate-600 text-sm font-medium mb-3 ml-1">
-            Cor de Identificação
-          </Text>
-          <View className="flex-row flex-wrap gap-3 mb-6">
-            {COLORS.map((color) => (
-              <TouchableOpacity
-                key={color}
-                onPress={() => setSelectedColor(color)}
-                className={`w-11 h-11 rounded-full ${selectedColor === color ? 'border-4 border-slate-200 shadow-md transform scale-110' : ''}`}
-                style={{ backgroundColor: color }}
-              />
-            ))}
-          </View>
-          <Button
-            title={editingId ? 'Salvar Categoria' : 'Criar Categoria'}
-            onPress={handleSave}
-            isLoading={saving}
-          />
-        </View>
-      )}
-
       <FlatList
         data={isLoading || error ? [] : categories}
         ListHeaderComponent={
-          <QueryState
-            loading={isLoading}
-            error={error}
-            retry={() => void fetch(true)}
-          />
+          <>
+            <QueryState
+              loading={isLoading}
+              error={error}
+              retry={() => void fetch(true)}
+            />{' '}
+            {showForm && (
+              <View className="mb-6 p-6 bg-app-surface rounded-lg border border-app-border shadow-xl">
+                <Input
+                  label={editingId ? 'Editar Categoria' : 'Nova Categoria'}
+                  error={fieldError}
+                  value={name}
+                  onChangeText={setName}
+                  placeholder="Nome da categoria"
+                  maxLength={INPUT_LIMITS.categoryName}
+                />
+                <Text className="text-app-textMuted text-sm font-medium mb-3 ml-1">
+                  Cor de Identificação
+                </Text>
+                <View className="flex-row flex-wrap gap-3 mb-6">
+                  {COLORS.map((color) => (
+                    <TouchableOpacity
+                      key={color}
+                      onPress={() => setSelectedColor(color)}
+                      className={`w-11 h-11 rounded-full ${selectedColor === color ? 'border-4 border-app-border shadow-md transform scale-110' : ''}`}
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                </View>
+                <Button
+                  title={editingId ? 'Salvar Categoria' : 'Criar Categoria'}
+                  onPress={handleSave}
+                  isLoading={saving}
+                />
+              </View>
+            )}
+          </>
         }
         renderItem={renderItem}
         keyExtractor={keyExtractor}

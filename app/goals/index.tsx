@@ -12,7 +12,7 @@ export default function Goals() {
   const router = useRouter(),
     resource = useResource(useCallback(() => goalService.overview(), []));
   return (
-    <SafeAreaView className="flex-1 bg-[#F7F8FA]">
+    <SafeAreaView className="flex-1 bg-app-background">
       <ScreenHeader
         title="Metas"
         subtitle="Dê um destino ao dinheiro das suas contas."
@@ -29,7 +29,7 @@ export default function Goals() {
               title="Nova meta"
               onPress={() => router.push('/goals/edit')}
             />
-            <Text className="my-4 text-sm leading-6 text-[#667085]">
+            <Text className="my-4 text-sm leading-6 text-app-textMuted">
               As contribuições organizam dinheiro que já está nas suas contas.
               Não alteram saldos nem entram como receita ou despesa.
             </Text>
@@ -42,7 +42,7 @@ export default function Goals() {
         }
         ListEmptyComponent={
           !resource.loading && !resource.error ? (
-            <Text className="py-6 text-[#667085]">
+            <Text className="py-6 text-app-textMuted">
               Crie sua primeira meta para acompanhar um objetivo.
             </Text>
           ) : undefined

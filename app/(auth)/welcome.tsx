@@ -1,3 +1,4 @@
+import { useTheme } from '../../src/theme/ThemeProvider';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { ScrollView, Text, View } from 'react-native';
@@ -5,9 +6,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BrandLogo } from '../../src/components/BrandLogo';
 import { Button } from '../../src/components/ui/Button';
 export default function WelcomeScreen() {
+  const theme = useTheme();
   const router = useRouter();
   return (
-    <SafeAreaView className="flex-1 bg-[#F7F8FA]">
+    <SafeAreaView className="flex-1 bg-app-background">
       <ScrollView
         contentContainerStyle={{
           flexGrow: 1,
@@ -16,13 +18,13 @@ export default function WelcomeScreen() {
         }}
       >
         <BrandLogo />
-        <Text className="mt-12 text-xs font-bold tracking-widest text-[#047857]">
+        <Text className="mt-12 text-xs font-bold tracking-widest text-app-primaryText">
           SUAS FINANÇAS, COM CLAREZA
         </Text>
-        <Text className="mt-4 text-4xl font-bold leading-tight text-[#101828]">
+        <Text className="mt-4 text-4xl font-bold leading-tight text-app-text">
           Mais controle. Melhores decisões.
         </Text>
-        <Text className="mb-8 mt-5 text-base leading-7 text-[#475467]">
+        <Text className="mb-8 mt-5 text-base leading-7 text-app-textSecondary">
           Organize suas contas, registre receitas e despesas e acompanhe seu
           dinheiro em um só lugar.
         </Text>
@@ -32,10 +34,12 @@ export default function WelcomeScreen() {
           'Seu histórico sempre à mão',
         ].map((label) => (
           <View key={label} className="mb-4 flex-row items-center">
-            <Feather name="check-circle" size={20} color="#047857" />
-            <Text className="ml-3 flex-1 text-base text-[#344054]">
-              {label}
-            </Text>
+            <Feather
+              name="check-circle"
+              size={20}
+              color={theme.colors.primaryText}
+            />
+            <Text className="ml-3 flex-1 text-base text-app-text">{label}</Text>
           </View>
         ))}
         <View className="mt-8">

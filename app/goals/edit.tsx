@@ -1,7 +1,10 @@
+import {
+  KeyboardScreen as SafeAreaView,
+  KeyboardScrollView as ScrollView,
+} from '../../src/components/KeyboardForm';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { QueryState } from '../../src/components/QueryState';
 import { Input } from '../../src/components/ui/Input';
@@ -76,7 +79,7 @@ export default function EditGoal() {
     }
   };
   return (
-    <SafeAreaView className="flex-1 bg-[#F7F8FA]">
+    <SafeAreaView className="flex-1 bg-app-background">
       <ScreenHeader title={id ? 'Editar meta' : 'Nova meta'} />
       <ScrollView
         contentContainerStyle={{ padding: 16, paddingBottom: 48 }}
@@ -88,7 +91,7 @@ export default function EditGoal() {
           retry={resource.reload}
         />
         {!resource.loading && !resource.error ? (
-          <View className="rounded-lg bg-white p-4">
+          <View className="rounded-lg bg-app-surface p-4">
             <Input
               label="Nome da meta"
               value={name}
@@ -109,7 +112,7 @@ export default function EditGoal() {
               onChange={setDeadline}
             />
             {errors.deadline ? (
-              <Text className="mb-3 text-[#B42318]">{errors.deadline}</Text>
+              <Text className="mb-3 text-app-danger">{errors.deadline}</Text>
             ) : null}
             {deadline ? (
               <View className="mb-4">
@@ -120,7 +123,7 @@ export default function EditGoal() {
                 />
               </View>
             ) : null}
-            <Text className="mb-5 text-sm leading-6 text-[#667085]">
+            <Text className="mb-5 text-sm leading-6 text-app-textMuted">
               O valor-alvo pode ser alterado depois. As contribuições já
               registradas serão preservadas.
             </Text>

@@ -1,3 +1,4 @@
+import { useTheme } from '../../theme/ThemeProvider';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
@@ -43,6 +44,7 @@ export function ColorPicker({
   onChange,
   colors,
 }: ColorPickerProps) {
+  const theme = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const allColors = [...new Set([...colors, ...EXTRA_COLORS])];
 
@@ -60,9 +62,9 @@ export function ColorPicker({
               width: 56,
               height: 48,
               padding: 2,
-              border: '1px solid #D0D5DD',
+              border: '1px solid ' + theme.colors.border,
               borderRadius: 14,
-              backgroundColor: '#FFFFFF',
+              backgroundColor: theme.colors.surface,
               cursor: 'pointer',
             },
           } as never,
@@ -71,7 +73,7 @@ export function ColorPicker({
 
   return (
     <View className="mb-6">
-      <Text className="mb-3 ml-1 text-sm font-medium text-[#667085]">
+      <Text className="mb-3 ml-1 text-sm font-medium text-app-textMuted">
         {label}
       </Text>
       <View className="flex-row flex-wrap items-center gap-3">
@@ -87,7 +89,11 @@ export function ColorPicker({
             accessibilityLabel={`Selecionar cor ${color}`}
           >
             {value === color ? (
-              <MaterialCommunityIcons name="check" size={19} color="#FFFFFF" />
+              <MaterialCommunityIcons
+                name="check"
+                size={19}
+                color={theme.colors.onPrimary}
+              />
             ) : null}
           </TouchableOpacity>
         ))}
@@ -95,14 +101,14 @@ export function ColorPicker({
         {webInput ?? (
           <TouchableOpacity
             onPress={() => setIsOpen(true)}
-            className="h-12 w-12 items-center justify-center rounded-lg border border-[#D0D5DD]"
+            className="h-12 w-12 items-center justify-center rounded-lg border border-app-border"
             style={{ backgroundColor: value }}
             accessibilityLabel="Escolher outra cor"
           >
             <MaterialCommunityIcons
               name="palette-outline"
               size={22}
-              color="#FFFFFF"
+              color={theme.colors.onPrimary}
             />
           </TouchableOpacity>
         )}
@@ -119,11 +125,11 @@ export function ColorPicker({
           onPress={() => setIsOpen(false)}
         >
           <Pressable
-            className="w-full max-w-[380px] rounded-lg bg-white p-5"
+            className="w-full max-w-[380px] rounded-lg bg-app-surface p-5"
             onPress={(event) => event.stopPropagation()}
           >
             <View className="mb-5 flex-row items-center justify-between">
-              <Text className="text-lg font-bold text-[#344054]">
+              <Text className="text-lg font-bold text-app-text">
                 Escolha uma cor
               </Text>
               <TouchableOpacity
@@ -133,7 +139,7 @@ export function ColorPicker({
                 <MaterialCommunityIcons
                   name="close"
                   size={22}
-                  color="#667085"
+                  color={theme.colors.textMuted}
                 />
               </TouchableOpacity>
             </View>
@@ -152,7 +158,7 @@ export function ColorPicker({
                     <MaterialCommunityIcons
                       name="check"
                       size={21}
-                      color="#FFFFFF"
+                      color={theme.colors.onPrimary}
                     />
                   ) : null}
                 </TouchableOpacity>

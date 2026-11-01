@@ -14,10 +14,10 @@ export function QueryState({
   if (!error) return null;
   return (
     <View
-      className="m-4 rounded-lg border border-[#D0D5DD] bg-white p-5"
+      className="m-4 rounded-lg border border-app-border bg-app-surface p-5"
       accessibilityLiveRegion="polite"
     >
-      <Text className="mb-4 text-[#B42318]">{error}</Text>
+      <Text className="mb-4 text-app-danger">{error}</Text>
       <Button title="Tentar novamente" onPress={retry} />
     </View>
   );

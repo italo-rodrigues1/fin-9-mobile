@@ -1,3 +1,4 @@
+import { useTheme } from '../../theme/ThemeProvider';
 import React from 'react';
 import { TouchableOpacity, Text, ViewStyle } from 'react-native';
 import { LoadingSkeleton } from '../LoadingSkeleton';
@@ -20,27 +21,28 @@ export function Button({
   disabled,
   style,
 }: ButtonProps) {
+  const theme = useTheme();
   const baseClass =
     'min-h-[56px] flex-row items-center justify-center rounded-lg px-5 py-4';
 
   const variantClass = {
     primary: '',
-    secondary: 'border border-[#E5E7EB] bg-white',
+    secondary: 'border border-app-border bg-app-surface',
     danger: '',
-    outline: 'border border-[#D6DEE6] bg-transparent',
+    outline: 'border border-app-border bg-transparent',
   }[variant];
 
   const textClass = {
     primary: 'text-white font-semibold text-lg',
-    secondary: 'text-[#344054] font-semibold text-lg',
+    secondary: 'text-app-text font-semibold text-lg',
     danger: 'text-white font-semibold text-lg',
-    outline: 'text-[#344054] font-semibold text-lg',
+    outline: 'text-app-text font-semibold text-lg',
   }[variant];
 
   const backgroundColor = {
-    primary: COLORS.primary,
-    secondary: COLORS.surface,
-    danger: COLORS.danger,
+    primary: theme.colors.primary,
+    secondary: theme.colors.surface,
+    danger: theme.colors.dangerSolid,
     outline: 'transparent',
   }[variant];
 

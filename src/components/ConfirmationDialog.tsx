@@ -20,15 +20,15 @@ export function ConfirmationDialog() {
         />
         <View
           accessibilityViewIsModal
-          className="w-full max-w-[440px] rounded-lg bg-white p-6"
+          className="w-full max-w-[440px] rounded-lg bg-app-surface p-6"
         >
           <Text
             accessibilityRole="header"
-            className="text-xl font-bold text-[#101828]"
+            className="text-xl font-bold text-app-text"
           >
             {request.title}
           </Text>
-          <Text className="mb-6 mt-3 text-base leading-6 text-[#475467]">
+          <Text className="mb-6 mt-3 text-base leading-6 text-app-textSecondary">
             {request.message}
           </Text>
           <Button title={request.confirmText} onPress={() => answer(true)} />

@@ -10,6 +10,33 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        app: {
+          background: 'rgb(var(--app-background) / <alpha-value>)',
+          surface: 'rgb(var(--app-surface) / <alpha-value>)',
+          surfaceLight: 'rgb(var(--app-surfaceLight) / <alpha-value>)',
+          text: 'rgb(var(--app-text) / <alpha-value>)',
+          textSecondary: 'rgb(var(--app-textSecondary) / <alpha-value>)',
+          textMuted: 'rgb(var(--app-textMuted) / <alpha-value>)',
+          border: 'rgb(var(--app-border) / <alpha-value>)',
+          primary: 'rgb(var(--app-primary) / <alpha-value>)',
+          primaryDark: 'rgb(var(--app-primaryDark) / <alpha-value>)',
+          primaryLight: 'rgb(var(--app-primaryLight) / <alpha-value>)',
+          primaryText: 'rgb(var(--app-primaryText) / <alpha-value>)',
+          success: 'rgb(var(--app-success) / <alpha-value>)',
+          danger: 'rgb(var(--app-danger) / <alpha-value>)',
+          dangerBackground: 'rgb(var(--app-dangerBackground) / <alpha-value>)',
+          dangerBorder: 'rgb(var(--app-dangerBorder) / <alpha-value>)',
+          warning: 'rgb(var(--app-warning) / <alpha-value>)',
+          warningBackground:
+            'rgb(var(--app-warningBackground) / <alpha-value>)',
+          warningBorder: 'rgb(var(--app-warningBorder) / <alpha-value>)',
+          white: 'rgb(var(--app-white) / <alpha-value>)',
+          onPrimary: 'rgb(var(--app-onPrimary) / <alpha-value>)',
+          avatar: 'rgb(var(--app-avatar) / <alpha-value>)',
+          skeleton: 'rgb(var(--app-skeleton) / <alpha-value>)',
+          inverse: 'rgb(var(--app-inverse) / <alpha-value>)',
+          onInverse: 'rgb(var(--app-onInverse) / <alpha-value>)',
+        },
         emerald: {
           50: '#ecfdf5',
           100: '#d1fae5',

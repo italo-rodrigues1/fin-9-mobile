@@ -1,3 +1,4 @@
+import { useTheme } from '../theme/ThemeProvider';
 import { useEffect, useRef } from 'react';
 import {
   AccessibilityInfo,
@@ -16,13 +17,14 @@ function Block({
   height?: number;
   light?: boolean;
 }) {
+  const theme = useTheme();
   return (
     <View
       style={{
         width,
         height,
         borderRadius: 6,
-        backgroundColor: light ? 'rgba(255,255,255,0.6)' : '#E4E7EC',
+        backgroundColor: light ? 'rgba(255,255,255,0.6)' : theme.colors.border,
       }}
     />
   );
@@ -36,6 +38,7 @@ export function LoadingSkeleton({
   label?: string;
   light?: boolean;
 }) {
+  const theme = useTheme();
   const opacity = useRef(new Animated.Value(1)).current;
   useEffect(() => {
     let active = true;
@@ -109,10 +112,10 @@ export function LoadingSkeleton({
                 style={{
                   gap: 12,
                   padding: 16,
-                  backgroundColor: '#FFFFFF',
+                  backgroundColor: theme.colors.surface,
                   borderRadius: 8,
                   borderWidth: 1,
-                  borderColor: '#EAECF0',
+                  borderColor: theme.colors.surfaceLight,
                 }}
               >
                 <Block width={index % 2 === 0 ? '44%' : '60%'} height={14} />

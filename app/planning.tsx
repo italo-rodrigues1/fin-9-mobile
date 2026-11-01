@@ -76,7 +76,7 @@ export default function Planning() {
           : 'Previsto';
   };
   return (
-    <SafeAreaView className="flex-1 bg-[#F7F8FA]">
+    <SafeAreaView className="flex-1 bg-app-background">
       <FlatList
         data={
           resource.loading || resource.error
@@ -114,7 +114,7 @@ export default function Planning() {
             />
             {!resource.loading && !resource.error ? (
               <>
-                <Text className="mb-3 mt-5 text-lg font-semibold text-[#101828]">
+                <Text className="mb-3 mt-5 text-lg font-semibold text-app-text">
                   Recorrências
                 </Text>
                 {resource.data?.rules.map((rule) => (
@@ -127,12 +127,12 @@ export default function Planning() {
                         params: { id: rule.id },
                       })
                     }
-                    className="mb-3 rounded-lg border border-[#E4E7EC] bg-white p-4"
+                    className="mb-3 rounded-lg border border-app-border bg-app-surface p-4"
                   >
-                    <Text className="font-semibold text-[#344054]">
+                    <Text className="font-semibold text-app-text">
                       {rule.title} · {rule.active ? 'Ativa' : 'Encerrada'}
                     </Text>
-                    <Text className="mt-2 text-sm text-[#667085]">
+                    <Text className="mt-2 text-sm text-app-textMuted">
                       {rule.interval === 'MONTHLY'
                         ? 'Mensal'
                         : rule.interval === 'WEEKLY'
@@ -143,14 +143,14 @@ export default function Planning() {
                   </TouchableOpacity>
                 ))}
                 {!resource.data?.rules.length ? (
-                  <Text className="mb-4 text-[#667085]">
+                  <Text className="mb-4 text-app-textMuted">
                     Nenhuma recorrência cadastrada.
                   </Text>
                 ) : null}
-                <Text className="mb-3 mt-4 text-lg font-semibold text-[#101828]">
+                <Text className="mb-3 mt-4 text-lg font-semibold text-app-text">
                   Próximos compromissos
                 </Text>
-                <Text className="mb-4 text-xs text-[#667085]">
+                <Text className="mb-4 text-xs text-app-textMuted">
                   Até 100 ocorrências, incluindo vencidas. As recorrências
                   mantêm uma previsão de 12 meses.
                 </Text>
@@ -160,22 +160,22 @@ export default function Planning() {
         }
         ListEmptyComponent={
           !resource.loading && !resource.error ? (
-            <Text className="p-4 text-[#667085]">
+            <Text className="p-4 text-app-textMuted">
               Nenhum compromisso pendente.
             </Text>
           ) : undefined
         }
         renderItem={({ item }) => (
-          <View className="mb-3 rounded-lg border border-[#E4E7EC] bg-white p-4">
+          <View className="mb-3 rounded-lg border border-app-border bg-app-surface p-4">
             <TouchableOpacity
               accessibilityRole="button"
               onPress={() => router.push('/(tabs)/transactions/' + item.id)}
             >
-              <Text className="font-semibold text-[#344054]">{item.title}</Text>
-              <Text className="mt-2 text-sm font-medium text-[#93370D]">
+              <Text className="font-semibold text-app-text">{item.title}</Text>
+              <Text className="mt-2 text-sm font-medium text-app-warning">
                 {due(item.date)} · {formatDate(item.date)}
               </Text>
-              <Text className="my-3 text-lg font-bold text-[#101828]">
+              <Text className="my-3 text-lg font-bold text-app-text">
                 {show ? formatCurrency(item.amount) : 'R$ ••••••'}
               </Text>
             </TouchableOpacity>

@@ -1,6 +1,7 @@
-import { Feather } from "@expo/vector-icons";
-import { Href, useRouter } from "expo-router";
-import { TouchableOpacity } from "react-native";
+import { useTheme } from '../theme/ThemeProvider';
+import { Feather } from '@expo/vector-icons';
+import { Href, useRouter } from 'expo-router';
+import { TouchableOpacity } from 'react-native';
 
 interface BackButtonProps {
   color?: string;
@@ -9,10 +10,11 @@ interface BackButtonProps {
 }
 
 export function BackButton({
-  color = "#344054",
-  backgroundColor = "#FFFFFF",
-  fallbackHref = "/(tabs)",
+  color,
+  backgroundColor,
+  fallbackHref = '/(tabs)',
 }: BackButtonProps) {
+  const theme = useTheme();
   const router = useRouter();
 
   const handlePress = () => {
@@ -32,9 +34,9 @@ export function BackButton({
       accessibilityLabel="Voltar"
       hitSlop={8}
       className="h-11 w-11 items-center justify-center rounded-full"
-      style={{ backgroundColor }}
+      style={{ backgroundColor: backgroundColor ?? theme.colors.surface }}
     >
-      <Feather name="arrow-left" size={22} color={color} />
+      <Feather name="arrow-left" size={22} color={color ?? theme.colors.text} />
     </TouchableOpacity>
   );
 }

@@ -1,3 +1,5 @@
+import { useTheme } from '../src/theme/ThemeProvider';
+import { AppThemeProvider } from '../src/theme/ThemeProvider';
 import { ConfirmationDialog } from '../src/components/ConfirmationDialog';
 import '../global.css';
 import React, { useEffect } from 'react';
@@ -10,6 +12,14 @@ import { Feedback } from '../src/components/Feedback';
 import { COLORS } from '../src/constants';
 
 export default function RootLayout() {
+  return (
+    <AppThemeProvider>
+      <RootNavigation />
+    </AppThemeProvider>
+  );
+}
+function RootNavigation() {
+  const theme = useTheme();
   const { isAuthenticated, isHydrated, loadToken } = useAuthStore();
 
   useEffect(() => {
@@ -20,21 +30,21 @@ export default function RootLayout() {
     return (
       <View
         className="flex-1 pt-14"
-        style={{ backgroundColor: COLORS.background }}
+        style={{ backgroundColor: theme.colors.background }}
       >
         <LoadingSkeleton variant="screen" label="Preparando aplicativo" />
-        <StatusBar style="dark" />
+        <StatusBar style={theme.isDark ? 'light' : 'dark'} />
       </View>
     );
   }
 
   return (
     <>
-      <StatusBar style="dark" />
+      <StatusBar style={theme.isDark ? 'light' : 'dark'} />
       <Stack
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: COLORS.background },
+          contentStyle: { backgroundColor: theme.colors.background },
         }}
       >
         <Stack.Screen name="index" />
@@ -72,7 +82,7 @@ export default function RootLayout() {
 
 export function SuspenseFallback() {
   return (
-    <View className="flex-1 bg-[#F7F8FA] pt-14">
+    <View className="flex-1 bg-app-background pt-14">
       <LoadingSkeleton variant="screen" label="Carregando tela" />
     </View>
   );

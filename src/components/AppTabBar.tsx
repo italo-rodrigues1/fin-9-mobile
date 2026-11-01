@@ -1,7 +1,8 @@
-import { Fragment } from 'react';
+import { useTheme } from '../theme/ThemeProvider';
+import { Fragment, useEffect, useState } from 'react';
 import type { BottomTabBarProps } from 'expo-router/js-tabs';
 import { Feather } from '@expo/vector-icons';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Keyboard, Text, TouchableOpacity, View } from 'react-native';
 import { QuickAddMenu } from './QuickAddMenu';
 const icons: Record<string, 'home' | 'list' | 'credit-card' | 'menu'> = {
   index: 'home',
@@ -16,9 +17,24 @@ export function AppTabBar({
   navigateToTab,
   insets,
 }: BottomTabBarProps) {
+  const theme = useTheme();
+  const [keyboardOpen, setKeyboardOpen] = useState(Keyboard.isVisible());
+  useEffect(() => {
+    const show = Keyboard.addListener('keyboardDidShow', () =>
+        setKeyboardOpen(true),
+      ),
+      hide = Keyboard.addListener('keyboardDidHide', () =>
+        setKeyboardOpen(false),
+      );
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+  if (keyboardOpen) return null;
   return (
     <View
-      className="flex-row border-t border-[#E4E7EC] bg-white"
+      className="flex-row border-t border-app-border bg-app-surface"
       style={{
         paddingTop: 4,
         paddingBottom: Math.max(8, insets.bottom),
@@ -28,7 +44,9 @@ export function AppTabBar({
       {state.routes.map((route, index) => {
         const selected = state.index === index;
         const title = descriptors[route.key].options.title || route.name;
-        const color = selected ? '#047857' : '#667085';
+        const color = selected
+          ? theme.colors.primaryText
+          : theme.colors.textMuted;
         return (
           <Fragment key={route.key}>
             {index === 2 ? <QuickAddMenu /> : null}

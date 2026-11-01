@@ -33,5 +33,6 @@ export const accountService = {
   delete: async (id: string): Promise<void> => {
     await api.delete(`/accounts/${id}`);
     readCaches.accounts.clear();
+    readCaches.transactions.clear();
   },
 };

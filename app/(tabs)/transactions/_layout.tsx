@@ -1,15 +1,17 @@
+import { useTheme } from '../../../src/theme/ThemeProvider';
 import { Stack } from 'expo-router';
 import { BackButton } from '../../../src/components/BackButton';
 
 export default function TransactionsLayout() {
+  const theme = useTheme();
   return (
     <Stack
       screenOptions={{
-        headerStyle: { backgroundColor: '#F7F8FA' },
-        headerTintColor: '#344054',
+        headerStyle: { backgroundColor: theme.colors.background },
+        headerTintColor: theme.colors.text,
         headerTitleStyle: { fontWeight: 'bold' },
         headerShadowVisible: false,
-        contentStyle: { backgroundColor: '#F7F8FA' },
+        contentStyle: { backgroundColor: theme.colors.background },
         animation: 'slide_from_right',
         headerLeft: () => <BackButton backgroundColor="transparent" />,
       }}

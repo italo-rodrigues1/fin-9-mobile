@@ -1,17 +1,13 @@
+import {
+  KeyboardScreen as SafeAreaView,
+  KeyboardScrollView as ScrollView,
+} from '../components/KeyboardForm';
+import { useTheme } from '../theme/ThemeProvider';
 import { notify } from '../stores/feedbackStore';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Alert, Platform, Text, TouchableOpacity, View } from 'react-native';
 import { Button } from '../components/ui/Button';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { ColorPicker } from '../components/ui/ColorPicker';
@@ -46,6 +42,7 @@ const INSTITUTION_OPTIONS = [
 ].map((institution) => ({ value: institution, label: institution }));
 
 export default function CreateAccountScreen() {
+  const theme = useTheme();
   const router = useRouter();
   const createAccount = useAccountStore((state) => state.create);
   const saving = React.useRef(false);
@@ -99,103 +96,99 @@ export default function CreateAccountScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F7F8FA]">
+    <SafeAreaView className="flex-1 bg-app-background">
       <ScreenHeader
         title="Cadastrar conta"
         subtitle="Adicione bancos, corretoras e outras contas para acompanhar seus saldos."
       />
-      <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+
+      <ScrollView
+        className="flex-1 px-4"
+        contentContainerStyle={{ paddingTop: 4, paddingBottom: 48 }}
+        keyboardShouldPersistTaps="handled"
       >
-        <ScrollView
-          className="flex-1 px-4"
-          contentContainerStyle={{ paddingTop: 4, paddingBottom: 48 }}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View className="rounded-lg bg-white p-5">
-            <Input
-              label="Nome da conta"
-              error={errors.name}
-              value={name}
-              onChangeText={setName}
-              placeholder="Ex: Reserva Nubank"
-              maxLength={INPUT_LIMITS.name}
-            />
-            {errors.institution ? (
-              <Text className="mb-2 text-sm text-[#B42318]">
-                {errors.institution}
-              </Text>
-            ) : null}
-            <Select
-              label="Instituição"
-              value={institution}
-              options={INSTITUTION_OPTIONS}
-              onChange={setInstitution}
-              placeholder="Ex: Nubank, XP Investimentos"
-              editable
-              maxLength={INPUT_LIMITS.institution}
-            />
-            <Input
-              label="Saldo atual (R$)"
-              error={errors.balance}
-              value={balance}
-              onChangeText={(value) => setBalance(sanitizeCurrencyInput(value))}
-              onBlur={() => {
-                const parsed = parseCurrencyInput(balance);
-                if (balance && Number.isFinite(parsed))
-                  setBalance(formatCurrencyInput(parsed));
-              }}
-              placeholder="0,00"
-              keyboardType="decimal-pad"
-              maxLength={INPUT_LIMITS.money}
-            />
-
-            <ColorPicker
-              label="Cor do cartão"
-              value={selectedColor}
-              onChange={setSelectedColor}
-              colors={ACCOUNT_COLORS}
-            />
-
-            <Text className="mb-3 ml-1 text-sm font-medium text-[#667085]">
-              Ícone
+        <View className="rounded-lg bg-app-surface p-5">
+          <Input
+            label="Nome da conta"
+            error={errors.name}
+            value={name}
+            onChangeText={setName}
+            placeholder="Ex: Reserva Nubank"
+            maxLength={INPUT_LIMITS.name}
+          />
+          {errors.institution ? (
+            <Text className="mb-2 text-sm text-app-danger">
+              {errors.institution}
             </Text>
-            <View className="mb-2 flex-row flex-wrap gap-3">
-              {ACCOUNT_ICON_OPTIONS.map((icon) => (
-                <TouchableOpacity
-                  key={icon}
-                  onPress={() => setSelectedIcon(icon)}
-                  className={`h-12 w-12 items-center justify-center rounded-lg border ${
-                    selectedIcon === icon
-                      ? 'border-[#344054] bg-[#F2F4F7]'
-                      : 'border-[#EAECF0] bg-[#F9FAFB]'
-                  }`}
-                >
-                  <MaterialCommunityIcons
-                    name={icon as never}
-                    size={22}
-                    color="#344054"
-                  />
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
+          ) : null}
+          <Select
+            label="Instituição"
+            value={institution}
+            options={INSTITUTION_OPTIONS}
+            onChange={setInstitution}
+            placeholder="Ex: Nubank, XP Investimentos"
+            editable
+            maxLength={INPUT_LIMITS.institution}
+          />
+          <Input
+            label="Saldo atual (R$)"
+            error={errors.balance}
+            value={balance}
+            onChangeText={(value) => setBalance(sanitizeCurrencyInput(value))}
+            onBlur={() => {
+              const parsed = parseCurrencyInput(balance);
+              if (balance && Number.isFinite(parsed))
+                setBalance(formatCurrencyInput(parsed));
+            }}
+            placeholder="0,00"
+            keyboardType="decimal-pad"
+            maxLength={INPUT_LIMITS.money}
+          />
 
-          <View className="mt-6">
-            {submitError ? (
-              <View className="mb-4 rounded-lg border border-[#FFB4B4] bg-[#FFF1F1] px-4 py-3">
-                <Text className="text-sm text-[#B42318]">{submitError}</Text>
-              </View>
-            ) : null}
-            <Button
-              title="Salvar Conta"
-              onPress={handleSubmit}
-              isLoading={isSubmitting}
-            />
+          <ColorPicker
+            label="Cor do cartão"
+            value={selectedColor}
+            onChange={setSelectedColor}
+            colors={ACCOUNT_COLORS}
+          />
+
+          <Text className="mb-3 ml-1 text-sm font-medium text-app-textMuted">
+            Ícone
+          </Text>
+          <View className="mb-2 flex-row flex-wrap gap-3">
+            {ACCOUNT_ICON_OPTIONS.map((icon) => (
+              <TouchableOpacity
+                key={icon}
+                onPress={() => setSelectedIcon(icon)}
+                className={`h-12 w-12 items-center justify-center rounded-lg border ${
+                  selectedIcon === icon
+                    ? 'border-app-text bg-app-surfaceLight'
+                    : 'border-app-border bg-app-surfaceLight'
+                }`}
+              >
+                <MaterialCommunityIcons
+                  name={icon as never}
+                  size={22}
+                  color={theme.colors.text}
+                />
+              </TouchableOpacity>
+            ))}
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        </View>
+
+        <View className="mt-6">
+          {submitError ? (
+            <View className="mb-4 rounded-lg border border-app-dangerBorder bg-app-dangerBackground px-4 py-3">
+              <Text className="text-sm text-app-danger">{submitError}</Text>
+            </View>
+          ) : null}
+          <Button
+            title="Salvar Conta"
+            onPress={handleSubmit}
+            isLoading={isSubmitting}
+          />
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

@@ -1,7 +1,11 @@
+import { usePrivacyStore } from '../src/stores/privacyStore';
+import {
+  KeyboardScreen as SafeAreaView,
+  KeyboardScrollView as ScrollView,
+} from '../src/components/KeyboardForm';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Text, View } from 'react-native';
 import { ScreenHeader } from '../src/components/ScreenHeader';
 import { QueryState } from '../src/components/QueryState';
 import { Input } from '../src/components/ui/Input';
@@ -19,13 +23,15 @@ import { notify } from '../src/stores/feedbackStore';
 import { confirmAction } from '../src/utils/confirmAction';
 import { errorMessage } from '../src/utils/errorMessage';
 import {
+  formatCurrency,
   formatCurrencyInput,
   parseCurrencyInput,
   sanitizeCurrencyInput,
   MAX_MONEY_VALUE,
 } from '../src/utils/format';
 export default function TransferForm() {
-  const { id } = useLocalSearchParams<{ id?: string }>(),
+  const showValues = usePrivacyStore((s) => s.showValues);
+  const { id, fromAccountId } = useLocalSearchParams<{ id?: string; fromAccountId?: string }>(),
     router = useRouter();
   const resource = useResource(
     useCallback(
@@ -57,10 +63,11 @@ export default function TransferForm() {
       seeded.current = true;
     } else if (!row) {
       const active = resource.data.accounts.filter((a) => !a.isArchived);
-      setFrom((old) => old || active[0]?.id || '');
-      setTo((old) => old || active[1]?.id || '');
+      const source = active.find((account) => account.id === fromAccountId)?.id || active[0]?.id || '';
+      setFrom((old) => old || source);
+      setTo((old) => old || active.find((account) => account.id !== source)?.id || '');
     }
-  }, [resource.data]);
+  }, [resource.data, fromAccountId]);
   const save = async () => {
     if (busy.current) return;
     const next: Record<string, string> = {},
@@ -122,8 +129,31 @@ export default function TransferForm() {
   const options = (resource.data?.accounts || [])
     .filter((a) => !a.isArchived)
     .map((a) => ({ value: a.id, label: a.name }));
+  if (
+    resource.data?.transfer?.fromAccount?.deletedAt ||
+    resource.data?.transfer?.toAccount?.deletedAt
+  )
+    return (
+      <SafeAreaView className="flex-1 bg-app-background">
+        <ScreenHeader title="Histórico da transferência" />
+        <ScrollView contentContainerStyle={{ padding: 16 }}>
+          <Text className="mb-4 text-xl font-semibold text-app-text">
+            {resource.data.transfer.title}
+          </Text>
+          <Text className="mb-4 text-xl font-bold text-app-text">
+            {showValues
+              ? formatCurrency(resource.data.transfer.amount)
+              : 'R$ ••••••'}
+          </Text>
+          <Text className="text-sm leading-6 text-app-textMuted">
+            Uma das contas foi excluída do app. A transferência está preservada
+            apenas para consulta, sem alterar o saldo da outra conta.
+          </Text>
+        </ScrollView>
+      </SafeAreaView>
+    );
   return (
-    <SafeAreaView className="flex-1 bg-[#F7F8FA]">
+    <SafeAreaView className="flex-1 bg-app-background">
       <ScreenHeader
         title={id ? 'Editar transferência' : 'Nova transferência'}
       />
@@ -137,8 +167,8 @@ export default function TransferForm() {
           retry={resource.reload}
         />
         {!resource.loading && !resource.error ? (
-          <View className="rounded-lg bg-white p-4">
-            <Text className="mb-5 text-sm leading-6 text-[#667085]">
+          <View className="rounded-lg bg-app-surface p-4">
+            <Text className="mb-5 text-sm leading-6 text-app-textMuted">
               Move dinheiro entre suas contas sem criar receita ou despesa.
             </Text>
             <Select
@@ -148,7 +178,7 @@ export default function TransferForm() {
               onChange={setFrom}
             />
             {errors.from ? (
-              <Text className="mb-3 text-[#B42318]">{errors.from}</Text>
+              <Text className="mb-3 text-app-danger">{errors.from}</Text>
             ) : null}
             <Select
               label="Conta de destino"
@@ -157,7 +187,7 @@ export default function TransferForm() {
               onChange={setTo}
             />
             {errors.to ? (
-              <Text className="mb-3 text-[#B42318]">{errors.to}</Text>
+              <Text className="mb-3 text-app-danger">{errors.to}</Text>
             ) : null}
             <Input
               label="Valor (R$)"
@@ -168,7 +198,7 @@ export default function TransferForm() {
             />
             <DateInput label="Data" value={date} onChange={setDate} />
             {errors.date ? (
-              <Text className="mb-3 text-[#B42318]">{errors.date}</Text>
+              <Text className="mb-3 text-app-danger">{errors.date}</Text>
             ) : null}
             <Input
               label="Descrição (opcional)"
@@ -193,7 +223,7 @@ export default function TransferForm() {
             ) : null}
             {options.length < 2 ? (
               <View className="mt-4">
-                <Text className="mb-3 text-sm text-[#667085]">
+                <Text className="mb-3 text-sm text-app-textMuted">
                   São necessárias duas contas ativas.
                 </Text>
                 <Button

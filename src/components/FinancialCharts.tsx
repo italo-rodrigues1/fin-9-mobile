@@ -1,12 +1,14 @@
+import { useTheme } from '../theme/ThemeProvider';
 import { Text, View } from 'react-native';
 import { FinancialReport, TransactionType } from '../types';
 import { usePrivacyStore } from '../stores/privacyStore';
 import { formatCurrency, getMonthName } from '../utils/format';
 export function FinancialCharts({ report }: { report: FinancialReport }) {
+  const theme = useTheme();
   const visible = usePrivacyStore((state) => state.showValues);
   if (!visible)
     return (
-      <Text className="my-4 text-sm text-[#667085]">
+      <Text className="my-4 text-sm text-app-textMuted">
         Gráficos ocultos enquanto os valores estão protegidos.
       </Text>
     );
@@ -20,22 +22,22 @@ export function FinancialCharts({ report }: { report: FinancialReport }) {
     .sort((a, b) => b.total - a.total);
   return (
     <>
-      <View className="mb-4 rounded-lg border border-[#E4E7EC] bg-white p-4">
-        <Text className="mb-1 text-base font-semibold text-[#101828]">
+      <View className="mb-4 rounded-lg border border-app-border bg-app-surface p-4">
+        <Text className="mb-1 text-base font-semibold text-app-text">
           Receitas e despesas
         </Text>
-        <Text className="mb-4 text-xs text-[#667085]">
+        <Text className="mb-4 text-xs text-app-textMuted">
           Últimos seis meses · receitas em verde, despesas em vermelho
         </Text>
         {history.every((row) => !row.totalIncome && !row.totalExpense) ? (
-          <Text className="py-4 text-[#667085]">
+          <Text className="py-4 text-app-textMuted">
             Nenhuma movimentação confirmada nesse período.
           </Text>
         ) : (
           <View
             accessibilityElementsHidden
             importantForAccessibility="no-hide-descendants"
-            className="h-36 flex-row items-end justify-around border-b border-[#EAECF0]"
+            className="h-36 flex-row items-end justify-around border-b border-app-border"
           >
             {history.map((row) => (
               <View
@@ -50,7 +52,7 @@ export function FinancialCharts({ report }: { report: FinancialReport }) {
                     style={{
                       width: 12,
                       height: Math.max(0, (row.totalIncome / peak) * 104),
-                      backgroundColor: '#047857',
+                      backgroundColor: theme.colors.primary,
                       borderTopLeftRadius: 3,
                       borderTopRightRadius: 3,
                     }}
@@ -59,13 +61,13 @@ export function FinancialCharts({ report }: { report: FinancialReport }) {
                     style={{
                       width: 12,
                       height: Math.max(0, (row.totalExpense / peak) * 104),
-                      backgroundColor: '#D92D20',
+                      backgroundColor: theme.colors.danger,
                       borderTopLeftRadius: 3,
                       borderTopRightRadius: 3,
                     }}
                   />
                 </View>
-                <Text className="my-2 text-[10px] text-[#475467]">
+                <Text className="my-2 text-[10px] text-app-textSecondary">
                   {getMonthName(row.month).slice(0, 3)}
                 </Text>
               </View>
@@ -75,7 +77,7 @@ export function FinancialCharts({ report }: { report: FinancialReport }) {
         {history.map((row) => (
           <Text
             key={row.year + '-' + row.month}
-            className="mt-2 text-xs text-[#475467]"
+            className="mt-2 text-xs text-app-textSecondary"
           >
             {getMonthName(row.month).slice(0, 3)}/{row.year}: receitas{' '}
             {formatCurrency(row.totalIncome)} · despesas{' '}
@@ -83,23 +85,23 @@ export function FinancialCharts({ report }: { report: FinancialReport }) {
           </Text>
         ))}
       </View>
-      <View className="mb-4 rounded-lg border border-[#E4E7EC] bg-white p-4">
-        <Text className="mb-4 text-base font-semibold text-[#101828]">
+      <View className="mb-4 rounded-lg border border-app-border bg-app-surface p-4">
+        <Text className="mb-4 text-base font-semibold text-app-text">
           Despesas por categoria
         </Text>
         {categories.length ? (
           categories.map((row) => (
             <View key={row.categoryId} className="mb-4">
               <View className="mb-2 flex-row justify-between gap-3">
-                <Text className="flex-1 text-sm text-[#344054]">
+                <Text className="flex-1 text-sm text-app-text">
                   {row.categoryName}
                 </Text>
-                <Text className="text-sm font-semibold text-[#344054]">
+                <Text className="text-sm font-semibold text-app-text">
                   {formatCurrency(row.total)} ·{' '}
                   {Math.round((row.total / report.totalExpense) * 100)}%
                 </Text>
               </View>
-              <View className="h-2 overflow-hidden rounded bg-[#F2F4F7]">
+              <View className="h-2 overflow-hidden rounded bg-app-surfaceLight">
                 <View
                   style={{
                     height: 8,
@@ -112,7 +114,7 @@ export function FinancialCharts({ report }: { report: FinancialReport }) {
             </View>
           ))
         ) : (
-          <Text className="text-[#667085]">
+          <Text className="text-app-textMuted">
             Nenhuma despesa confirmada no mês.
           </Text>
         )}

@@ -1,3 +1,4 @@
+import { useTheme } from '../theme/ThemeProvider';
 import React from 'react';
 import { Text, View } from 'react-native';
 
@@ -6,7 +7,8 @@ interface BrandLogoProps {
 }
 
 export function BrandLogo({ muted = false }: BrandLogoProps) {
-  const brandColor = muted ? '#B8C2CC' : '#169670';
+  const theme = useTheme();
+  const brandColor = muted ? theme.colors.textMuted : theme.colors.primaryText;
 
   return (
     <View className="flex-row items-center">

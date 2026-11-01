@@ -1,3 +1,4 @@
+import { useTheme } from '../../src/theme/ThemeProvider';
 import { confirmAction } from '../../src/utils/confirmAction';
 import { useAuthStore } from '../../src/stores/authStore';
 import { notify } from '../../src/stores/feedbackStore';
@@ -8,6 +9,7 @@ import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 export default function MoreScreen() {
+  const theme = useTheme();
   const router = useRouter();
   const logout = useAuthStore((state) => state.logout);
   const handleLogout = async () => {
@@ -20,13 +22,13 @@ export default function MoreScreen() {
     }
   };
   return (
-    <SafeAreaView className="flex-1 bg-[#F7F8FA]">
+    <SafeAreaView className="flex-1 bg-app-background">
       <ScreenHeader
         title="Mais"
         subtitle="Organize seu aplicativo e sua conta."
       />
       <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
-        <View className="mx-4 overflow-hidden rounded-lg border border-[#E4E7EC] bg-white">
+        <View className="mx-4 overflow-hidden rounded-lg border border-app-border bg-app-surface">
           {(
             [
               {
@@ -51,13 +53,21 @@ export default function MoreScreen() {
               accessibilityRole="button"
               accessibilityLabel={item.title}
               onPress={() => router.push(item.href)}
-              className="flex-row items-center border-b border-[#EAECF0] p-5"
+              className="flex-row items-center border-b border-app-border p-5"
             >
-              <Feather name={item.icon} size={20} color="#047857" />
-              <Text className="ml-3 flex-1 text-base font-semibold text-[#344054]">
+              <Feather
+                name={item.icon}
+                size={20}
+                color={theme.colors.primary}
+              />
+              <Text className="ml-3 flex-1 text-base font-semibold text-app-text">
                 {item.title}
               </Text>
-              <Feather name="chevron-right" size={20} color="#667085" />
+              <Feather
+                name="chevron-right"
+                size={20}
+                color={theme.colors.textMuted}
+              />
             </TouchableOpacity>
           ))}
         </View>

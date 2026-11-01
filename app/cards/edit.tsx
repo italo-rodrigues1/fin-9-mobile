@@ -1,7 +1,10 @@
+import {
+  KeyboardScreen as SafeAreaView,
+  KeyboardScrollView as ScrollView,
+} from '../../src/components/KeyboardForm';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { QueryState } from '../../src/components/QueryState';
 import { Input } from '../../src/components/ui/Input';
@@ -93,7 +96,7 @@ export default function EditCard() {
   };
   const fixed = Boolean(r.data?.invoices.length);
   return (
-    <SafeAreaView className="flex-1 bg-[#F7F8FA]">
+    <SafeAreaView className="flex-1 bg-app-background">
       <ScreenHeader title={id ? 'Editar cartão' : 'Novo cartão'} />
       <ScrollView
         contentContainerStyle={{ padding: 16, paddingBottom: 48 }}
@@ -101,7 +104,7 @@ export default function EditCard() {
       >
         <QueryState loading={r.loading} error={r.error} retry={r.reload} />
         {!r.loading && !r.error ? (
-          <View className="rounded-lg bg-white p-4">
+          <View className="rounded-lg bg-app-surface p-4">
             <Input
               label="Nome do cartão"
               value={name}
@@ -117,7 +120,7 @@ export default function EditCard() {
               error={errors.limit}
             />
             {fixed ? (
-              <Text className="mb-5 text-sm leading-6 text-[#667085]">
+              <Text className="mb-5 text-sm leading-6 text-app-textMuted">
                 Fechamento dia {closing} e vencimento dia {due}. O ciclo é
                 preservado após criar faturas. Para usar outro ciclo, cadastre
                 outro cartão.
@@ -140,7 +143,7 @@ export default function EditCard() {
                   maxLength={2}
                   error={errors.due}
                 />
-                <Text className="mb-5 text-sm leading-6 text-[#667085]">
+                <Text className="mb-5 text-sm leading-6 text-app-textMuted">
                   Se o dia do vencimento for menor ou igual ao fechamento, o
                   vencimento será no mês seguinte.
                 </Text>

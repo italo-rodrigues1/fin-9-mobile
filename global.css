@@ -1,3 +1,56 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --app-background: 247 248 250;
+  --app-surface: 255 255 255;
+  --app-surfaceLight: 242 244 247;
+  --app-text: 16 24 40;
+  --app-textSecondary: 71 84 103;
+  --app-textMuted: 102 112 133;
+  --app-border: 208 213 221;
+  --app-primary: 4 120 87;
+  --app-primaryDark: 6 78 59;
+  --app-primaryLight: 231 248 241;
+  --app-primaryText: 4 120 87;
+  --app-success: 4 120 87;
+  --app-danger: 180 35 24;
+  --app-dangerBackground: 254 243 242;
+  --app-dangerBorder: 254 205 202;
+  --app-warning: 181 71 8;
+  --app-warningBackground: 255 250 235;
+  --app-warningBorder: 254 223 137;
+  --app-white: 255 255 255;
+  --app-onPrimary: 255 255 255;
+  --app-avatar: 231 248 241;
+  --app-skeleton: 228 231 236;
+  --app-inverse: 16 24 40;
+  --app-onInverse: 255 255 255;
+}
+.dark {
+  --app-background: 11 18 32;
+  --app-surface: 21 32 51;
+  --app-surfaceLight: 32 46 67;
+  --app-text: 242 244 247;
+  --app-textSecondary: 208 213 221;
+  --app-textMuted: 152 162 179;
+  --app-border: 52 64 84;
+  --app-primary: 4 120 87;
+  --app-primaryDark: 6 78 59;
+  --app-primaryLight: 16 60 51;
+  --app-primaryText: 110 231 183;
+  --app-success: 110 231 183;
+  --app-danger: 253 162 155;
+  --app-dangerBackground: 59 30 39;
+  --app-dangerBorder: 128 51 59;
+  --app-warning: 254 200 75;
+  --app-warningBackground: 55 44 22;
+  --app-warningBorder: 120 92 38;
+  --app-white: 255 255 255;
+  --app-onPrimary: 255 255 255;
+  --app-avatar: 16 60 51;
+  --app-skeleton: 52 64 84;
+  --app-inverse: 228 231 236;
+  --app-onInverse: 16 24 40;
+}

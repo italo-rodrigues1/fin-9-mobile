@@ -12,7 +12,7 @@ export default function Cards() {
   const router = useRouter(),
     r = useResource(useCallback(() => cardService.list(), []));
   return (
-    <SafeAreaView className="flex-1 bg-[#F7F8FA]">
+    <SafeAreaView className="flex-1 bg-app-background">
       <ScreenHeader
         title="Cartões de crédito"
         subtitle="Compras, parcelas e faturas."
@@ -27,7 +27,7 @@ export default function Cards() {
               title="Novo cartão"
               onPress={() => router.push('/cards/edit')}
             />
-            <Text className="my-4 text-sm leading-6 text-[#667085]">
+            <Text className="my-4 text-sm leading-6 text-app-textMuted">
               Compras comprometem o limite. O saldo das contas e as despesas dos
               relatórios mudam ao registrar o pagamento da fatura.
             </Text>
@@ -36,7 +36,7 @@ export default function Cards() {
         }
         ListEmptyComponent={
           !r.loading && !r.error ? (
-            <Text className="py-5 text-[#667085]">
+            <Text className="py-5 text-app-textMuted">
               Cadastre seu primeiro cartão para organizar as faturas.
             </Text>
           ) : undefined

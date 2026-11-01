@@ -1,5 +1,8 @@
+import type { TextInputInstance } from 'react-native';
+import { useFormInputFocus } from '../KeyboardForm';
+import { useTheme } from '../../theme/ThemeProvider';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef } from 'react';
 import {
   Modal,
   Pressable,
@@ -40,6 +43,9 @@ export function Select({
   disabled = false,
   maxLength = INPUT_LIMITS.defaultText,
 }: SelectProps) {
+  const focusInput = useFormInputFocus(),
+    inputRef = useRef<TextInputInstance>(null);
+  const theme = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const selected = useMemo(
     () => options.find((option) => option.value === value),
@@ -54,20 +60,22 @@ export function Select({
   return (
     <View className="mb-4">
       {label ? (
-        <Text className="mb-2 ml-1 text-sm font-medium text-[#667085]">
+        <Text className="mb-2 ml-1 text-sm font-medium text-app-textMuted">
           {label}
         </Text>
       ) : null}
 
       {editable ? (
-        <View className="flex-row items-center rounded-lg border border-[#D0D5DD] bg-white">
+        <View className="flex-row items-center rounded-lg border border-app-border bg-app-surface">
           <TextInput
-            className="flex-1 px-4 py-4 text-base text-[#344054]"
+            ref={inputRef}
+            onFocus={() => focusInput(inputRef.current)}
+            className="flex-1 px-4 py-4 text-base text-app-text"
             accessibilityLabel={label || placeholder}
             value={value}
             onChangeText={onChange}
             placeholder={placeholder}
-            placeholderTextColor={COLORS.textMuted}
+            placeholderTextColor={theme.colors.textMuted}
             maxLength={maxLength}
           />
           <TouchableOpacity
@@ -78,7 +86,7 @@ export function Select({
             <MaterialCommunityIcons
               name="chevron-down"
               size={24}
-              color="#667085"
+              color={theme.colors.textMuted}
             />
           </TouchableOpacity>
         </View>
@@ -89,19 +97,19 @@ export function Select({
           accessibilityState={{ expanded: isOpen, disabled }}
           onPress={() => setIsOpen(true)}
           disabled={disabled}
-          className={`flex-row items-center rounded-lg border border-[#D0D5DD] bg-white px-4 py-4 ${
+          className={`flex-row items-center rounded-lg border border-app-border bg-app-surface px-4 py-4 ${
             disabled ? 'opacity-60' : ''
           }`}
           activeOpacity={0.75}
         >
           <View className="flex-1">
             <Text
-              className={`text-base ${selected ? 'text-[#344054]' : 'text-[#667085]'}`}
+              className={`text-base ${selected ? 'text-app-text' : 'text-app-textMuted'}`}
             >
               {selected?.label ?? placeholder}
             </Text>
             {selected?.subtitle ? (
-              <Text className="mt-1 text-xs text-[#667085]">
+              <Text className="mt-1 text-xs text-app-textMuted">
                 {selected.subtitle}
               </Text>
             ) : null}
@@ -109,7 +117,7 @@ export function Select({
           <MaterialCommunityIcons
             name="chevron-down"
             size={24}
-            color="#667085"
+            color={theme.colors.textMuted}
           />
         </TouchableOpacity>
       )}
@@ -125,11 +133,11 @@ export function Select({
           onPress={() => setIsOpen(false)}
         >
           <Pressable
-            className="max-h-[70%] rounded-lg bg-white p-5"
+            className="max-h-[70%] rounded-lg bg-app-surface p-5"
             onPress={(event) => event.stopPropagation()}
           >
             <View className="mb-4 flex-row items-center justify-between">
-              <Text className="text-lg font-bold text-[#344054]">
+              <Text className="text-lg font-bold text-app-text">
                 {modalTitle ?? label}
               </Text>
               <TouchableOpacity
@@ -139,7 +147,7 @@ export function Select({
                 <MaterialCommunityIcons
                   name="close"
                   size={22}
-                  color="#667085"
+                  color={theme.colors.textMuted}
                 />
               </TouchableOpacity>
             </View>
@@ -151,17 +159,17 @@ export function Select({
                     key={option.value}
                     onPress={() => chooseOption(option)}
                     className={`mb-2 flex-row items-center rounded-lg px-4 py-3 ${
-                      isSelected ? 'bg-[#EAFBF0]' : 'bg-[#F9FAFB]'
+                      isSelected ? 'bg-app-primaryLight' : 'bg-app-surfaceLight'
                     }`}
                   >
                     <View className="flex-1">
                       <Text
-                        className={`font-medium ${isSelected ? 'text-[#169670]' : 'text-[#344054]'}`}
+                        className={`font-medium ${isSelected ? 'text-app-primaryText' : 'text-app-text'}`}
                       >
                         {option.label}
                       </Text>
                       {option.subtitle ? (
-                        <Text className="mt-1 text-xs text-[#667085]">
+                        <Text className="mt-1 text-xs text-app-textMuted">
                           {option.subtitle}
                         </Text>
                       ) : null}
@@ -170,7 +178,7 @@ export function Select({
                       <MaterialCommunityIcons
                         name="check"
                         size={20}
-                        color="#169670"
+                        color={theme.colors.primary}
                       />
                     ) : null}
                   </TouchableOpacity>

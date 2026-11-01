@@ -1,6 +1,10 @@
+import {
+  KeyboardScreen as SafeAreaView,
+  KeyboardFlatList as FlatList,
+} from '../src/components/KeyboardForm';
+import { useTheme } from '../src/theme/ThemeProvider';
 import { useCallback, useState } from 'react';
-import { FlatList, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { ScreenHeader } from '../src/components/ScreenHeader';
 import { PeriodPicker } from '../src/components/PeriodPicker';
 import { QueryState } from '../src/components/QueryState';
@@ -24,6 +28,7 @@ import {
   MAX_MONEY_VALUE,
 } from '../src/utils/format';
 export default function Budgets() {
+  const theme = useTheme();
   const [period, setPeriod] = useState({
       month: getCurrentMonth(),
       year: getCurrentYear(),
@@ -77,7 +82,7 @@ export default function Budgets() {
     }
   };
   return (
-    <SafeAreaView className="flex-1 bg-[#F7F8FA]">
+    <SafeAreaView className="flex-1 bg-app-background">
       <FlatList
         data={
           resource.loading || resource.error ? [] : resource.data?.budgets || []
@@ -101,7 +106,7 @@ export default function Budgets() {
               retry={resource.reload}
             />
             {!resource.loading && !resource.error ? (
-              <View className="mb-5 rounded-lg bg-white p-4">
+              <View className="mb-5 rounded-lg bg-app-surface p-4">
                 <Select
                   label="Categoria"
                   value={categoryId}
@@ -123,7 +128,7 @@ export default function Budgets() {
                   onPress={save}
                   isLoading={saving}
                 />
-                <Text className="mt-3 text-xs leading-5 text-[#667085]">
+                <Text className="mt-3 text-xs leading-5 text-app-textMuted">
                   Salvar novamente a mesma categoria altera seu limite. Apenas
                   despesas confirmadas entram no acompanhamento.
                 </Text>
@@ -133,25 +138,25 @@ export default function Budgets() {
         }
         ListEmptyComponent={
           !resource.loading && !resource.error ? (
-            <Text className="p-4 text-[#667085]">
+            <Text className="p-4 text-app-textMuted">
               Nenhum orçamento para esse mês.
             </Text>
           ) : undefined
         }
         renderItem={({ item }) => (
-          <View className="mb-4 rounded-lg border border-[#E4E7EC] bg-white p-4">
-            <Text className="text-base font-semibold text-[#101828]">
+          <View className="mb-4 rounded-lg border border-app-border bg-app-surface p-4">
+            <Text className="text-base font-semibold text-app-text">
               {item.category.name}
             </Text>
-            <Text className="mt-3 text-sm text-[#475467]">
+            <Text className="mt-3 text-sm text-app-textSecondary">
               Utilizado: {money(item.used)} de {money(item.amount)}
             </Text>
-            <Text className="mt-2 text-sm text-[#475467]">
+            <Text className="mt-2 text-sm text-app-textSecondary">
               Restante: {money(item.remaining)}
             </Text>
             {show ? (
               <>
-                <View className="my-3 h-2 overflow-hidden rounded bg-[#F2F4F7]">
+                <View className="my-3 h-2 overflow-hidden rounded bg-app-surfaceLight">
                   <View
                     style={{
                       height: 8,
@@ -159,14 +164,14 @@ export default function Budgets() {
                         '%') as `${number}%`,
                       backgroundColor:
                         item.alert === 'EXCEEDED'
-                          ? '#B42318'
+                          ? theme.colors.danger
                           : item.alert === 'WARNING'
-                            ? '#B54708'
-                            : '#047857',
+                            ? theme.colors.warning
+                            : theme.colors.primary,
                     }}
                   />
                 </View>
-                <Text className="mb-3 text-sm font-medium text-[#475467]">
+                <Text className="mb-3 text-sm font-medium text-app-textSecondary">
                   {item.percentage}% utilizado
                   {item.alert === 'EXCEEDED'
                     ? ' · Limite atingido ou ultrapassado'
@@ -176,7 +181,7 @@ export default function Budgets() {
                 </Text>
               </>
             ) : (
-              <Text className="my-3 text-sm text-[#667085]">
+              <Text className="my-3 text-sm text-app-textMuted">
                 Valores e percentuais ocultos.
               </Text>
             )}
@@ -187,7 +192,7 @@ export default function Budgets() {
                   setAmount(formatCurrencyInput(item.amount));
                 }}
               >
-                <Text className="font-semibold text-[#047857]">
+                <Text className="font-semibold text-app-primaryText">
                   Editar limite
                 </Text>
               </TouchableOpacity>
@@ -209,7 +214,7 @@ export default function Budgets() {
                   }
                 }}
               >
-                <Text className="font-semibold text-[#B42318]">Remover</Text>
+                <Text className="font-semibold text-app-danger">Remover</Text>
               </TouchableOpacity>
             </View>
           </View>

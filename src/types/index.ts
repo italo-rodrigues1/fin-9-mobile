@@ -25,6 +25,7 @@ export interface Category {
 }
 
 export interface Account {
+  deletedAt?: string | null;
   isArchived?: boolean;
   id: string;
   name: string;
@@ -38,6 +39,7 @@ export interface Account {
 }
 
 export interface Transaction {
+  account?: { id: string; name: string; deletedAt?: string | null };
   cardPaymentId?: string | null;
   cardPayment?: {
     id: string;
@@ -169,6 +171,7 @@ export interface Goal {
   status: 'COMPLETED' | 'REVIEW' | 'OVERDUE' | 'IN_PROGRESS';
 }
 export interface GoalFundingAccount {
+  deletedAt?: string | null;
   id: string;
   name: string;
   institution: string;
@@ -186,7 +189,7 @@ export interface GoalContribution {
   note: string | null;
   account?: Pick<
     GoalFundingAccount,
-    'id' | 'name' | 'institution' | 'isArchived'
+    'id' | 'name' | 'institution' | 'isArchived' | 'deletedAt'
   >;
 }
 export interface GoalOverview {
@@ -230,7 +233,12 @@ export interface CardPayment {
   accountId: string;
   amount: number;
   date: string;
-  account: { id: string; name: string; isArchived: boolean };
+  account: {
+    id: string;
+    name: string;
+    isArchived: boolean;
+    deletedAt?: string | null;
+  };
 }
 export interface CardInvoice {
   id: string;

@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "scheme": "fin-9",
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -23,7 +23,8 @@
         "backgroundImage": "./assets/splash-icon.png",
         "monochromeImage": "./assets/splash-icon.png"
       },
-      "package": "com.fin9.mobile"
+      "package": "com.fin9.mobile",
+      "softwareKeyboardLayoutMode": "resize"
     },
     "plugins": [
       [

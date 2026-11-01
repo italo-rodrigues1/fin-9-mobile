@@ -1,7 +1,10 @@
+import {
+  KeyboardScreen as SafeAreaView,
+  KeyboardScrollView as ScrollView,
+} from '../../src/components/KeyboardForm';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { QueryState } from '../../src/components/QueryState';
 import { Input } from '../../src/components/ui/Input';
@@ -109,7 +112,7 @@ export default function Contribution() {
     (a) => !a.isArchived || a.id === old?.accountId,
   );
   return (
-    <SafeAreaView className="flex-1 bg-[#F7F8FA]">
+    <SafeAreaView className="flex-1 bg-app-background">
       <ScreenHeader title={id ? 'Editar contribuição' : 'Nova contribuição'} />
       <ScrollView
         contentContainerStyle={{ padding: 16, paddingBottom: 48 }}
@@ -121,15 +124,25 @@ export default function Contribution() {
           retry={resource.reload}
         />
         {!resource.loading && !resource.error ? (
-          <View className="rounded-lg bg-white p-4">
-            <Text className="mb-2 text-lg font-semibold text-[#101828]">
+          <View className="rounded-lg bg-app-surface p-4">
+            <Text className="mb-2 text-lg font-semibold text-app-text">
               {resource.data?.detail.goal.name}
             </Text>
-            <Text className="mb-5 text-sm leading-6 text-[#667085]">
+            <Text className="mb-5 text-sm leading-6 text-app-textMuted">
               Escolha onde esse dinheiro está. A contribuição apenas o destina
               para a meta, sem alterar o saldo nem criar uma movimentação. A
               data identifica este registro.
             </Text>
+            {old &&
+            !resource.data?.detail.accounts.some(
+              (a) => a.id === old.accountId,
+            ) ? (
+              <Text className="mb-4 text-sm leading-6 text-app-warning">
+                A conta desta contribuição foi excluída do app. Selecione outra
+                conta para transferir a destinação ou remova a contribuição pelo
+                histórico da meta.
+              </Text>
+            ) : null}
             <Select
               label="Conta"
               value={accountId}
@@ -141,17 +154,17 @@ export default function Contribution() {
               onChange={setAccount}
             />
             {errors.account ? (
-              <Text className="mb-3 text-[#B42318]">{errors.account}</Text>
+              <Text className="mb-3 text-app-danger">{errors.account}</Text>
             ) : null}
             {selected ? (
-              <Text className="mb-4 text-sm leading-6 text-[#667085]">
+              <Text className="mb-4 text-sm leading-6 text-app-textMuted">
                 Livre para novas destinações:{' '}
                 {show ? formatCurrency(selected.availableAmount) : 'R$ ••••••'}.
                 {old && old.accountId === selected.id
                   ? ' O valor deste registro já está destinado; você pode reduzi-lo ou alterá-lo conforme o saldo disponível.'
                   : ''}
                 {selected.isArchived
-                  ? ' Reative a conta para aumentar o valor.'
+                  ? ' Selecione uma conta ativa para aumentar a destinação.'
                   : ''}
               </Text>
             ) : null}
@@ -168,7 +181,7 @@ export default function Contribution() {
               onChange={setDate}
             />
             {errors.date ? (
-              <Text className="mb-3 text-[#B42318]">{errors.date}</Text>
+              <Text className="mb-3 text-app-danger">{errors.date}</Text>
             ) : null}
             <Input
               label="Observação (opcional)"
@@ -184,7 +197,7 @@ export default function Contribution() {
             />
             {!accounts.length ? (
               <View className="mt-4">
-                <Text className="mb-3 text-sm text-[#667085]">
+                <Text className="mb-3 text-sm text-app-textMuted">
                   Cadastre ou reative uma conta para destinar dinheiro.
                 </Text>
                 <Button

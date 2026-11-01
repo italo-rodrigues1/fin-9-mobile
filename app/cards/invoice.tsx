@@ -87,7 +87,7 @@ export default function Invoice() {
     }
   };
   return (
-    <SafeAreaView className="flex-1 bg-[#F7F8FA]">
+    <SafeAreaView className="flex-1 bg-app-background">
       <ScreenHeader title="Fatura do cartão" />
       <FlatList
         contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
@@ -98,7 +98,7 @@ export default function Invoice() {
             <QueryState loading={r.loading} error={r.error} retry={r.reload} />
             {!r.loading && !r.error && r.data ? (
               <>
-                <Text className="mb-3 text-lg font-semibold text-[#101828]">
+                <Text className="mb-3 text-lg font-semibold text-app-text">
                   {r.data.card.name}
                 </Text>
                 <CardInvoiceSummary invoice={r.data.invoice} />
@@ -113,7 +113,8 @@ export default function Invoice() {
                       })
                     }
                   />
-                ) : r.data.invoice.payment ? (
+                ) : r.data.invoice.payment &&
+                  !r.data.invoice.payment.account.deletedAt ? (
                   <Button
                     title="Estornar registro de pagamento"
                     variant="danger"
@@ -121,18 +122,20 @@ export default function Invoice() {
                     isLoading={saving}
                   />
                 ) : (
-                  <Text className="text-sm leading-6 text-[#667085]">
+                  <Text className="text-sm leading-6 text-app-textMuted">
                     {r.data.invoice.status === 'OPEN'
                       ? 'O pagamento pode ser registrado após o fechamento.'
-                      : 'A fatura não possui valores para pagar.'}
+                      : r.data.invoice.status === 'PAID'
+                        ? 'O pagamento em conta excluída foi preservado apenas para consulta.'
+                        : 'A fatura não possui valores para pagar.'}
                   </Text>
                 )}
-                <Text className="my-4 text-sm leading-6 text-[#667085]">
+                <Text className="my-4 text-sm leading-6 text-app-textMuted">
                   Compras e parcelas não geram despesas nos relatórios até o
                   pagamento. Ao pagar, cada parcela entra na categoria original
                   e na data do pagamento, uma única vez.
                 </Text>
-                <Text className="mb-4 text-lg font-semibold text-[#101828]">
+                <Text className="mb-4 text-lg font-semibold text-app-text">
                   Compras e parcelas
                 </Text>
               </>
@@ -141,24 +144,24 @@ export default function Invoice() {
         }
         ListEmptyComponent={
           !r.loading && !r.error ? (
-            <Text className="py-4 text-[#667085]">
+            <Text className="py-4 text-app-textMuted">
               Nenhuma parcela nesta fatura.
             </Text>
           ) : undefined
         }
         renderItem={({ item }) => (
-          <View className="mb-3 rounded-lg border border-[#E4E7EC] bg-white p-4">
-            <Text className="text-base font-semibold text-[#101828]">
+          <View className="mb-3 rounded-lg border border-app-border bg-app-surface p-4">
+            <Text className="text-base font-semibold text-app-text">
               {item.purchase.title}
             </Text>
-            <Text className="mt-2 text-sm text-[#667085]">
+            <Text className="mt-2 text-sm text-app-textMuted">
               Parcela {item.number}/{item.purchase.installmentCount} ·{' '}
               {item.purchase.category?.name}
             </Text>
-            <Text className="mt-2 text-lg font-bold text-[#101828]">
+            <Text className="mt-2 text-lg font-bold text-app-text">
               {show ? formatCurrency(item.amount) : 'R$ ••••••'}
             </Text>
-            <Text className="my-3 text-xs text-[#667085]">
+            <Text className="my-3 text-xs text-app-textMuted">
               Compra em {formatDate(item.purchase.date)}
             </Text>
             {item.canEdit ? (
@@ -174,7 +177,7 @@ export default function Invoice() {
                 }
               />
             ) : (
-              <Text className="text-xs leading-5 text-[#667085]">
+              <Text className="text-xs leading-5 text-app-textMuted">
                 Compra com parcela paga. Para editar, estorne os respectivos
                 pagamentos.
               </Text>

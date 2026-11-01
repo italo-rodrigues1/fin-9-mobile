@@ -1,3 +1,4 @@
+import { useTheme } from '../theme/ThemeProvider';
 import { usePrivacyStore } from '../stores/privacyStore';
 import React, { useCallback } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
@@ -11,6 +12,7 @@ interface TransactionItemProps {
 }
 
 function TransactionItemComponent({ item, onPress }: TransactionItemProps) {
+  const theme = useTheme();
   const showValues = usePrivacyStore((state) => state.showValues);
   const isIncome = item.type === TransactionType.INCOME;
   const icon = item.category
@@ -23,14 +25,14 @@ function TransactionItemComponent({ item, onPress }: TransactionItemProps) {
     <TouchableOpacity
       onPress={handlePress}
       activeOpacity={0.7}
-      className="mb-3 flex-row items-center rounded-lg bg-white px-4 py-4"
+      className="mb-3 flex-row items-center rounded-lg bg-app-surface px-4 py-4"
     >
       <View
         className="mr-4 h-11 w-11 items-center justify-center rounded-full"
         style={{
           backgroundColor: item.category?.color
             ? `${item.category.color}20`
-            : '#F2F4F7',
+            : theme.colors.surfaceLight,
         }}
       >
         <Text className="text-xl">{icon}</Text>
@@ -38,19 +40,19 @@ function TransactionItemComponent({ item, onPress }: TransactionItemProps) {
 
       <View className="flex-1 mr-3 justify-center">
         <Text
-          className="mb-1 text-base font-semibold text-[#344054]"
+          className="mb-1 text-base font-semibold text-app-text"
           numberOfLines={1}
         >
           {item.title}
         </Text>
-        <Text className="text-xs font-medium text-[#667085]">
+        <Text className="text-xs font-medium text-app-textMuted">
           {formatDateShort(item.date)}
           {item.status === 'PLANNED' ? ' · Previsto' : ''}
         </Text>
       </View>
 
       <Text
-        className={`text-base font-semibold ${isIncome ? 'text-[#047857]' : 'text-[#FF6B6B]'}`}
+        className={`text-base font-semibold ${isIncome ? 'text-app-primaryText' : 'text-app-danger'}`}
       >
         {showValues
           ? `${isIncome ? '+' : '-'} ${formatCurrency(item.amount)}`

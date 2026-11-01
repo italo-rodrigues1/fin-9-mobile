@@ -1,7 +1,10 @@
+import {
+  KeyboardScreen as SafeAreaView,
+  KeyboardScrollView as ScrollView,
+} from '../../src/components/KeyboardForm';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { QueryState } from '../../src/components/QueryState';
 import { Input } from '../../src/components/ui/Input';
@@ -157,7 +160,7 @@ export default function Purchase() {
     }
   };
   return (
-    <SafeAreaView className="flex-1 bg-[#F7F8FA]">
+    <SafeAreaView className="flex-1 bg-app-background">
       <ScreenHeader title={id ? 'Compra no cartão' : 'Nova compra no cartão'} />
       <ScrollView
         contentContainerStyle={{ padding: 16, paddingBottom: 48 }}
@@ -165,23 +168,23 @@ export default function Purchase() {
       >
         <QueryState loading={r.loading} error={r.error} retry={r.reload} />
         {!r.loading && !r.error && card ? (
-          <View className="rounded-lg bg-white p-4">
-            <Text className="mb-4 text-lg font-semibold text-[#101828]">
+          <View className="rounded-lg bg-app-surface p-4">
+            <Text className="mb-4 text-lg font-semibold text-app-text">
               {card.name}
             </Text>
             {locked ? (
-              <Text className="text-sm leading-6 text-[#667085]">
+              <Text className="text-sm leading-6 text-app-textMuted">
                 Esta compra tem parcelas pagas. Estorne os registros de
                 pagamento nas respectivas faturas para alterar ou excluir a
                 compra.
               </Text>
             ) : card.isArchived ? (
-              <Text className="text-sm leading-6 text-[#667085]">
+              <Text className="text-sm leading-6 text-app-textMuted">
                 Reative o cartão para registrar ou editar compras.
               </Text>
             ) : (
               <>
-                <Text className="mb-5 text-sm leading-6 text-[#667085]">
+                <Text className="mb-5 text-sm leading-6 text-app-textMuted">
                   Informe o valor total da compra. Parcelas sem juros
                   comprometem o limite agora e compõem as faturas; o saldo só
                   muda ao registrar o pagamento.
@@ -210,7 +213,9 @@ export default function Purchase() {
                   onChange={setCategory}
                 />
                 {errors.category ? (
-                  <Text className="mb-3 text-[#B42318]">{errors.category}</Text>
+                  <Text className="mb-3 text-app-danger">
+                    {errors.category}
+                  </Text>
                 ) : null}
                 <DateInput
                   label="Data da compra"
@@ -218,7 +223,7 @@ export default function Purchase() {
                   onChange={setDate}
                 />
                 {errors.date ? (
-                  <Text className="mb-3 text-[#B42318]">{errors.date}</Text>
+                  <Text className="mb-3 text-app-danger">{errors.date}</Text>
                 ) : null}
                 <Select
                   label="Parcelamento"
@@ -232,14 +237,14 @@ export default function Purchase() {
                   }))}
                 />
                 {preview.length ? (
-                  <View className="mb-5 rounded-lg bg-[#F2F4F7] p-4">
-                    <Text className="mb-3 font-semibold text-[#344054]">
+                  <View className="mb-5 rounded-lg bg-app-surfaceLight p-4">
+                    <Text className="mb-3 font-semibold text-app-text">
                       Previsão das parcelas
                     </Text>
                     {preview.slice(0, all ? 36 : 3).map((p) => (
                       <Text
                         key={p.number}
-                        className="mb-2 text-sm leading-6 text-[#475467]"
+                        className="mb-2 text-sm leading-6 text-app-textSecondary"
                       >
                         {p.number}/{count} ·{' '}
                         {show ? formatCurrency(p.amount) : 'R$ ••••••'}
@@ -258,7 +263,7 @@ export default function Purchase() {
                         variant="outline"
                       />
                     ) : null}
-                    <Text className="mt-2 text-xs leading-5 text-[#667085]">
+                    <Text className="mt-2 text-xs leading-5 text-app-textMuted">
                       A soma das parcelas preserva o total da compra. Compras no
                       fechamento entram na próxima fatura.
                     </Text>

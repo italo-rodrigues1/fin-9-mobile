@@ -1,7 +1,10 @@
+import {
+  KeyboardScreen as SafeAreaView,
+  KeyboardFlatList as FlatList,
+} from '../../../src/components/KeyboardForm';
 import { useCallback, useEffect, useState } from 'react';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { FlatList, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { ScreenHeader } from '../../../src/components/ScreenHeader';
 import { PeriodPicker } from '../../../src/components/PeriodPicker';
 import { QueryState } from '../../../src/components/QueryState';
@@ -87,7 +90,7 @@ export default function TransactionsListScreen() {
     });
   };
   return (
-    <SafeAreaView className="flex-1 bg-[#F7F8FA]">
+    <SafeAreaView className="flex-1 bg-app-background">
       <FlatList
         data={isLoading || error ? [] : transactions}
         keyExtractor={(item) => item.id}
@@ -123,7 +126,7 @@ export default function TransactionsListScreen() {
               />
             ) : null}
             {filters.startDate ? (
-              <Text className="mb-3 text-sm text-[#667085]">
+              <Text className="mb-3 text-sm text-app-textMuted">
                 Intervalo: {filters.startDate} a {filters.endDate}
               </Text>
             ) : null}
@@ -131,16 +134,16 @@ export default function TransactionsListScreen() {
               accessibilityRole="button"
               accessibilityState={{ expanded }}
               onPress={() => setExpanded(!expanded)}
-              className="mb-4 rounded-lg border border-[#D0D5DD] bg-white p-3"
+              className="mb-4 rounded-lg border border-app-border bg-app-surface p-3"
             >
-              <Text className="text-center font-semibold text-[#047857]">
+              <Text className="text-center font-semibold text-app-primaryText">
                 {expanded
                   ? 'Fechar filtros'
                   : 'Conta, categoria e outros filtros'}
               </Text>
             </TouchableOpacity>
             {expanded ? (
-              <View className="mb-4 rounded-lg bg-white p-4">
+              <View className="mb-4 rounded-lg bg-app-surface p-4">
                 <Select
                   label="Conta"
                   value={filters.accountId || ''}
@@ -223,7 +226,7 @@ export default function TransactionsListScreen() {
                 />
                 <DateInput label="Data final" value={end} onChange={setEnd} />
                 {dateError ? (
-                  <Text className="mb-3 text-sm text-[#B42318]">
+                  <Text className="mb-3 text-sm text-app-danger">
                     {dateError}
                   </Text>
                 ) : null}
@@ -255,7 +258,7 @@ export default function TransactionsListScreen() {
         }
         ListEmptyComponent={
           !isLoading && !error ? (
-            <Text className="p-6 text-center text-[#667085]">
+            <Text className="p-6 text-center text-app-textMuted">
               Nenhum lançamento encontrado para esses filtros.
             </Text>
           ) : undefined

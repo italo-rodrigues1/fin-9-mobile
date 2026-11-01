@@ -10,11 +10,11 @@ interface EmptyStateProps {
 export function EmptyState({ icon, title, description }: EmptyStateProps) {
   return (
     <View className="items-center justify-center px-6 py-12">
-      <View className="mb-5 h-20 w-20 items-center justify-center rounded-full bg-[#F2F4F7]">
+      <View className="mb-5 h-20 w-20 items-center justify-center rounded-full bg-app-surfaceLight">
         <Text className="text-4xl">{icon}</Text>
       </View>
-      <Text className="mb-2 text-lg font-semibold text-[#344054]">{title}</Text>
-      <Text className="text-center text-sm leading-6 text-[#667085]">
+      <Text className="mb-2 text-lg font-semibold text-app-text">{title}</Text>
+      <Text className="text-center text-sm leading-6 text-app-textMuted">
         {description}
       </Text>
     </View>

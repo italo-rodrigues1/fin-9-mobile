@@ -1,3 +1,4 @@
+import { useTheme } from '../theme/ThemeProvider';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -5,6 +6,7 @@ import { Modal, Pressable, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TransactionType } from '../types';
 export function QuickAddMenu() {
+  const theme = useTheme();
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -16,7 +18,7 @@ export function QuickAddMenu() {
     {
       label: 'Transferência',
       icon: 'repeat' as const,
-      color: '#475467',
+      color: theme.colors.textSecondary,
       press: () => {
         setOpen(false);
         router.push('/transfer');
@@ -25,13 +27,13 @@ export function QuickAddMenu() {
     {
       label: 'Nova despesa',
       icon: 'arrow-down-right' as const,
-      color: '#B42318',
+      color: theme.colors.danger,
       press: () => openTransaction(TransactionType.EXPENSE),
     },
     {
       label: 'Nova receita',
       icon: 'arrow-up-right' as const,
-      color: '#047857',
+      color: theme.colors.primaryText,
       press: () => openTransaction(TransactionType.INCOME),
     },
     {
@@ -55,12 +57,12 @@ export function QuickAddMenu() {
         style={{ minHeight: 56 }}
       >
         <View
-          className="mb-1 items-center justify-center rounded-lg bg-[#047857]"
+          className="mb-1 items-center justify-center rounded-lg bg-app-primary"
           style={{ width: 38, height: 30 }}
         >
-          <Feather name="edit-3" size={20} color="#FFFFFF" />
+          <Feather name="edit-3" size={20} color={theme.colors.onPrimary} />
         </View>
-        <Text className="text-center text-[10px] font-semibold text-[#047857]">
+        <Text className="text-center text-[10px] font-semibold text-app-primaryText">
           Novo registro
         </Text>
       </TouchableOpacity>
@@ -79,13 +81,13 @@ export function QuickAddMenu() {
           />
           <View
             accessibilityViewIsModal
-            className="rounded-t-lg border-t border-[#E4E7EC] bg-white px-5 pt-5"
+            className="rounded-t-lg border-t border-app-border bg-app-surface px-5 pt-5"
             style={{ paddingBottom: Math.max(16, insets.bottom) }}
           >
             <View className="mb-3 flex-row items-center justify-between">
               <Text
                 accessibilityRole="header"
-                className="text-xl font-bold text-[#101828]"
+                className="text-xl font-bold text-app-text"
               >
                 Novo registro
               </Text>
@@ -95,7 +97,7 @@ export function QuickAddMenu() {
                 onPress={() => setOpen(false)}
                 className="h-11 w-11 items-center justify-center"
               >
-                <Feather name="x" size={22} color="#667085" />
+                <Feather name="x" size={22} color={theme.colors.textMuted} />
               </TouchableOpacity>
             </View>
             {actions.map((action) => (
@@ -104,13 +106,17 @@ export function QuickAddMenu() {
                 accessibilityRole="button"
                 accessibilityLabel={action.label}
                 onPress={action.press}
-                className="flex-row items-center border-t border-[#EAECF0] py-5"
+                className="flex-row items-center border-t border-app-border py-5"
               >
                 <Feather name={action.icon} size={22} color={action.color} />
-                <Text className="ml-4 flex-1 text-base font-semibold text-[#344054]">
+                <Text className="ml-4 flex-1 text-base font-semibold text-app-text">
                   {action.label}
                 </Text>
-                <Feather name="chevron-right" size={20} color="#667085" />
+                <Feather
+                  name="chevron-right"
+                  size={20}
+                  color={theme.colors.textMuted}
+                />
               </TouchableOpacity>
             ))}
           </View>

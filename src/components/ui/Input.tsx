@@ -1,4 +1,7 @@
-import React from 'react';
+import type { TextInputInstance } from 'react-native';
+import { useFormInputFocus } from '../KeyboardForm';
+import { useTheme } from '../../theme/ThemeProvider';
+import React, { useRef } from 'react';
 import { View, TextInput, Text } from 'react-native';
 import { COLORS, INPUT_LIMITS } from '../../constants';
 
@@ -31,34 +34,41 @@ export function Input({
   onBlur,
   maxLength = INPUT_LIMITS.defaultText,
 }: InputProps) {
+  const focusInput = useFormInputFocus(),
+    inputRef = useRef<TextInputInstance>(null);
+  const theme = useTheme();
   return (
     <View className="mb-4">
       {Boolean(label) && (
-        <Text className="mb-2 ml-1 text-sm font-medium text-[#667085]">
+        <Text className="mb-2 ml-1 text-sm font-medium text-app-textMuted">
           {label}
         </Text>
       )}
       <TextInput
-        className={`rounded-lg border bg-white px-4 py-4 text-base text-[#344054] ${
-          error ? 'border-[#FF6B6B]' : 'border-[#D0D5DD]'
+        ref={inputRef}
+        className={`rounded-lg border bg-app-surface px-4 py-4 text-base text-app-text ${
+          error ? 'border-app-danger' : 'border-app-border'
         } ${multiline ? 'min-h-[120px] text-top' : ''}`}
         accessibilityLabel={label || placeholder}
         accessibilityHint={error}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={COLORS.textMuted}
+        placeholderTextColor={theme.colors.textMuted}
         secureTextEntry={secureTextEntry}
         keyboardType={keyboardType}
         multiline={multiline}
         autoCapitalize={autoCapitalize}
-        onFocus={onFocus}
+        onFocus={() => {
+          focusInput(inputRef.current);
+          onFocus?.();
+        }}
         onBlur={onBlur}
         maxLength={maxLength}
         textAlignVertical={multiline ? 'top' : 'center'}
       />
       {error && (
-        <Text className="mt-2 ml-1 text-xs text-[#FF6B6B]">{error}</Text>
+        <Text className="mt-2 ml-1 text-xs text-app-danger">{error}</Text>
       )}
     </View>
   );
