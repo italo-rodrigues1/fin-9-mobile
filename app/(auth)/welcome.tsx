@@ -4,10 +4,10 @@ import { StatusBar } from 'expo-status-bar';
 import {
   Animated,
   Image,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -31,8 +31,8 @@ export default function WelcomeScreen() {
   const compact = availableHeight < 780;
   const artworkScale = Math.min(
     (pageWidth - 24) / 360,
-    compact ? 0.82 : 1.08,
-    Math.max(0.5, (availableHeight - 470) / 340),
+    compact ? 0.78 : 0.98,
+    Math.max(0.5, (availableHeight - 470) / 360),
   );
   const titleSize = Math.min(46, (pageWidth - 56) * 0.125, 58 / fontScale);
 
@@ -108,34 +108,30 @@ export default function WelcomeScreen() {
           </Animated.View>
         </ScrollView>
         <View style={styles.actions}>
-          <Pressable
+          <TouchableOpacity
             accessibilityRole="button"
             accessibilityLabel="Começar agora, criar uma conta"
             onPress={() => router.push('/(auth)/register')}
-            style={({ pressed }) => [
-              styles.primaryButton,
-              pressed && styles.primaryPressed,
-            ]}
+            activeOpacity={0.85}
+            style={styles.primaryButton}
           >
             <Text style={styles.primaryButtonText}>Começar agora</Text>
             <View style={styles.buttonArrow}>
               <Feather name="arrow-up-right" size={22} color={INK} />
             </View>
-          </Pressable>
-          <Pressable
+          </TouchableOpacity>
+          <TouchableOpacity
             accessibilityRole="button"
             accessibilityLabel="Já tenho conta, entrar"
             onPress={() => router.push('/(auth)/login')}
-            style={({ pressed }) => [
-              styles.loginButton,
-              pressed && styles.loginPressed,
-            ]}
+            activeOpacity={0.75}
+            style={styles.loginButton}
           >
             <Text style={styles.loginText}>
               Já tem uma conta? <Text style={styles.loginLink}>Entrar</Text>
             </Text>
             <Feather name="arrow-right" size={15} color={LIME} />
-          </Pressable>
+          </TouchableOpacity>
           <View style={styles.footer}>
             <Feather name="lock" size={11} color="#A0ADA4" />
             <Text style={styles.footerText}>
@@ -160,7 +156,12 @@ const styles = StyleSheet.create({
       'radial-gradient(ellipse at 85% 22%, rgba(60, 104, 54, 0.18) 0%, rgba(11, 18, 16, 0) 70%)',
   },
   scroll: { flex: 1, marginHorizontal: -28 },
-  scrollContent: { paddingHorizontal: 28, paddingBottom: 12 },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'flex-end',
+    paddingHorizontal: 28,
+    paddingBottom: 4,
+  },
   page: {
     width: '100%',
     maxWidth: 480,
@@ -198,8 +199,8 @@ const styles = StyleSheet.create({
     letterSpacing: 1.5,
     fontWeight: '600',
   },
-  artwork: { marginHorizontal: -28, marginTop: 16, marginBottom: 6 },
-  copy: { marginTop: 4 },
+  artwork: { marginHorizontal: -28, marginTop: 8, marginBottom: 2 },
+  copy: { marginTop: 0 },
   eyebrowRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -223,8 +224,8 @@ const styles = StyleSheet.create({
     marginTop: 18,
   },
   actions: {
-    marginTop: 12,
-    paddingTop: 8,
+    marginTop: 6,
+    paddingTop: 4,
     flexShrink: 0,
   },
   primaryButton: {
@@ -239,7 +240,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 12,
   },
-  primaryPressed: { backgroundColor: '#BEE06F', transform: [{ scale: 0.985 }] },
   primaryButtonText: {
     color: INK,
     fontWeight: '700',
@@ -264,7 +264,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 12,
   },
-  loginPressed: { backgroundColor: '#17211A' },
   loginText: {
     color: '#AAB5AE',
     fontSize: 13,
