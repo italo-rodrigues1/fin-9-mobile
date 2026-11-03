@@ -8,8 +8,10 @@ import { Input } from "../../src/components/ui/Input";
 import { INPUT_LIMITS } from "../../src/constants";
 import { useAuthStore } from "../../src/stores/authStore";
 import { notify } from "../../src/stores/feedbackStore";
+import { useTheme } from "../../src/theme/ThemeProvider";
 
 export default function LoginScreen() {
+  const { colors } = useTheme();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -54,7 +56,7 @@ export default function LoginScreen() {
           Novo por aqui?{" "}
           <Link
             href="/(auth)/register"
-            style={{ fontWeight: "bold", color: "#E7F8F1" }}
+            style={{ fontWeight: "bold", color: colors.primaryText }}
           >
             Crie uma conta
           </Link>

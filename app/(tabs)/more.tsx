@@ -22,7 +22,10 @@ export default function MoreScreen() {
     }
   };
   return (
-    <SafeAreaView className="flex-1 bg-app-background">
+    <SafeAreaView
+      className="flex-1 bg-app-background"
+      edges={['top', 'left', 'right']}
+    >
       <ScreenHeader
         title="Mais"
         subtitle="Organize seu aplicativo e sua conta."

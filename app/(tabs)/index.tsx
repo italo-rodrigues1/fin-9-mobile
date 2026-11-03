@@ -60,7 +60,10 @@ export default function DashboardScreen() {
   const money = (value: number) =>
     showValues ? formatCurrency(value) : 'R$ ••••••';
   return (
-    <SafeAreaView className="flex-1 bg-app-background">
+    <SafeAreaView
+      className="flex-1 bg-app-background"
+      edges={['top', 'left', 'right']}
+    >
       <FlatList
         data={!loading && !error ? data?.recent || [] : []}
         keyExtractor={(item) => item.id}

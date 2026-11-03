@@ -36,9 +36,8 @@ export function AppTabBar({
     <View
       className="flex-row border-t border-app-border bg-app-surface"
       style={{
-        paddingTop: 4,
-        paddingBottom: Math.max(8, insets.bottom),
-        minHeight: 64 + insets.bottom,
+        paddingTop: 2,
+        paddingBottom: Math.max(4, insets.bottom),
       }}
     >
       {state.routes.map((route, index) => {
@@ -67,7 +66,7 @@ export function AppTabBar({
                 emitter.emit({ type: 'tabLongPress', target: route.key })
               }
               className="flex-1 items-center justify-center"
-              style={{ minHeight: 56 }}
+              style={{ minHeight: 48 }}
             >
               <Feather
                 name={icons[route.name] || 'menu'}

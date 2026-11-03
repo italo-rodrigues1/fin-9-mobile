@@ -157,14 +157,14 @@ function luminance(hex) {
   return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
 }
 
-test('the actual welcome CTA retains its visible surface, readable label and registration action on native', () => {
+test('the welcome actions retain their visible surface, readable label and login/registration destinations on native', () => {
   const { tree, routes } = renderWelcome();
   const button = findElement(
     tree,
     (element) =>
-      element.props?.accessibilityLabel === 'Começar agora, criar uma conta',
+      element.props?.accessibilityLabel === 'Começar agora, fazer login',
   );
-  assert.ok(button, 'Welcome must expose its registration button');
+  assert.ok(button, 'Welcome must expose its login button');
   const props = resolveNativeProps(button);
   assert.equal(props.style.backgroundColor, '#D5F588');
   assert.equal(props.style.minHeight, 62);
@@ -185,5 +185,12 @@ test('the actual welcome CTA retains its visible surface, readable label and reg
   );
   assert.equal(typeof props.onPress, 'function');
   props.onPress();
-  assert.deepEqual(routes, ['/(auth)/register']);
+  const registerButton = findElement(
+    tree,
+    (element) =>
+      element.props?.accessibilityLabel === 'Não tem uma conta? Cadastrar',
+  );
+  assert.ok(registerButton, 'Welcome must expose its registration button');
+  resolveNativeProps(registerButton).onPress();
+  assert.deepEqual(routes, ['/(auth)/login', '/(auth)/register']);
 });

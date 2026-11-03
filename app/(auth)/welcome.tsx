@@ -29,11 +29,8 @@ export default function WelcomeScreen() {
   const pageWidth = Math.min(width, 480);
   const availableHeight = height - insets.top - insets.bottom;
   const compact = availableHeight < 780;
-  const artworkScale = Math.min(
-    (pageWidth - 24) / 360,
-    compact ? 0.78 : 0.98,
-    Math.max(0.5, (availableHeight - 470) / 360),
-  );
+  // Keep the cards legible on short screens; the artwork and copy can scroll.
+  const artworkScale = Math.min((pageWidth - 24) / 360, 1.04);
   const titleSize = Math.min(46, (pageWidth - 56) * 0.125, 58 / fontScale);
 
   const reveal = (progress: Animated.Value, distance = 22) => ({
@@ -110,8 +107,8 @@ export default function WelcomeScreen() {
         <View style={styles.actions}>
           <TouchableOpacity
             accessibilityRole="button"
-            accessibilityLabel="Começar agora, criar uma conta"
-            onPress={() => router.push('/(auth)/register')}
+            accessibilityLabel="Começar agora, fazer login"
+            onPress={() => router.push('/(auth)/login')}
             activeOpacity={0.85}
             style={styles.primaryButton}
           >
@@ -122,13 +119,13 @@ export default function WelcomeScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             accessibilityRole="button"
-            accessibilityLabel="Já tenho conta, entrar"
-            onPress={() => router.push('/(auth)/login')}
+            accessibilityLabel="Não tem uma conta? Cadastrar"
+            onPress={() => router.push('/(auth)/register')}
             activeOpacity={0.75}
             style={styles.loginButton}
           >
             <Text style={styles.loginText}>
-              Já tem uma conta? <Text style={styles.loginLink}>Entrar</Text>
+              Não tem uma conta? <Text style={styles.loginLink}>Cadastrar</Text>
             </Text>
             <Feather name="arrow-right" size={15} color={LIME} />
           </TouchableOpacity>

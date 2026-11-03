@@ -90,7 +90,10 @@ export default function TransactionsListScreen() {
     });
   };
   return (
-    <SafeAreaView className="flex-1 bg-app-background">
+    <SafeAreaView
+      className="flex-1 bg-app-background"
+      edges={['top', 'left', 'right']}
+    >
       <FlatList
         data={isLoading || error ? [] : transactions}
         keyExtractor={(item) => item.id}

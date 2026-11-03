@@ -8,8 +8,8 @@ Implementada em 31/10/2026, inspirada nas referências visuais fornecidas pelo u
 - Cartões ilustrativos de saldo e metas, sobrepostos, com gradientes e sombras. Valores são exemplos decorativos, sem consulta à API.
 - Logo oficial de `assets/icon.png` no cabeçalho e no cartão frontal; composição sem a caixa flutuante “Mais clareza. Mais liberdade.”.
 - Entrada em sequência da ilustração e texto; flutuação e rotação suaves dos cartões. Ações permanecem visíveis desde a abertura, independentemente da animação.
-- “Começar agora” abre o cadastro; “Entrar” abre o login. A proteção de sessão e os redirecionamentos existentes continuam nas rotas atuais.
-- Layout centralizado com largura máxima e ilustração adaptada à largura e altura disponíveis. Cabeçalho e ações ficam fora da rolagem, respeitando a área segura; apenas a ilustração e o texto rolam em telas pequenas ou com fontes ampliadas. Recorte de filhos do ScrollView desativado para preservar os elementos transformados no Android.
+- “Começar agora” abre o login; “Não tem uma conta? Cadastrar” abre o cadastro. A proteção de sessão e os redirecionamentos existentes continuam nas rotas atuais.
+- Layout centralizado com largura máxima e ilustração adaptada à largura disponível. Os cartões mantêm seu tamanho em telas baixas, usando rolagem quando necessário. Cabeçalho e ações ficam fora da rolagem, respeitando a área segura; apenas a ilustração e o texto rolam em telas pequenas ou com fontes ampliadas. Recorte de filhos do ScrollView desativado para preservar os elementos transformados no Android.
 - Nome “Fin-9.” com inicial maiúscula no cabeçalho e nos cartões ilustrativos.
 - Conteúdo da área rolável alinhado ao final, mantendo apenas 14 px entre a descrição e o botão em 390 × 844; os cartões preservam o destaque visual e o espaço excedente fica acima da ilustração.
 - Ações com `TouchableOpacity`, estilos estáticos e feedback de toque por opacidade, compatíveis com o processamento nativo do NativeWind.

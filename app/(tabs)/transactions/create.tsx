@@ -241,7 +241,10 @@ export default function CreateTransactionScreen() {
     return (
       <>
         <Stack.Screen options={{ title: 'Histórico da conta excluída' }} />
-        <SafeAreaView className="flex-1 bg-app-background">
+        <SafeAreaView
+          className="flex-1 bg-app-background"
+          edges={['left', 'right']}
+        >
           <ScrollView contentContainerStyle={{ padding: 16 }}>
             <Text className="mb-4 text-xl font-semibold text-app-text">
               {title}
@@ -263,7 +266,10 @@ export default function CreateTransactionScreen() {
     return (
       <>
         <Stack.Screen options={{ title: 'Pagamento de fatura' }} />
-        <SafeAreaView className="flex-1 bg-app-background">
+        <SafeAreaView
+          className="flex-1 bg-app-background"
+          edges={['left', 'right']}
+        >
           <View className="p-4">
             <Text className="mb-3 text-lg font-semibold text-app-text">
               {title}
@@ -303,7 +309,7 @@ export default function CreateTransactionScreen() {
       />
       <SafeAreaView
         className="flex-1 bg-app-background"
-        edges={['left', 'right', 'bottom']}
+        edges={['left', 'right']}
       >
         <ScrollView
           className="flex-1 px-4"

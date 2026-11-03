@@ -19,7 +19,10 @@ export default function AccountsScreen() {
     }, [fetch]),
   );
   return (
-    <SafeAreaView className="flex-1 bg-app-background">
+    <SafeAreaView
+      className="flex-1 bg-app-background"
+      edges={['top', 'left', 'right']}
+    >
       <ScreenHeader
         title="Contas"
         subtitle="Seus saldos, organizados por instituição."

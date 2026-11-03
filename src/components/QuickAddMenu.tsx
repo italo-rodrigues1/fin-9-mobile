@@ -54,7 +54,7 @@ export function QuickAddMenu() {
         accessibilityState={{ expanded: open }}
         onPress={() => setOpen(true)}
         className="flex-1 items-center justify-center"
-        style={{ minHeight: 56 }}
+        style={{ minHeight: 48 }}
       >
         <View
           className="mb-1 items-center justify-center rounded-lg bg-app-primary"

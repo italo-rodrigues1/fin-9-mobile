@@ -8,8 +8,10 @@ import { Input } from "../../src/components/ui/Input";
 import { INPUT_LIMITS } from "../../src/constants";
 import { useAuthStore } from "../../src/stores/authStore";
 import { notify } from "../../src/stores/feedbackStore";
+import { useTheme } from "../../src/theme/ThemeProvider";
 
 export default function RegisterScreen() {
+  const { colors } = useTheme();
   const [name, setName] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [email, setEmail] = useState("");
@@ -72,7 +74,7 @@ export default function RegisterScreen() {
           <Link
             href="/(auth)/login"
             replace
-            style={{ fontWeight: "bold", color: "#E7F8F1" }}
+            style={{ fontWeight: "bold", color: colors.primaryText }}
           >
             Fazer login
           </Link>
