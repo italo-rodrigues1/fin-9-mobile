@@ -1,6 +1,6 @@
 import { Link, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { AuthError, AuthScreen } from "../../src/components/auth/AuthScreen";
 import { PasswordRequirements } from "../../src/components/auth/PasswordRequirements";
 import { Button } from "../../src/components/ui/Button";
@@ -134,7 +134,7 @@ export default function RegisterScreen() {
         maxLength={INPUT_LIMITS.password}
       />
       <AuthError message={error} />
-      <View className="mt-2">
+      <View style={styles.submitContainer}>
         <Button
           title="Criar conta"
           onPress={handleRegister}
@@ -144,3 +144,9 @@ export default function RegisterScreen() {
     </AuthScreen>
   );
 }
+
+const styles = StyleSheet.create({
+  submitContainer: {
+    marginTop: 8,
+  },
+});

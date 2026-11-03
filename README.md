@@ -20,6 +20,8 @@ npm install
 
 ## Configuração de ambiente
 
+Para ativar o login Google no app e na API, siga [o guia de configuração OAuth](docs/google-auth.md). A integração nativa exige uma nova build de desenvolvimento/distribuição; o acesso por e-mail continua disponível no Expo Go.
+
 O app usa a variável `EXPO_PUBLIC_API_URL` para acessar a API.
 
 Arquivo: `.env`

@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { FlatList, TouchableOpacity } from 'react-native';
+import { FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAccountStore } from '../../src/stores/accountStore';
 import { useTheme } from '../../src/theme/ThemeProvider';
@@ -28,7 +28,7 @@ export default function AccountsScreen() {
             accessibilityRole="button"
             accessibilityLabel="Nova conta"
             onPress={() => router.push('/accounts/create')}
-            className="h-11 w-11 items-center justify-center rounded-full bg-app-primary"
+            style={[styles.addButton, { backgroundColor: theme.colors.primary }]}
           >
             <Feather name="plus" size={22} color={theme.colors.onPrimary} />
           </TouchableOpacity>
@@ -73,3 +73,13 @@ export default function AccountsScreen() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  addButton: {
+    alignItems: 'center',
+    borderRadius: 22,
+    height: 44,
+    justifyContent: 'center',
+    width: 44,
+  },
+});

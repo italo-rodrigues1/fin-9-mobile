@@ -2,6 +2,7 @@ import { errorMessage } from '../utils/errorMessage';
 import { create } from 'zustand';
 import { User } from '../types';
 import { authService } from '../services/authService';
+import { googleAuth } from '../services/googleAuth';
 import { AUTH_TOKEN_KEY, tokenStorage } from '../services/tokenStorage';
 import { useCategoryStore } from './categoryStore';
 import { useAccountStore } from './accountStore';
@@ -15,6 +16,7 @@ interface AuthState {
   isHydrated: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: (idToken?: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   deleteAccount: () => Promise<void>;
@@ -38,6 +40,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   error: null,
 
   login: async (email, password) => {
+    if (get().isLoading) return;
     set({ isLoading: true, error: null });
     try {
       const { user, token } = await authService.login(email, password);
@@ -50,7 +53,26 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
+  loginWithGoogle: async (credential) => {
+    if (get().isLoading) return;
+    set({ isLoading: true, error: null });
+    try {
+      const idToken = credential ?? (await googleAuth.signIn());
+      if (!idToken) return;
+      const { user, token } = await authService.loginWithGoogle(idToken);
+      await tokenStorage.setItem(AUTH_TOKEN_KEY, token);
+      set({ user, token, isAuthenticated: true });
+    } catch (err) {
+      const message = errorMessage(err, 'Não foi possível entrar com Google');
+      set({ error: message });
+      throw new Error(message);
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
   register: async (name, email, password) => {
+    if (get().isLoading) return;
     set({ isLoading: true, error: null });
     try {
       const { user, token } = await authService.register(name, email, password);
@@ -67,6 +89,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     await tokenStorage.removeItem(AUTH_TOKEN_KEY);
     resetAppStores();
     set({ user: null, token: null, isAuthenticated: false, error: null });
+    void googleAuth.signOut().catch(() => {});
   },
 
   deleteAccount: async () => {
@@ -81,6 +104,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         error: null,
         isLoading: false,
       });
+      void googleAuth.signOut().catch(() => {});
     } catch (err: any) {
       const message = errorMessage(err, 'Erro ao excluir conta');
       set({ error: message });
